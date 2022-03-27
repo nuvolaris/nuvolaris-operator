@@ -28,6 +28,7 @@ import json
 import uuid
 from datetime import datetime
 
+SLACK_URL = 'https://hooks.slack.com/services/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'
 TOKEN = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 SECRETS_PATH = "nuvolaris-test/tests/operator-obj.yaml"
 SECRETS = yaml.safe_load(open(SECRETS_PATH))["spec"]
@@ -71,7 +72,7 @@ def get_pods_json():
 @kopf.on.login()
 def login(**kwargs):
     req.post(
-        SECRETS["openwhisk_monitor"]["slack"], 
+        SLACK_URL, 
         json={
         'text' : get_login_notification(get_pods_json())
     })
@@ -90,7 +91,7 @@ def whisk_create(spec, name, **kwargs):
     msg = "\n".join(message)
     logging.debug(msg)
     req.post(
-        SECRETS["openwhisk_monitor"]["slack"], 
+        SLACK_URL, 
         json={
             'text' : get_creation_notification(get_pods_json(), msg)
         }
@@ -114,7 +115,7 @@ def whisk_delete(spec, **kwargs):
     msg = "\n".join(message)
     logging.debug(msg)
     req.post(
-        SECRETS["openwhisk_monitor"]["slack"], 
+        SLACK_URL, 
         json={
             'text' : get_deletion_notification(get_pods_json(), msg)
         }
@@ -124,7 +125,7 @@ def whisk_delete(spec, **kwargs):
 @kopf.on.cleanup()
 def logout(**kwargs):
     req.post(
-        SECRETS["openwhisk_monitor"]["slack"], 
+        SLACK_URL, 
         json={
             'text' : get_logout_notification()
         }
@@ -139,7 +140,7 @@ def service_update(old, new, name, **kwargs):
         ingress = new['ingress']   
     apihost = openwhisk.apihost(ingress, node_labels)
     req.post(
-        SECRETS["openwhisk_monitor"]["slack"], 
+        SLACK_URL, 
         json={
             'text' : get_status_notification(f'- apihost: {apihost}\n- name: {name}\n- new: {new}\n- old: {old}')
         }
