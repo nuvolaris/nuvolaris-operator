@@ -45,19 +45,19 @@ def get_login_notification(json):
         login_text = LOGIN_TEXTS['pykube']  
     else:
         login_text = LOGIN_TEXTS['client']
-    return f'{get_notification_header("login")}\nOpenWhisk Monitor Operator {login_text} from:\n{get_system_info()}\nOPERATOR ID: {UUID.hex}\nGET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("login")}\n- OpenWhisk Monitor Operator {login_text} from:{get_system_info()}\n- OPERATOR ID: {UUID.hex}\n- GET PODS at {datetime.now()}:\n{json}'
 
 def get_creation_notification(json, message):
-    return f'{get_notification_header("create")}\nOpenWhisk Created!\nMESSAGE:\n{message}\nGET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("create")}\n- OpenWhisk Created!\n- MESSAGE:\n{message}\n- GET PODS at {datetime.now()}:\n{json}'
 
 def get_deletion_notification(json, message):
-    return f'{get_notification_header("delete")}\nOpenWhisk Deleted!\nMESSAGE:\n{message}\nGET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("delete")}\n- OpenWhisk Deleted!\n- MESSAGE:\n{message}\n- GET PODS at {datetime.now()}:\n{json}'
 
 def get_logout_notification():
-    return f'{get_notification_header("logout")}\nOpenWhisk Monitor Operator logged out from:\n{get_system_info()}\nOPERATOR ID: {UUID.hex}'
+    return f'{get_notification_header("logout")}\n- OpenWhisk Monitor Operator logged out from:{get_system_info()}\n- OPERATOR ID: {UUID.hex}'
 
 def get_status_notification(message):
-    return f'{get_notification_header("status")}\nOpenWhisk Status Changed!\nMESSAGE:\n{message}'
+    return f'{get_notification_header("status")}\n- OpenWhisk Status Changed!\n- MESSAGE:\n{message}'
 def get_pods_json():
     try:
         pods = kube.kubectl("get", "pods", jsonpath='{.items[]}')  
@@ -65,7 +65,7 @@ def get_pods_json():
         return 'No pods responded'
     
     pods_json_dump = json.dumps(pods, indent=4, sort_keys=True)
-    return pods_json_dump
+    return pods_json_dump.replace('\\"', '"')
 
 # tested by an integration test
 @kopf.on.login()
@@ -101,8 +101,16 @@ def whisk_create(spec, name, **kwargs):
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
 def whisk_delete(spec, **kwargs):
     message = []
-    message.append(openwhisk.delete())
-    message.append(openwhisk.cleanup())
+    try:
+        message.append('DELETION RESULT: ' + openwhisk.delete())
+    except:
+        message.append('Failed to delete OpenWhisk deployment.\n')
+
+    try:
+        message.append('CLEANUP RESULT: ' + openwhisk.cleanup())
+    except:
+        message.append('Failed clean-up of OpenWhisk deployment.\n')
+
     msg = "\n".join(message)
     logging.debug(msg)
     req.post(
@@ -133,7 +141,7 @@ def service_update(old, new, name, **kwargs):
     req.post(
         SECRETS["openwhisk_monitor"]["slack"], 
         json={
-            'text' : get_status_notification('apihost: {apihost}\nname: {name}\nnew: {new}\nold: {old}')
+            'text' : get_status_notification(f'apihost: {apihost}\nname: {name}\nnew: {new}\nold: {old}')
         }
     )
     openwhisk.annotate(f"apihost={apihost}")
