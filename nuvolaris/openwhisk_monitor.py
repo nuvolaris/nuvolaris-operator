@@ -45,19 +45,19 @@ def get_login_notification(json):
         login_text = LOGIN_TEXTS['pykube']  
     else:
         login_text = LOGIN_TEXTS['client']
-    return f'{get_notification_header("login")}\n- OpenWhisk Monitor Operator {login_text} from:{get_system_info()}\n- OPERATOR ID: {UUID.hex}\n- GET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("login")}\n- OpenWhisk Monitor Operator {login_text} from: {get_system_info()}\n- Operator ID: {UUID.hex}\n- Pods at {datetime.now()}:\n{json}'
 
 def get_creation_notification(json, message):
-    return f'{get_notification_header("create")}\n- OpenWhisk Created!\n- MESSAGE:\n{message}\n- GET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("create")}\n- OpenWhisk Created!\n- Info:\n{message}\n- Pods at {datetime.now()}:\n{json}'
 
 def get_deletion_notification(json, message):
-    return f'{get_notification_header("delete")}\n- OpenWhisk Deleted!\n- MESSAGE:\n{message}\n- GET PODS at {datetime.now()}:\n{json}'
+    return f'{get_notification_header("delete")}\n- OpenWhisk Deleted!\n- Info:\n{message}\n- Pods at {datetime.now()}:\n{json}'
 
 def get_logout_notification():
-    return f'{get_notification_header("logout")}\n- OpenWhisk Monitor Operator logged out from:{get_system_info()}\n- OPERATOR ID: {UUID.hex}'
+    return f'{get_notification_header("logout")}\n- OpenWhisk Monitor Operator logged out from: {get_system_info()}\n- Operator ID: {UUID.hex}'
 
 def get_status_notification(message):
-    return f'{get_notification_header("status")}\n- OpenWhisk Status Changed!\n- MESSAGE:\n{message}'
+    return f'{get_notification_header("status")}\n- OpenWhisk Status Changed!\n- Info:\n{message}'
 def get_pods_json():
     try:
         pods = kube.kubectl("get", "pods", jsonpath='{.items[]}')  
@@ -102,14 +102,14 @@ def whisk_create(spec, name, **kwargs):
 def whisk_delete(spec, **kwargs):
     message = []
     try:
-        message.append('DELETION RESULT: ' + openwhisk.delete())
+        message.append('- DELETION RESULT: ' + openwhisk.delete())
     except:
-        message.append('Failed to delete OpenWhisk deployment.\n')
+        message.append('- DELETION RESULT: Failed to delete OpenWhisk deployment.\n')
 
     try:
-        message.append('CLEANUP RESULT: ' + openwhisk.cleanup())
+        message.append('- CLEANUP RESULT: ' + openwhisk.cleanup())
     except:
-        message.append('Failed clean-up of OpenWhisk deployment.\n')
+        message.append('- CLEANUP RESULT: Failed clean-up of OpenWhisk deployment.\n')
 
     msg = "\n".join(message)
     logging.debug(msg)
@@ -141,7 +141,7 @@ def service_update(old, new, name, **kwargs):
     req.post(
         SECRETS["openwhisk_monitor"]["slack"], 
         json={
-            'text' : get_status_notification(f'apihost: {apihost}\nname: {name}\nnew: {new}\nold: {old}')
+            'text' : get_status_notification(f'- apihost: {apihost}\n- name: {name}\n- new: {new}\n- old: {old}')
         }
     )
     openwhisk.annotate(f"apihost={apihost}")
