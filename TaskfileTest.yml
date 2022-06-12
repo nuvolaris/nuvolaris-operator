@@ -20,8 +20,8 @@ version: '3'
 vars:
   IMAGE: nuvolaris/nuvolaris-operator
   REPO: ghcr.io
-  TAG: 0.2.0-trinity.22050318
-    #sh: git describe --tags --abbrev=0 2>/dev/null || echo latest
+  TAG:
+    sh: git describe --tags --abbrev=0 2>/dev/null || echo nightly
   KUBE:
     sh: ./detect.sh
   WHISK: '{{default "whisk" .WHISK}}'
@@ -30,14 +30,6 @@ vars:
   
 tasks:
   
-  build-and-load:
-    - docker build . -t {{.OPERATOR_IMAGE}}:{{.OPERATOR_TAG}}
-    - kind load docker-image {{.OPERATOR_IMAGE}}:{{.OPERATOR_TAG}} --name=nuvolaris
-
-  preload:
-    - docker pull {{.CONTROLLER_IMAGE}}:{{.CONTROLLER_TAG}}
-    - kind load docker-image {{.CONTROLLER_IMAGE}}:{{.CONTROLLER_TAG}} --name=nuvolaris
-
   kustomization:
     cmds:
     - |
@@ -72,14 +64,19 @@ tasks:
     | kubectl apply -f -
   - |    
     while ! kubectl -n nuvolaris wait pod --for=condition=ready -l app=controller
-    do sleep 1 ; echo still waiting...
+    do sleep 1 ; echo waiting controller...
+    done
+  - |    
+    while ! kubectl -n nuvolaris wait pod redis-0 --for=condition=ready 
+    do sleep 1 ; echo waiting redis...
     done
   - |    
     while ! kubectl -n nuvolaris wait pod --for=condition=ready -l user-action-pod=true
-    do sleep 1 ; echo still waiting... 
+    do sleep 1 ; echo waiting actions... 
     done
   
   destroy-instance:
+    - (sleep 5 ; task defin) &
     - kubectl -n nuvolaris delete wsk/controller
   
   destroy:
@@ -89,7 +86,13 @@ tasks:
   cleanup: kubectl -n nuvolaris delete pvc --all
   
   config: |-
-    APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}' | sed -e 's/https:/http:/')
+    while true
+    do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}' | sed -e 's/https:/http:/')
+      if echo $APIHOST | grep pending
+      then echo "apihost still pending..." ; sleep 5
+      else break
+      fi
+    done
     echo "*** $APIHOST ***"
     AUTH=$(kubectl -n nuvolaris get wsk/controller -o yaml | awk '/nuvolaris:/{print $2}')
     echo $AUTH
@@ -106,10 +109,7 @@ tasks:
       URL=$(wsk action get hello --url | tail +2)
       curl -sL $URL | grep hello
 
-  all:
-    - task: operator
-    - task: instance
-    - task: config
-    - task: hello
-    - task: destroy
-    #- task: cleanup
+  ping:
+    - wsk package update redis -p redis redis://redis
+    - wsk action update redis/ping tests/ping.js
+    - wsk action invoke redis/ping -r | grep "PONG"

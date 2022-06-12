@@ -15,27 +15,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-[tool.poetry]
-name = "nuvolaris"
-version = "0.2.0"
-description = "Nuvolaris operator"
-authors = ["Michele Sciabarra <michele@sciabarra.com>"]
+version: '3'
 
-[tool.poetry.dependencies]
-python = "^3.9"
-kopf = {extras = ["full-auth"], version = "^1.35.3"}
-PyYAML = "^6.0"
-pykube = "^0.15.0"
-Jinja2 = "^3.0.3"
-requests = "^2.27.1"
-flatdict = "^4.0.1"
+vars:
+  GC_PROJECT: qapla-dev
+  GC_REGION: europe-west1
+  GC_CLUSTER: qapla-dev-webapp
 
-[tool.poetry.dev-dependencies]
-ipython = "^7.31.0"
+tasks:
 
-[tool.poetry.scripts]
-dbinit = "nuvolaris.couchdb:init"
+  login: 
+    - gcloud auth login
+    - gcloud config set project qapla-dev
+  
+  list: |- 
+    gcloud container clusters list
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+  config: |-
+    gcloud config set project {{.GC_PROJECT}}
+    gcloud config set compute/region {{.GC_REGION}} 
+    gcloud container clusters get-credentials {{.GC_CLUSTER}}
+    cp ~/.kube/config gke.kubeconfig
+  
+

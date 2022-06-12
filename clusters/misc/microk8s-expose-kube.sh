@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,27 +16,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-[tool.poetry]
-name = "nuvolaris"
-version = "0.2.0"
-description = "Nuvolaris operator"
-authors = ["Michele Sciabarra <michele@sciabarra.com>"]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-kopf = {extras = ["full-auth"], version = "^1.35.3"}
-PyYAML = "^6.0"
-pykube = "^0.15.0"
-Jinja2 = "^3.0.3"
-requests = "^2.27.1"
-flatdict = "^4.0.1"
-
-[tool.poetry.dev-dependencies]
-ipython = "^7.31.0"
-
-[tool.poetry.scripts]
-dbinit = "nuvolaris.couchdb:init"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+DNS="${1:?dns}"
+sudo microk8s stop
+sed -i "/DNS.5/a DNS.6 = $DNS" /var/snap/microk8s/current/certs/csr.conf.template
+sudo microk8s start
+microk8s config | sed -e "s/server: .*/server: https:\/\/$DNS:16443/" >kubeconfig

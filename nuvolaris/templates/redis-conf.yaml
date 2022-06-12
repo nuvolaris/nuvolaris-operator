@@ -14,28 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
----
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: couchdb-init
+  name: redis-cm
   namespace: nuvolaris
-spec:
-  backoffLimit: 3
-  template:
-    metadata:
-      name: couchdb-init
-      namespace: nuvolaris
-    spec:
-      serviceAccount: nuvolaris-operator
-      restartPolicy: Never      
-      containers:
-      - name: init-couchdb
-        image: "{{image}}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["./dbinit.sh"]
-        #command: ["sleep", "inf"]
-        env:
-        - name: "NUVOLARIS_CONFIG"
-          value: >
-            {{config}}
+data:
+    redis-conf: |
+                #requirepass <secure_password>
+
+
+
+
+

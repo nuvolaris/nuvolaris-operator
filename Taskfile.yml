@@ -30,14 +30,13 @@ vars:
   T: ""
 
 env:
+  OPERATOR_TAG: "{{.TAG}}"
   OPERATOR_IMAGE:
     sh: awk -F= '/OPERATOR_IMAGE/ { print $2}' <Dockerfile
-  OPERATOR_TAG:
-    sh: awk -F= '/OPERATOR_TAG/ { print $2}' <Dockerfile
   CONTROLLER_IMAGE: 
     sh: awk -F= '/CONTROLLER_IMAGE/ { print $2}' <Dockerfile
   CONTROLLER_TAG: 
-    sh:  awk -F= '/CONTROLLER_TAG/ { print $2}' <Dockerfile
+    sh: awk -F= '/CONTROLLER_TAG/ { print $2}' <Dockerfile
 
 dotenv:
   - .env
@@ -53,13 +52,16 @@ tasks:
       - ssh-key
       - configure-env
     cmds:
+      - task: kind:config
       - poetry install
     status:
       - test -e $GOBIN/kopf
 
   env: env
   
-  watch: watch kubectl -n nuvolaris get all
+  watch: watch kubectl -n nuvolaris get no,po,svc 
+
+  logs: kubectl -n nuvolaris logs nuvolaris-operator -f
   
   cli: 
     - task: d:cli
@@ -67,11 +69,25 @@ tasks:
   run:
     - task: d:run
 
+  operator:
+    - task: t:operator
+
   deploy: 
     - task: d:deploy
 
   destroy: 
     - task: d:destroy
+
+  nuv:
+    - task: kind:config
+    - nuv setup --context=kind-nuvolaris --apihost=auto --image-tag={{.TAG}}
+
+  install:
+    - task: operator
+    - task: deploy
+    - task: config
+    - task: hello
+    - task: ping
 
   config: 
     - task: t:config
@@ -79,15 +95,25 @@ tasks:
   hello: 
     - task: t:hello
 
+  ping: 
+    - task: t:ping
+
   defin:
     - task: d:defin
 
-  image-tag: git tag -d $(git tag) ; git tag -f {{.BASETAG}}.$(date +%y%m%d%H) ; git tag
+  image-tag: 
+    - git tag -d $(git tag) 
+    - git tag -f {{.BASETAG}}.$(date +%y%m%d%H) 
+    - git tag
 
-  build: docker build . -t {{.REPO}}/{{.IMAGE}}:{{.TAG}} {{.CLI_ARGS}}
+  build: docker build  -t {{.REPO}}/{{.IMAGE}}:{{.TAG}} --build-arg OPTAG={{.TAG}} {{.CLI_ARGS}} .
+
+  build-and-load:
+    - task: build
+    - kind load docker-image {{.REPO}}/{{.IMAGE}}:{{.TAG}} --name=nuvolaris
 
   buildx-and-push:
-    - docker buildx build --platform linux/amd64,linux/arm64 -t {{.REPO}}/{{.IMAGE}}:{{.TAG}} . --push
+    - docker buildx build --platform linux/amd64,linux/arm64 -t {{.REPO}}/{{.IMAGE}}:{{.TAG}} --build-arg OPTAG={{.TAG}} . --push
 
   # configure env
   configure-env:
@@ -117,9 +143,9 @@ tasks:
 
   clean:
     cmds:
-      - cmd: kubectl -n nuvolaris delete all --all
+      - cmd: kubectl -n nuvolaris delete wsk/controller
         ignore_error: true
-      - cmd: kubectl -n nuvolaris delete wsk --all
+      - cmd: kubectl -n nuvolaris delete all --all
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete pvc --all
         ignore_error: true
@@ -135,8 +161,12 @@ tasks:
         done
     silent: true
 
+
+  iclean: rm -f deploy/*/kustomization.yaml deploy/*/__*
+
   itest: 
     cmds:
+      - task: iclean
       - |
         kubectl apply -f deploy/nuvolaris-operator/whisk-crd.yaml
         kubectl apply -f deploy/nuvolaris-operator/nuvolaris-common.yaml
@@ -144,19 +174,20 @@ tasks:
         do  
             if test -e "$test"
             then  echo "*** [{{.KUBE}}] $test"
-                  rm -f deploy/*/kustomization.yaml deploy/*/__*
                   poetry run ipython $test {{.CLI_ARGS}}
             fi
         done
     silent: true
 
   dtest:
-    - task: t:all
+    - task: t:operator
+    - task: t:instance
+    - task: wtest
 
-  uitest:
-    - task: clean
-    - tast: utest
-    - task: itest
+  wtest:
+    - task: t:config
+    - task: t:hello
+    - task: t:ping
 
   test:
     - task: clean
@@ -173,13 +204,19 @@ tasks:
     cmds: 
       - |-
         if test -z "{{.CLI_ARGS}}"
-        then echo 'use "task all-kubes  -- <target> runs the target against all the available kubes'
+        then echo 'use "task all-kubes -- <target> runs the target against all the available kubes'
         else  for cfg in clusters/*.kubeconfig
-              do  cp -v $cfg ~/.kube/config
+              do  /usr/games/cowsay -f duck  $(basename $cfg .kubeconfig) 2>/dev/null
+                  cp -v $cfg ~/.kube/config >/dev/null
                   task {{.CLI_ARGS}}
               done
         fi
     silent: true
+
+  kube-test: 
+    cmds:
+      - task dtest 2>/dev/null >/dev/null
+    
 
   use: 
     cmds:
@@ -211,14 +248,22 @@ includes:
   t: 
     taskfile: TaskfileTest.yml
   kind:
-    taskfile: "clusters/kind.yml"
-    dir: "clusters"
+    taskfile: clusters/kind.yml
+    dir: clusters
     optional: yes
   eks:
     taskfile: clusters/eks.yml
-    dir: "clusters"
+    dir: clusters
+    optional: yes
+  aks:
+    taskfile: clusters/aks.yml
+    dir: clusters
     optional: yes
   lks:  
     taskfile: clusters/lks.yml
-    dir: clusters/
+    dir: clusters
+    optional: yes
+  gke:
+    taskfile: clusters/gke.yml
+    dir: clusters
     optional: yes

@@ -1,3 +1,4 @@
+
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,27 +16,22 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-[tool.poetry]
-name = "nuvolaris"
-version = "0.2.0"
-description = "Nuvolaris operator"
-authors = ["Michele Sciabarra <michele@sciabarra.com>"]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-kopf = {extras = ["full-auth"], version = "^1.35.3"}
-PyYAML = "^6.0"
-pykube = "^0.15.0"
-Jinja2 = "^3.0.3"
-requests = "^2.27.1"
-flatdict = "^4.0.1"
+import nuvolaris.testutil as tu
+import nuvolaris.config as cfg
+import nuvolaris.kustomize as kus
+import nuvolaris.kube as kube
+import nuvolaris.redis as redis
 
-[tool.poetry.dev-dependencies]
-ipython = "^7.31.0"
+import requests as req
+import yaml, sys, os
 
-[tool.poetry.scripts]
-dbinit = "nuvolaris.couchdb:init"
+cfg.clean()
+cfg.detect_labels()
+cfg.detect_storage()
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+assert(redis.create())
+while not kube.wait("po/redis-0", "condition=ready"): pass
+assert(kube.get("po/redis-0"))
+assert(kube.get("svc/redis"))
+assert(redis.delete())

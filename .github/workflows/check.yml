@@ -16,8 +16,6 @@
 # under the License.
 #
 #
-# Copyright 2021 Nuvolaris Inc
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,13 +54,17 @@ jobs:
         run: bash .github/cisetup.sh
       - name: Install
         run: task setup
+      - name: BuildAndLoad
+        run: task build-and-load
       - name: Test
         run: task test
         continue-on-error: true
       - name: Ngrok
-        run: if test -f .github/ngrok ; then bash .github/debug-github-actions.sh ; fi
+        if: ${{ env.NGROK == 'on' }}
+        run: bash .github/debug-github-actions.sh
         env:
           NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
           USER_PASS: ${{ secrets.USER_PASS }}
       - name: Wait
-        run: if test -f .github/ngrok ; then bash .github/wait.sh ; fi
+        if: ${{ env.NGROK == 'on' }}
+        run: bash .github/wait.sh

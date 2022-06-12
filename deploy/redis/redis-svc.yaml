@@ -1,3 +1,5 @@
+---
+# Source: openwhisk/templates/couchdb-svc.yaml
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,28 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
----
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Service
 metadata:
-  name: couchdb-init
+  name: redis
   namespace: nuvolaris
 spec:
-  backoffLimit: 3
-  template:
-    metadata:
-      name: couchdb-init
-      namespace: nuvolaris
-    spec:
-      serviceAccount: nuvolaris-operator
-      restartPolicy: Never      
-      containers:
-      - name: init-couchdb
-        image: "{{image}}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["./dbinit.sh"]
-        #command: ["sleep", "inf"]
-        env:
-        - name: "NUVOLARIS_CONFIG"
-          value: >
-            {{config}}
+  type: NodePort
+  selector:
+    name: redis
+  ports:   
+    - port: 6379
+      targetPort: 6379
+      nodePort: 30379

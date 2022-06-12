@@ -1,3 +1,4 @@
+<!--
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,27 +16,21 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-[tool.poetry]
-name = "nuvolaris"
-version = "0.2.0"
-description = "Nuvolaris operator"
-authors = ["Michele Sciabarra <michele@sciabarra.com>"]
+-->
+# Expose MicroK8s Apihost externally
 
-[tool.poetry.dependencies]
-python = "^3.9"
-kopf = {extras = ["full-auth"], version = "^1.35.3"}
-PyYAML = "^6.0"
-pykube = "^0.15.0"
-Jinja2 = "^3.0.3"
-requests = "^2.27.1"
-flatdict = "^4.0.1"
+If you want to access to the server remotely, you need to add the DNS name of the server (either the real one or the .nip.io) and  generate a proper configuration with:
 
-[tool.poetry.dev-dependencies]
-ipython = "^7.31.0"
+```
+DNS='<your-dns-name>'
+sudo microk8s stop
+sed -i "/DNS.5/a DNS.6 = $DNS" /var/snap/microk8s/current/certs/csr.conf.template
+sudo microk8s start
+microk8s config | sed -e "s/server: .*/server: https:\/\/$DNS:16443/" >kubeconfig
+```
 
-[tool.poetry.scripts]
-dbinit = "nuvolaris.couchdb:init"
+You can then download the kubeconfig file and copy in your ~/.kube/config to access the remote Kubernetes cluster.
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+Then you can then [donwload `nuv`](https://github.com/nuvolaris/nuvolaris/releases) and [install](SETUP.md#kubernetes-installation) Nuvolaris from the server itself with `nuv setup --context=<context>`.
+
+
