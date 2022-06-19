@@ -19,8 +19,8 @@ version: '3'
 
 tasks:
   login: |-
-    CURR_USER=$(az account show --query user.name --output tsv)
-    if [ "${CURR_USER}" == "${AKS_SERVICE_PRINCIPAL_APPID}" ] 
+    AZ_IS_LOGGED=$(az account list)    
+    if [ "${AZ_IS_LOGGED}" != "[]" ]
     then
       echo "Already logged in!"
     else
@@ -29,7 +29,8 @@ tasks:
     fi  
 
   create: 
-    deps: login
+    deps: 
+      - login
     cmds: 
       - |-
         az group create --name nuvolaris --location northeurope
@@ -37,14 +38,15 @@ tasks:
           --resource-group nuvolaris \
           --name nuvolaris \
           --node-count 1 \
-          --node-vm-size Standard_D2_v2 \
+          --node-vm-size Standard_D3_v2 \
           --node-osdisk-size 80 \
           --nodepool-name nuvnp1 \
           --ssh-key-value id_rsa.pub \
           --network-plugin azure    
 
   destroy: 
-    deps: login
+    deps:
+      - login
     cmds: 
       - |-
         az login --service-principal -u ${AKS_SERVICE_PRINCIPAL_APPID} -p ${AKS_SERVICE_PRINCIPAL_PASSWORD} \
@@ -52,12 +54,14 @@ tasks:
         az group delete --name nuvolaris --no-wait --yes
   
   list: 
-    deps: login
+    deps: 
+      - login
     cmds: 
       - az aks list
 
   config: 
-    deps: login
+    deps: 
+      - login
     cmds: 
       - az aks get-credentials --resource-group nuvolaris --name nuvolaris --file aks.kubeconfig
   
