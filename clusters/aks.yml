@@ -18,13 +18,47 @@
 version: '3'
 
 tasks:
+  login: |-
+    CURR_USER=$(az account show --query user.name --output tsv)
+    if [ "${CURR_USER}" == "${AKS_SERVICE_PRINCIPAL_APPID}" ] 
+    then
+      echo "Already logged in!"
+    else
+      az login --service-principal -u ${AKS_SERVICE_PRINCIPAL_APPID} -p ${AKS_SERVICE_PRINCIPAL_PASSWORD} \
+        --tenant ${AKS_SERVICE_PRINCIPAL_TENANT}    
+    fi  
 
-  create: echo "not implemented"
+  create: 
+    deps: login
+    cmds: 
+      - |-
+        az group create --name nuvolaris --location northeurope
+        az aks create \
+          --resource-group nuvolaris \
+          --name nuvolaris \
+          --node-count 1 \
+          --node-vm-size Standard_D2_v2 \
+          --node-osdisk-size 80 \
+          --nodepool-name nuvnp1 \
+          --ssh-key-value id_rsa.pub \
+          --network-plugin azure    
 
-  destroy: echo "not implemented"
+  destroy: 
+    deps: login
+    cmds: 
+      - |-
+        az login --service-principal -u ${AKS_SERVICE_PRINCIPAL_APPID} -p ${AKS_SERVICE_PRINCIPAL_PASSWORD} \
+        --tenant ${AKS_SERVICE_PRINCIPAL_TENANT}
+        az group delete --name nuvolaris --no-wait --yes
   
-  list: az aks list
+  list: 
+    deps: login
+    cmds: 
+      - az aks list
 
-  config: az aks get-credentials --resource-group nuvolaris --name nuvolaris --file aks.kubeconfig
+  config: 
+    deps: login
+    cmds: 
+      - az aks get-credentials --resource-group nuvolaris --name nuvolaris --file aks.kubeconfig
   
   
