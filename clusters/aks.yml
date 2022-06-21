@@ -39,7 +39,7 @@ tasks:
           --name nuvolaris \
           --node-count 1 \
           --node-vm-size Standard_D3_v2 \
-          --node-osdisk-size 80 \
+          --node-osdisk-size 50 \
           --nodepool-name nuvnp1 \
           --ssh-key-value id_rsa.pub \
           --network-plugin azure    
@@ -48,10 +48,7 @@ tasks:
     deps:
       - login
     cmds: 
-      - |-
-        az login --service-principal -u ${AKS_SERVICE_PRINCIPAL_APPID} -p ${AKS_SERVICE_PRINCIPAL_PASSWORD} \
-        --tenant ${AKS_SERVICE_PRINCIPAL_TENANT}
-        az group delete --name nuvolaris --no-wait --yes
+      - az group delete --name nuvolaris --no-wait --yes
   
   list: 
     deps: 
