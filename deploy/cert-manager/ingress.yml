@@ -20,6 +20,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: playground
+            name: controller
             port:
-              number: 3232
+              number: 3233
