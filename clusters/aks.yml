@@ -38,8 +38,9 @@ tasks:
           --resource-group nuvolaris \
           --name nuvolaris \
           --node-count 1 \
-          --node-vm-size Standard_D3_v2 \
-          --node-osdisk-size 50 \
+          --node-vm-size Standard_DS3_v2 \
+          --node-osdisk-size 80 \
+          --node-osdisk-type Ephemeral \
           --nodepool-name nuvnp1 \
           --ssh-key-value id_rsa.pub \
           --network-plugin azure    
@@ -62,4 +63,13 @@ tasks:
     cmds: 
       - az aks get-credentials --resource-group nuvolaris --name nuvolaris --file aks.kubeconfig
   
-  
+  setingress:
+    deps:
+      - login
+    cmds:
+      - |-
+        IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o json | jq .status.loadBalancer.ingress[0].ip -r)
+        DNSNAME="nuvolaris-ingress"
+        PUBLICIPID=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
+        az network public-ip update --ids $PUBLICIPID --dns-name $DNSNAME
+        az network public-ip show --ids $PUBLICIPID --query "[dnsSettings.fqdn]" --output tsv

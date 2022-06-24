@@ -27,8 +27,8 @@ elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
 then echo "microk8s"
 elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
 then echo "lks"
-elif echo "$LABELS" | jq . | grep kubernetes.azure.com >/dev/null
-then echo "aks"
+#elif echo "$LABELS" | jq . | grep kubernetes.azure.com >/dev/null
+#then echo "aks"
 elif echo "$LABELS" | jq . | awk '/nuvolaris.io\/kube/ {print $2}' | grep kind >/dev/null
 then echo "kind"
 else echo "generic"

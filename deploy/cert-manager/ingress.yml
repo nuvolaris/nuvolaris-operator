@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nuvolaris-ingress
+  namespace: nuvolaris
+  annotations:
+    kubernetes.io/ingress.class: "nginx"    
+    cert-manager.io/issuer: "letsencrypt-nuvolaris"
+
+spec:
+  tls:
+  - hosts:
+    - nuvolaris-ingress.northeurope.cloudapp.azure.com
+    secretName: nuvolaris-tls
+  rules:
+  - host: nuvolaris-ingress.northeurope.cloudapp.azure.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: playground
+            port:
+              number: 3232
