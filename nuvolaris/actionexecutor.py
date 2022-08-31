@@ -138,9 +138,10 @@ def get_subjects(db, username, password):
 
 #
 # get actions from the nuvolaris_whisks db
+# having an annotation with key=cron or key=autoexec and value=true
 #
 def get_cron_aware_actions(db, username, password):
-    selector = '{"selector":{"entityType":"action", "annotations": {"$elemMatch": {"key": "cron"}}}, "fields": ["_id", "annotations", "name", "_rev","namespace","parameters","entityType"]}'
+    selector = '{"selector":{"entityType":"action", "$or":[{"annotations": {"$elemMatch": {"key": "cron"}}},{"annotations": {"$elemMatch": {"$and":[{"key":"autoexec"},{"value":true}]}}}] }, "fields": ["_id", "annotations", "name", "_rev","namespace","parameters","entityType"]}'
     return find_docs(db, "whisks", selector, username, password)
 #
 # POST a request to invoke the ow action
@@ -166,8 +167,148 @@ def call_ow_action(url, parameters, ow_auth):
     except Exception as inst:
         logging.warn(f"Failed to invoke action {type(inst)}")
         logging.warn(inst)
-        return False        
+        return False
+
+#
+# Update the action annotations to disable the cron execution
+# by setting {"autoexec":false}
+#        
+def unschedule_autoexec_action(action_url, ow_auth):   
+    logging.info(f"Purging cron details from action {action_url}")    
+    headers = {'Content-Type': 'application/json'}
+
+    try:
+        updating_data = {}
+        updated_annotation = [{"key":"autoexec","value":False}]
+        updating_data["annotations"]=updated_annotation
+        logging.info(f"updating with {json.dumps(updating_data)}")
+        
+        response = req.put(f"{action_url}?overwrite=true", auth=(ow_auth['username'],ow_auth['password']), headers=headers, data=json.dumps(updating_data))
+
+        if response.status_code != 200:
+            logging.warn(f"PUT call to {action_url}?overwrite=true failed with {response.status_code}. Body {response.text}")
+            return False
+
+        logging.info(f"PUT call to {action_url}?overwrite=true succeeded with {response.status_code}. Action cron policy removed")
+        return True
+    except Exception as inst:
+        logging.warn(f"Failed to invoke action {type(inst)}")
+        logging.warn(inst)
+        return False       
+
+#
+# Extract the cron expression from the given annotations list
+#
+def get_cron_expression(actionAnnotations):
+    """
+        >>> import nuvolaris.actionexecutor as ae 
+        >>> annotations = []
+        >>> annotations.append({"key":"cron","value":"*/2 * * * *"})
+        >>> annotations.append({"key":"provide-api-key","value":False})            
+        >>> annotations.append({"key":"exec","value":"nodejs:14"})
+        >>> "*/2 * * * *" == ae.get_cron_expression(annotations)
+        True
+        >>> "once" == ae.get_cron_expression([{"key":"cron","value":"once"}])
+        True
+    """
+    for a in actionAnnotations:
+        if(a['key'] == 'cron'):
+            return a['value']
+
+    return None
+
+#
+# Extract the autoexect flag from the given annotations list
+#
+def get_autoexec(actionAnnotations):
+    """
+        >>> import nuvolaris.actionexecutor as ae 
+        >>> annotations = []
+        >>> annotations.append({"key":"autoexec","value":True})
+        >>> annotations.append({"key":"provide-api-key","value":False})            
+        >>> annotations.append({"key":"exec","value":"nodejs:14"})
+        >>> ae.get_autoexec(annotations)
+        True
+        >>> ae.get_autoexec([{"key":"autoexec","value":False}])
+        False
+    """
+    for a in actionAnnotations:
+        if(a['key'] == 'autoexec'):
+            return a['value']
+
+    return False    
+
+#
+# Determine if the action should be triggered
+# possible return values are
+# execute if the action should be triggered according to current date
+# no_execution if the action should not be triggered or the cron expression is not a valid one
+#
+def should_trigger(actionNamespace, actionName, actionCronExpression, currentDate, executionInterval):
+    if not cn.croniter.is_valid(actionCronExpression):
+        logging.warn(f"action {actionNamespace}/{actionName} cron expression {actionCronExpression} is not valid. Skipping execution")
+        return "no_execution"
+
+    if not action_should_trigger(currentDate, executionInterval, actionCronExpression):
+        logging.warn(f"action {actionNamespace}/{actionName} cron expression {actionCronExpression} does not trigger an execution at {currentDate}")
+        return "no_execution"
     
+    return "execute"
+
+def build_action_url(baseurl,namespace, package, action_name):
+    """
+        >>> import nuvolaris.actionexecutor as ae         
+        >>> url = ae.build_action_url("http://localhost:3233/api/v1/namespaces/","nuvolaris","mongo","mongo")
+        >>> url == "http://localhost:3233/api/v1/namespaces/nuvolaris/actions/mongo/mongo"
+        True
+        >>> url = ae.build_action_url("http://localhost:3233/api/v1/namespaces/","nuvolaris",None,"mongo")
+        >>> url == "http://localhost:3233/api/v1/namespaces/nuvolaris/actions/mongo"
+        True
+        >>> url = ae.build_action_url("http://localhost:3233/api/v1/namespaces/","nuvolaris","","mongo")
+        >>> url == "http://localhost:3233/api/v1/namespaces/nuvolaris/actions/mongo"
+        True
+    """    
+    url = f"{baseurl}{namespace}/actions/"
+    if package:
+        url += f"{package}/"
+
+    url += action_name    
+    return url  
+
+def get_package_from_namespace(action_namespace):
+    """
+        >>> import nuvolaris.actionexecutor as ae         
+        >>> package = ae.get_package_from_namespace("nuvolaris")
+        >>> package == ""
+        True
+        >>> package = ae.get_package_from_namespace("nuvolaris/mongo")
+        >>> package == "mongo"
+        True
+        >>> package = ae.get_package_from_namespace("nuvolaris/mongo/mongo")
+        >>> package == "mongo/mongo"
+        True
+    """    
+    parts = action_namespace.partition("/")
+
+    if parts[2]:
+        return parts[2]
+
+    return ""
+
+def get_subject(action_namespace):
+    """
+        >>> import nuvolaris.actionexecutor as ae         
+        >>> package = ae.get_subject("nuvolaris")
+        >>> package == "nuvolaris"
+        True
+        >>> package = ae.get_subject("nuvolaris/mongo")
+        >>> package == "nuvolaris"
+        True
+        >>> package = ae.get_subject("nuvolaris/mongo/mongo")
+        >>> package == "nuvolaris"
+        True
+    """    
+    return action_namespace.partition("/")[0]
 #
 # Evaluate if the given whisk action must be executed or not
 # 
@@ -180,24 +321,30 @@ def handle_action(baseurl, currentDate, executionInterval, dAction, subjects):
     actionNamespace = dAction['namespace']
     actionParameters = list(dAction['parameters'])
     actionAnnotations = list(dAction['annotations'])
-    actionCronExpression = " "    
 
-    for a in actionAnnotations:
-        if(a['key'] == 'cron'):
-            actionCronExpression = a['value']
- 
-    if not cn.croniter.is_valid(actionCronExpression):
-        logging.warn(f"action {actionNamespace}/{actionName} cron expression {actionCronExpression} is not valid. Skipping execution")
+    autoexecAction = get_autoexec(actionAnnotations)
+    execute = "no_execution"
+
+    #gives always precedence to the autoexec annotations
+    if autoexecAction:
+        execute = "execute_once"
+    else:
+        actionCronExpression = get_cron_expression(actionAnnotations)
+        execute = should_trigger(actionNamespace,actionName,actionCronExpression,currentDate,executionInterval)
+
+    if "no_execution" == execute:
         return None
 
-    if not action_should_trigger(currentDate, executionInterval, actionCronExpression):
-        logging.warn(f"action {actionNamespace}/{actionName} cron expression {actionCronExpression} does not trigger an execution at {currentDate}")
-        return None
-
-    subjectName = actionNamespace.split("/")[0]
-    auth = get_auth(subjects, subjectName)
+    namespaceSubject = get_subject(actionNamespace)
+    auth = get_auth(subjects, namespaceSubject)
     if(auth):
-        call_ow_action(f"{baseurl}{actionNamespace}/actions/{actionName}?blocking=false&result=false", actionParameters, auth)
+        package = get_package_from_namespace(actionNamespace)
+        
+        base_action_url = build_action_url(baseurl,namespaceSubject, package, actionName)        
+        ret = call_ow_action(f"{base_action_url}?blocking=false&result=false", actionParameters, auth)
+
+        if ret and "execute_once" == execute:
+            unschedule_autoexec_action(base_action_url, auth)
     else:
         logging.warn('No subject {subjectName} credentials found!')
     return None
