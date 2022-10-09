@@ -16,6 +16,7 @@
 # under the License.
 #
 import flatdict, json, os
+import nuvolaris.kube as kube
 
 _config = {}
 
@@ -33,9 +34,9 @@ def configure(spec: dict):
 def reconfigure():
     try:
         spec = kube.kubectl("get", "wsk/controller", jsonpath="{.spec}")[0]
-        configure(spec)
-        return True
-    except:
+        return configure(spec)
+    except Exception as e:
+        print(e)
         return False
 
 
@@ -132,7 +133,7 @@ def detect_storage(storages=None):
                     _config['nuvolaris.provisioner'] = st['provisioner']
             except:
                 pass
-    if not "storageClass" in _config:
+    if not "nuvolaris.storageClass" in _config:
         res["nuvolaris.storageClass"] = "default"
         _config["nuvolaris.storageClass"] = "default"
     return res

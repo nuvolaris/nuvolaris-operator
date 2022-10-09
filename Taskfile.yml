@@ -21,6 +21,7 @@ vars:
   G: ""
   N: ""
   T: ""
+  S: ""
   BASETAG: 0.3.0-morpheus
   KUBE:
     sh: ./detect.sh
@@ -129,7 +130,7 @@ tasks:
 
   image-tag: 
     - git tag -d $(git tag) 
-    - git tag -f {{.BASETAG}}.$(date +%y%m%d%H) 
+    - git tag -f {{.BASETAG}}.$(date +%y%m%d%H){{.S}}
     - env PAGER= git tag
 
   # configure env
