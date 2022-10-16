@@ -29,7 +29,7 @@ ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # install Python
 RUN apt-get update && apt-get -y upgrade &&\
-    apt-get -y install apt-utils python3.10 python3.10-venv curl sudo telnet inetutils-ping
+    apt-get -y install apt-utils python3.10 python3.10-venv curl sudo telnet inetutils-ping vim
 # Download Kubectl
 RUN KVER="v1.23.0" ;\
     ARCH="$(dpkg --print-architecture)" ;\

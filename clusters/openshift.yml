@@ -41,13 +41,6 @@ tasks:
       --dir openshift \
       --log-level=debug
 
-  destroy: 
-    deps:
-    - init
-    cmds: 
-    - >
-      openshift-install destroy cluster --dir openshift --log-level=debug
-
   config: 
     - |-
       mkdir -p ~/.kube
@@ -56,15 +49,17 @@ tasks:
 
   user:
     - oc apply -f openshift-user.yaml
-
-  user1:
     - oc adm policy add-role-to-user admin nuvolaris
-    - oc adm policy add-role-to-user nuvolaris-operator-cr nuvolaris
-    - oc adm policy add-role-to-user nuvolaris-operator-role nuvolaris
 
   project:
     - oc new-project nuvolaris --description="Nuvolaris" --display-name="Nuvolaris"
     - oc project nuvolaris
-    - oc adm policy add-role-to-user admin nuvolaris
  
-  login:
+  login: oc login -u nuvolaris -p s3cr3t
+
+  destroy:
+    deps:
+    - init
+    cmds: 
+    - >
+      openshift-install destroy cluster --dir openshift --log-level=debug

@@ -43,17 +43,18 @@ def create(owner=None):
     image = f"{img}:{tag}"
 
     config = json.dumps(cfg.getall())
+    vsize = int(cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 0))
     data = {
         "image": image,
         "config": config,
         "name": "couchdb", 
-        "size": cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 10), 
+        "size": vsize, 
         "dir": "/opt/couchdb/data",
         "storageClass": cfg.get("nuvolaris.storageClass")
     }
 
     kust =  kus.secretLiteral("couchdb-auth", user, pasw)
-    if cfg.get("couchdb.volume", None, "yes") == "yes":
+    if vsize >0:
         kust += kus.patchTemplate("couchdb", "set-attach.yaml", data) 
     spec = kus.kustom_list("couchdb", kust, templates=["couchdb-init.yaml"], data=data)
     

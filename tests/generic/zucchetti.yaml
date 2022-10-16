@@ -39,8 +39,7 @@ spec:
     # start cron based action parser
     cron: true     
   openwhisk:
-    volume: no
-    volume-size: 10
+    volume-size: 0
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
       nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -54,8 +53,7 @@ spec:
   couchdb:
     host: couchdb
     port: 5984
-    volume: no
-    volume-size: 10
+    volume-size: 0
     admin:
       user: whisk_admin
       password: some_passw0rd
@@ -67,8 +65,7 @@ spec:
       password: s0meP@ass2
   mongodb:
     host: mongodb
-    volume: no
-    volume-size: 10
+    volume-size: 0
     admin: 
       user: whisk_admin
       password: 0therPa55
@@ -78,11 +75,9 @@ spec:
     exposedExternally: True
   kafka:
     host: kafka
-    volume: no
-    volume-size: 10
+    volume-size: 0
   s3:
-    volume: no
-    volume-size: 10
+    volume-size: 0
     id: AKIAIOSFODNN7EXAMPLE
     key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     region: eu-central-1

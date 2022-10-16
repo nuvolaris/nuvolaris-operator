@@ -38,11 +38,11 @@ spec:
           capabilities:
             drop:
             - ALL
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false 
-          runAsNonRoot: true
-          seccompProfile:
-            type: RuntimeDefault
+          #allowPrivilegeEscalation: false
+          #readOnlyRootFilesystem: false 
+          #runAsNonRoot: true
+          #seccompProfile:
+          #  type: RuntimeDefault
         image: "ghcr.io/nuvolaris/couchdb:2.3.1-morpheus.22090618"
         imagePullPolicy: "Always"
         #command: ["sleep", "inf"]

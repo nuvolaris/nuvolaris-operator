@@ -27,13 +27,14 @@ import kopf
 
 def create(owner=None):
     logging.info("create redis")
+    vsize = int(cfg.get("couchdb.volume-size", "REDIS_VOLUME_SIZE", 0))
     data = {
         "name": "redis",
         "dir": "/redis-master-data",
-        "size": cfg.get("couchdb.volume-size", "REDIS_VOLUME_SIZE", 10),
+        "size": vsize,
         "storageClass": cfg.get("nuvolaris.storageClass")
     }
-    if cfg.get("redis.volume", None, "yes") == "yes":
+    if vsize >0:
         kust = kus.patchTemplate("redis", "set-attach.yaml", data)
     spec = kus.kustom_list("redis", kust, templates=["redis-conf.yaml"], data=data)
 
