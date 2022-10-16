@@ -33,11 +33,11 @@ spec:
         capabilities:
           drop:
           - ALL
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: false 
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+        #allowPrivilegeEscalation: false
+        #readOnlyRootFilesystem: false 
+        #runAsNonRoot: true
+        #seccompProfile:
+        #  type: RuntimeDefault
       resources:
         limits:
           cpu: "1"

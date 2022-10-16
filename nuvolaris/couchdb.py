@@ -53,7 +53,8 @@ def create(owner=None):
     }
 
     kust =  kus.secretLiteral("couchdb-auth", user, pasw)
-    kust += kus.patchTemplate("couchdb", "set-attach.yaml", data) 
+    if cfg.get("couchdb.volume", None, "yes") == "yes":
+        kust += kus.patchTemplate("couchdb", "set-attach.yaml", data) 
     spec = kus.kustom_list("couchdb", kust, templates=["couchdb-init.yaml"], data=data)
     
     if owner:

@@ -33,7 +33,8 @@ def create(owner=None):
         "size": cfg.get("couchdb.volume-size", "REDIS_VOLUME_SIZE", 10),
         "storageClass": cfg.get("nuvolaris.storageClass")
     }
-    kust = kus.patchTemplate("redis", "set-attach.yaml", data)
+    if cfg.get("redis.volume", None, "yes") == "yes":
+        kust = kus.patchTemplate("redis", "set-attach.yaml", data)
     spec = kus.kustom_list("redis", kust, templates=["redis-conf.yaml"], data=data)
 
     if owner:
