@@ -84,7 +84,7 @@ def whisk_create(spec, name, **kwargs):
 
     if cfg.get('components.openwhisk'):
         try:
-            owner)
+            msg = openwhisk.create(owner)
             state['openwhisk'] = "on"
             logging.info(msg)
         except:
