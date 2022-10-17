@@ -57,6 +57,8 @@ tasks:
  
   login: oc login -u nuvolaris -p s3cr3t
 
+  kubeadmin: oc login -u kubeadmin -p $(cat openshift/auth/kubeadmin-password)
+
   destroy:
     deps:
     - init

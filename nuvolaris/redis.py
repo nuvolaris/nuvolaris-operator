@@ -34,6 +34,8 @@ def create(owner=None):
         "size": vsize,
         "storageClass": cfg.get("nuvolaris.storageClass")
     }
+
+    kust = ''
     if vsize >0:
         kust = kus.patchTemplate("redis", "set-attach.yaml", data)
     spec = kus.kustom_list("redis", kust, templates=["redis-conf.yaml"], data=data)

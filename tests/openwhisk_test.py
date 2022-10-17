@@ -23,7 +23,8 @@ import nuvolaris.kube as kube
 import os
 
 # apihost
-assert(cfg.configure(tu.load_sample_config(), clean=True))
+cfg.clean()
+assert(cfg.configure(tu.load_sample_config()))
 assert(ow.apihost([]) == "https://pending")
 
 cfg.put("nuvolaris.apihost", "localhost")
@@ -35,7 +36,8 @@ assert( ow.apihost([]) == 'http://localhost:3232')
 
 a = [ { "hostname": "elb.amazonaws.com"} ]
 assert( ow.apihost(a) == 'http://localhost:3232')
-assert(cfg.configure(tu.load_sample_config(), clean=True))
+cfg.clean()
+assert(cfg.configure(tu.load_sample_config()))
 assert( ow.apihost(a) == 'https://elb.amazonaws.com')
 
 a = [{"ip": "20.86.250.184"}]
@@ -44,9 +46,9 @@ assert( ow.apihost(a) == "https://20.86.250.184")
 import doctest
 doctest.testfile("tests/openwhisk_test.txt", module_relative=False)
 
+!kubectl apply -f deploy/nuvolaris-permissions
 !kubectl apply -f deploy/nuvolaris-operator/nuvolaris-common.yaml
-!kubectl apply -f deploy/nuvolaris-operator/whisk-crd.yaml
-!kubectl apply -f tests/whisk-dev.yaml
+!kubectl apply -f tests/whisk.yaml
 
 wsk = kube.get("wsk/controller")
 ow.create(wsk)

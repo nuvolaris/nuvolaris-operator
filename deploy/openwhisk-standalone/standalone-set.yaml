@@ -35,7 +35,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: openwhisk-standalone
-        image: ghcr.io/msciabarra/openwhisk-standalone:0.3.0-morpheus.22092015
+        image: ghcr.io/msciabarra/openwhisk-standalone:0.3.0-morpheus.22101621
         imagePullPolicy: Always
         resources:
           requests:
