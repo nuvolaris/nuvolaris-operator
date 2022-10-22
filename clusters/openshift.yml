@@ -50,6 +50,8 @@ tasks:
   user:
     - oc apply -f openshift-user.yaml
     - oc adm policy add-role-to-user admin nuvolaris
+    - oc apply -f ../deploy/nuvolaris-permissions/whisk-crd.yaml
+    - oc apply -f openshift-aggregate.yaml
 
   project:
     - oc new-project nuvolaris --description="Nuvolaris" --display-name="Nuvolaris"
@@ -57,7 +59,7 @@ tasks:
  
   login: oc login -u nuvolaris -p s3cr3t
 
-  kubeadmin: oc login -u kubeadmin -p $(cat openshift/auth/kubeadmin-password)
+  rootlogin: oc login -u kubeadmin -p $(cat openshift/auth/kubeadmin-password)
 
   destroy:
     deps:

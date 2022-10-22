@@ -38,6 +38,11 @@ spec:
         command:
           - redis-server
           - "/redis-master/redis.conf"
+        resources:
+          requests:
+            memory: "1G"
+          limits:
+            memory: "4G"
         securityContext:
           capabilities:
             drop:
@@ -45,8 +50,8 @@ spec:
           #allowPrivilegeEscalation: false
           #readOnlyRootFilesystem: false 
           #runAsNonRoot: true
-          #seccompProfile:
-          #  type: RuntimeDefault
+          seccompProfile:
+            type: RuntimeDefault
         env:
         - name: MASTER
           value: "true"
