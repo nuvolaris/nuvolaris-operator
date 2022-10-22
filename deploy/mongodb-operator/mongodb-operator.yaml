@@ -86,6 +86,6 @@ spec:
           readOnlyRootFilesystem: true
           runAsUser: 2000
       securityContext:
-        seccompProfile:
-          type: RuntimeDefault
+        #seccompProfile:
+        #  type: RuntimeDefault
       serviceAccountName: mongodb-kubernetes-operator
