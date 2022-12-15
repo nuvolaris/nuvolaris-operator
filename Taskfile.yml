@@ -50,7 +50,7 @@ includes:
   gke:
     taskfile: clusters/gke.yml
     dir: clusters
-  m8s:
+  mik:
     taskfile: clusters/microk8s.yml
     dir: clusters
 

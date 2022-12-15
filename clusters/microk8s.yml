@@ -18,48 +18,58 @@
 version: '3'
 
 vars: 
+  # if you change this you have to change also the ami id in microk8s.cf
   REGION: "us-east-1"
   # preallocated elastic ip and dns pointing to that IP
-  HOSTNAME: "dev.nuvolaris.io"
+  STACK: 
+    sh: echo ${GITHUB_USER}-nuvolaris-dev
+
+  APIHOST: apihost.txt
 
 tasks:
 
-  create: 
+  create:
+    - task: import-key 
     - > 
       aws cloudformation create-stack 
-      --stack-name nuvolaris-dev --region {{.REGION}}
+      --stack-name {{.STACK}} --region {{.REGION}}
       --template-body file://microk8s.cf
+      --parameter ParameterKey=Stack,ParameterValue={{.STACK}}
     - >
       aws cloudformation wait stack-create-complete
-      --stack-name nuvolaris-dev --region {{.REGION}}
+      --stack-name {{.STACK}} --region {{.REGION}} 
 
   destroy: 
     - >
       aws cloudformation delete-stack 
-      --stack-name nuvolaris-dev --region {{.REGION}}
+      --stack-name {{.STACK}} --region {{.REGION}}
     - >
       aws cloudformation wait stack-delete-complete
-      --stack-name nuvolaris-dev --region {{.REGION}}
+      --stack-name {{.STACK}} --region {{.REGION}}
 
   get-ip: 
     - |-
       aws ec2 describe-instances \
-      --filters 'Name=tag:Name,Values=nuvolaris-dev' \
-      --filters Name=instance-state-name,Values=running \
+      --filters 'Name=tag:Name,Values={{.STACK}}' \
       --region={{.REGION}} --output json \
-      | jq -r '.Reservations[].Instances[].PublicIpAddress'
+      | jq -r '.Reservations[].Instances[].PublicIpAddress' | tee apihost.txt
       
   enter:
-      ssh -i id_rsa -o "StrictHostKeyChecking=no" ubuntu@{{.HOSTNAME}} 
-  
-  config: 
+      - task: get-ip
+      - ssh -i id_rsa -o "StrictHostKeyChecking=no" ubuntu@$(cat {{.APIHOST}})
+
+  config:
+      - task: get-ip
+      - mkdir -p ~/.kube
       - |-
         ssh -i id_rsa -o "StrictHostKeyChecking=no" \
-        ubuntu@{{.HOSTNAME}} sudo cloud-init status --wait
+        "ubuntu@$(cat {{.APIHOST}})" sudo cloud-init status --wait
         scp -i id_rsa -o "StrictHostKeyChecking=no" \
-        ubuntu@{{.HOSTNAME}}:/etc/kubeconfig microk8s.kubeconfig
+        "ubuntu@$(cat {{.APIHOST}}):/etc/kubeconfig" microk8s.kubeconfig
 
-
-  import-key: > 
-      aws ec2 import-key-pair --key-name "nuvolaris-dev" 
+  import-key: 
+    cmds:
+    - >
+      aws ec2 import-key-pair --key-name "{{.STACK}}"
       --public-key-material fileb://./id_rsa.pub --region {{.REGION}}
+    ignore_error: yes

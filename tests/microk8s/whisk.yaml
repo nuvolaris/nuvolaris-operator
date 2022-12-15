@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: dev.nuvolaris.io
+      apihost: $APIHOST
       #apiport: 80
       #protocol: http 
   components:

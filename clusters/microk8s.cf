@@ -15,13 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 
+
+Parameters:
+    Stack: 
+      Type: String
+      Description: prefix for resources
+
 Resources:
   MyInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-052efd3df9dad4825 # ImageID valid only in us-east-1 region
       InstanceType: t2.medium
-      KeyName: dev.nuvolaris.io 
+      KeyName: !Ref Stack
       SecurityGroupIds:
         - !Ref MySecurityGroup
       BlockDeviceMappings:
@@ -31,7 +37,7 @@ Resources:
             DeleteOnTermination: true        
       Tags:
         - Key: Name
-          Value: 'nuvolaris-dev'  
+          Value: !Ref Stack  
       UserData:
         Fn::Base64: !Sub |
             #!/bin/bash
@@ -51,7 +57,7 @@ Resources:
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: "dev-nuvolaris-sg"
+      GroupName: !Ref Stack
       GroupDescription: "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -70,10 +76,3 @@ Resources:
           FromPort: 16443
           ToPort: 16443
           CidrIp: 0.0.0.0/0
-  
-  MyIPAssociation:
-    Type: AWS::EC2::EIPAssociation
-    Properties: 
-      AllocationId: "eipalloc-09cbaf94bb7b02919"
-      InstanceId: !Ref MyInstance
- 
