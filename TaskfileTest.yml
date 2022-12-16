@@ -47,7 +47,6 @@ tasks:
         newName: ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
         newTag: {{.OPERATOR_TAG}}
       resources:
-      - nuvolaris-common.yaml
       - operator-pod.yaml
       __EOF__
 
