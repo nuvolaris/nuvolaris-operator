@@ -21,12 +21,15 @@ vars:
   # if you change this you have to change also the ami id in microk8s.cf
   REGION: "us-east-1"
   # preallocated elastic ip and dns pointing to that IP
-  STACK: 
-    sh: echo ${GITHUB_USER}-nuvolaris-dev
-
+  # apihost file
   APIHOST: apihost.txt
 
+  # hack to read a variable from .env
+  STACK:
+    sh: awk -F= '/GITHUB_USER=/{print $2 "-nuvolaris-dev"}' ../.env
+
 tasks:
+
 
   create:
     - task: import-key 
@@ -73,3 +76,7 @@ tasks:
       aws ec2 import-key-pair --key-name "{{.STACK}}"
       --public-key-material fileb://./id_rsa.pub --region {{.REGION}}
     ignore_error: yes
+
+  env: env
+
+  stack: echo {{.STACK}}
