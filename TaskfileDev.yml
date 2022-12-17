@@ -33,9 +33,9 @@ vars:
     sh: awk -F= '/ENV CONTROLLER_IMAGE=/ { print $2 ; exit }' Dockerfile
 
 env:
-    APIHOST: 
-      sh: awk '/server:/{match($0, /\/\/(.*):/, s); print s[1]}'  ~/.kube/config  2>/dev/null || echo localhost:3233
-
+    APIHOST:
+      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
+      
 tasks:
 
   env: env

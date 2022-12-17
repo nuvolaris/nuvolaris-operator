@@ -30,7 +30,6 @@ vars:
   STACK: "{{.GITHUB_USER}}-nuvolaris-dev"
   KUBECONFIG: "microk8s-{{.GITHUB_USER}}.kubeconfig"
   
-
 tasks:
 
   create:
@@ -71,6 +70,8 @@ tasks:
         "ubuntu@$(cat {{.APIHOST}})" sudo cloud-init status --wait
         scp -i id_rsa -o "StrictHostKeyChecking=no" \
         "ubuntu@$(cat {{.APIHOST}}):/etc/kubeconfig" {{.KUBECONFIG}}
+      - cp -v {{.KUBECONFIG}} ~/.kube/config
+      - kubectl get nodes
 
   import-key: 
     cmds:
@@ -80,7 +81,6 @@ tasks:
     ignore_error: yes
 
   env: env
-
 
   info: 
     cmds:
