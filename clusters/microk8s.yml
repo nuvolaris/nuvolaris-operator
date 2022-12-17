@@ -25,11 +25,13 @@ vars:
   APIHOST: apihost.txt
 
   # hack to read a variable from .env
-  STACK:
-    sh: awk -F= '/GITHUB_USER=/{print $2 "-nuvolaris-dev"}' ../.env
+  GITHUB_USER: 
+    sh: awk -F= '/GITHUB_USER=/{print $2}' ../.env
+  STACK: "{{.GITHUB_USER}}-nuvolaris-dev"
+  KUBECONFIG: "microk8s-{{.GITHUB_USER}}.kubeconfig"
+  
 
 tasks:
-
 
   create:
     - task: import-key 
@@ -68,7 +70,7 @@ tasks:
         ssh -i id_rsa -o "StrictHostKeyChecking=no" \
         "ubuntu@$(cat {{.APIHOST}})" sudo cloud-init status --wait
         scp -i id_rsa -o "StrictHostKeyChecking=no" \
-        "ubuntu@$(cat {{.APIHOST}}):/etc/kubeconfig" microk8s.kubeconfig
+        "ubuntu@$(cat {{.APIHOST}}):/etc/kubeconfig" {{.KUBECONFIG}}
 
   import-key: 
     cmds:
@@ -79,4 +81,11 @@ tasks:
 
   env: env
 
-  stack: echo {{.STACK}}
+
+  info: 
+    cmds:
+    - echo user  {{.GITHUB_USER}}
+    - echo stack {{.STACK}}
+    - echo kubeconfig {{.KUBECONFIG}}
+    silent: true
+    

@@ -65,6 +65,7 @@ tasks:
       - ssh-key
       - configure-env
     cmds:
+      - mkdir -p ~/.kube ; touch ~/.kube/config
       - poetry install
     status:
       - test -e $GOBIN/kopf
@@ -149,10 +150,8 @@ tasks:
   # generate ssh keys
   ssh-key:
     cmds:
-      - ssh-keygen -b 2048 -t rsa -f clusters/id_rsa -q -N ""
+      - test -f clusters/id_rsa || ssh-keygen -b 2048 -t rsa -f clusters/id_rsa -q -N ""
       - ssh-keygen  -y -f clusters/id_rsa >clusters/id_rsa.pub
-    status:
-      - test -f clusters/id_rsa.pub
 
   clean:
     cmds:
