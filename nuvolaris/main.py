@@ -126,7 +126,7 @@ def whisk_create(spec, name, **kwargs):
         logging.info(msg)
         state['mongodb'] = "on"
     else:
-        state['mongodb'] = "off"          
+        state['mongodb'] = "off"
 
     return state
 
