@@ -16,21 +16,21 @@
 # under the License.
 #
 ---
-apiVersion: v1
-kind: Namespace
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
 metadata:
-  name: nuvolaris
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config
-  namespace: nuvolaris
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: nuvolaris-operator
-  namespace: nuvolaris
-  labels:
-    app: nuvolaris-operator    
+  name: letsencrypt-issuer
+spec:
+  acme:
+    # The ACME server URL
+    server: "{{acme_server_url}}"
+    # Email address used for ACME registration
+    email: "{{acme_registered_email}}"
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-key
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    - http01:
+        ingress:
+          class: nginx

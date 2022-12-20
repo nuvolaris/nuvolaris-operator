@@ -26,6 +26,7 @@ import nuvolaris.bucket as bucket
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
+import nuvolaris.certmanager as cm
 
 # tested by an integration test
 @kopf.on.login()
@@ -56,8 +57,12 @@ def whisk_create(spec, name, **kwargs):
         "redis": "?",  # Redis
         "mongodb": "?",  # MongoDB
         "s3bucket": "?",   # S3-compatbile buckets
-        "cron": "?"   # Cron based actions executor
+        "cron": "?",   # Cron based actions executor
+        "tls": "?"   # Cron based actions executor
     }
+
+    runtime = cfg.get('nuvolaris.kube')
+    logging.info(f"kubernetes engine in use={runtime}")
 
     if cfg.get('components.couchdb'):
         try:
@@ -101,7 +106,18 @@ def whisk_create(spec, name, **kwargs):
             logging.exception("cannot create cron")
             state['cron']= "error"
     else:
-        state['cron'] = "off"         
+        state['cron'] = "off" 
+
+    if cfg.get('components.tls'):        
+        try:
+            msg = cm.create(owner)
+            state['cm'] = "on"
+            logging.info(msg)
+        except:
+            logging.exception("cannot configure tls")
+            state['cm']= "error"
+    else:
+        state['cm'] = "off"                 
 
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -153,7 +169,11 @@ def whisk_delete(spec, **kwargs):
 
     if cfg.get("components.cron"):
         msg = cron.delete()
-        logging.info(msg)               
+        logging.info(msg)
+
+    if cfg.get("components.tls"):
+        msg = cm.delete()
+        logging.info(msg)                       
 
 
 # tested by integration test
