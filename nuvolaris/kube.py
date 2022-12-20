@@ -44,7 +44,7 @@ def kubectl(*args, namespace="nuvolaris", input=None, jsonpath=None):
         mocker.save(input)
         return mres
 
-    cmd = ["kubectl", "-n", namespace]
+    cmd = namespace and ["kubectl", "-n", namespace] or ["kubectl"]
     cmd += list(args)
     if jsonpath:
         cmd += ["-o", "jsonpath-as-json=%s" % jsonpath]
@@ -131,9 +131,9 @@ def deleteTemplate(name, data, namespace="nuvolaris"):
     return kubectl("delete", "-f", "-", namespace=namespace, input=obj)
 
 
-def get(name):
+def get(name, namespace="nuvolaris"):
     try:
-        return json.loads(kubectl("get", name, "-ojson"))
+        return json.loads(kubectl("get", name, "-ojson", namespace=namespace))
     except:
         return None
 

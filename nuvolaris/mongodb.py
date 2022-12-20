@@ -91,7 +91,7 @@ def create(owner=None):
         
         tpl_filter =  ["mongodb-auth.yaml","mongodb-auth-nuvolaris.yaml","mongodb.yaml"]
         if exposed: 
-            logging.info("*** invluding mongodb service for localhost access")
+            logging.info("*** including mongodb service for localhost access")
             tpl_filter.append("mongodb-svc.yaml")
         
 
@@ -105,7 +105,6 @@ def create(owner=None):
         
         # skipping this at the moment
         res = kube.apply(mspec)
-        logging.info(f"*** created mongodb instance: {res}")
     else:
         logging.info("*** something went wrong deploying mongodb operator")    
     return res 
