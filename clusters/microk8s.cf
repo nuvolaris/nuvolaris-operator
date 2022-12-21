@@ -26,7 +26,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-052efd3df9dad4825 # ImageID valid only in us-east-1 region
-      InstanceType: t2.medium
+      InstanceType: t2.large
       KeyName: !Ref Stack
       SecurityGroupIds:
         - !Ref MySecurityGroup

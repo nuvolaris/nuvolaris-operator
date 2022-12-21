@@ -62,6 +62,7 @@ ADD deploy/scheduler /home/nuvolaris/deploy/scheduler
 ADD deploy/mongodb-operator /home/nuvolaris/deploy/mongodb-operator
 ADD deploy/mongodb /home/nuvolaris/deploy/mongodb
 ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
+ADD deploy/nginx-ingress /home/nuvolaris/deploy/nginx-ingress
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
 RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
 USER nuvolaris

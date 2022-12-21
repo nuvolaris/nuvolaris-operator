@@ -37,7 +37,7 @@ spec:
             - -c
             - ./cron.sh
             env:
-            - name: "NUVOLARIS_CONFIG"
+            - name: "SCHEDULER_CONFIG"
               value: "{}"             
           restartPolicy: OnFailure
 

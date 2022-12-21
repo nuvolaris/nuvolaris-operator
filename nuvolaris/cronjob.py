@@ -30,12 +30,19 @@ def create(owner=None):
 
     #default to every minutes if not configured
     schedule = cfg.get('scheduler.schedule') or "* * * * *"
+    config = {
+        "scheduler.schedule":schedule,
+        "controller.protocol":cfg.get('controller.protocol') or "http",
+        "controller.host":cfg.get('controller.host') or "controller",
+        "controller.port":cfg.get('controller.port') or "3233",
+        "couchdb.controller.user":cfg.get('couchdb.controller.user'),
+        "couchdb.controller.password":cfg.get('couchdb.controller.password')
+    }
 
-    config = json.dumps(cfg.getall())
     data = {
         "image": image,
         "schedule": schedule,
-        "config": config,
+        "config": json.dumps(config),
         "name": "cron"
     }
     
