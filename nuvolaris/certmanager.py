@@ -22,12 +22,23 @@ import nuvolaris.config as cfg
 
 def create(owner=None):
     logging.info(f"*** Configuring certificate manager")
-
+    
+    cm = kube.get("service/cert-manager","cert-manager")
+    if cm:
+        return "certificate manager is already installed...skipping setup"
+    else:
+        # we apply the cert-manager.yaml as is
+        spec = kus.raw("cert-manager","cert-manager.yaml")
+        cfg.put("state.cm.spec", spec)        
+        res = kube.kubectl("apply", "-f", "deploy/cert-manager/cert-manager.yaml",namespace=None)
+        return res
+    
+    # We deploy a cluster-issuer
     #acme_registered_email = cfg.get('tls.acme-registered-email') or "nuvolaris@nuvolaris.io"
     #acme_server_url = cfg.get('tls.acme-server-url') or "https://acme-staging-v02.api.letsencrypt.org/directory"
     
-    #logging.info(f"Configuring TLS support using email {acme_registered_email}")
-    #logging.info(f"Configuring TLS support using let's encrypt server {acme_server_url}")
+    #logging.info(f"*** Configuring cluster issuer using email {acme_registered_email}")
+    #logging.info(f"*** Configuring cluster issuer using let's encrypt server {acme_server_url}")
 
     #config = json.dumps(cfg.getall())
     #data = {
@@ -35,20 +46,18 @@ def create(owner=None):
     #    "acme_server_url": acme_server_url,
     #    "name": "tls"
     #}
-    cm = kube.get("service/cert-manager","cert-manager")
-    if cm:
-        logging.info("certificate manager is already installed...skipping setup")
-    else:
-        # we apply the cert-manager.yaml as is
-        spec = kus.raw("cert-manager","cert-manager.yaml")
-        cfg.put("state.cm.spec", spec)        
-        res = kube.kubectl("apply", "-f", "deploy/cert-manager/cert-manager.yaml",namespace=None)
-        return res
+    
+    #kus.patchTemplates("cert-manager", ["cluster-issuer.yaml"], data)
+    #spec = kus.raw("cert-manager","__cluster-issuer.yaml")
+    #cfg.put("state.issuer.spec", spec)
+        
+    # create a cluster issuer
+    #res = kube.kubectl("apply", "-f", "deploy/cert-manager/__cluster-issuer.yaml",namespace=None)
+    #return res
 
 def delete():
     spec = cfg.get("state.cm.spec")
     res = False
     if spec:
         res = kube.kubectl("delete", "-f", "deploy/cert-manager/cert-manager.yaml",namespace=None)
-        logging.info(f"delete cm: {res}")
-    return res
+        return res

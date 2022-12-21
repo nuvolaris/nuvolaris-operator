@@ -20,7 +20,7 @@ import flatdict, json, os
 _config = {}
 
 # define a configuration 
-# the configuratoin is a map, followed by a list of labels 
+# the configuration is a map, followed by a list of labels 
 # the map can be a serialized json and will be flattened to a map of values.
 # you can have only a configuration active at a time
 # if you want to set a new configuration you have to clean it
