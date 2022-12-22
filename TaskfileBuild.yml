@@ -53,26 +53,11 @@ tasks:
       ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}} 
       --name=nuvolaris
 
-  buildx: >
-      docker buildx build
-      --platform linux/amd64  
+buildx-and-push:
+    - > 
+      docker buildx build 
+      --platform linux/amd64,linux/arm64 
       -t ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
-      --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-      --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}} 
-      {{.CLI_ARGS}} .
-
-  buildx-and-push:
-    - task: buildx
-    - docker push ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
-
-  buildarm: >
-      docker buildx build
-      --platform linux/arm64   
-      -t ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
-      --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-      --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}} 
-      {{.CLI_ARGS}} .
-
-  buildarm-and-push:
-    - task: buildarm
-    - docker push ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
+      --build-arg OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
+      --build-arg OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}} 
+      . --push
