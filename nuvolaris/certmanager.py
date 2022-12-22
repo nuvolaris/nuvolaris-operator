@@ -28,9 +28,9 @@ def create(owner=None):
         return "certificate manager is already installed...skipping setup"
     else:
         # we apply the cert-manager.yaml as is
-        spec = kus.raw("cert-manager","cert-manager.yaml")
+        spec = "deploy/cert-manager/cert-manager.yaml"
         cfg.put("state.cm.spec", spec)        
-        res = kube.kubectl("apply", "-f", "deploy/cert-manager/cert-manager.yaml",namespace=None)
+        res = kube.kubectl("apply", "-f", spec, namespace=None)
         return res
     
     # We deploy a cluster-issuer
@@ -59,5 +59,5 @@ def delete():
     spec = cfg.get("state.cm.spec")
     res = False
     if spec:
-        res = kube.kubectl("delete", "-f", "deploy/cert-manager/cert-manager.yaml",namespace=None)
+        res = kube.kubectl("delete", "-f", spec, namespace=None)
         return res

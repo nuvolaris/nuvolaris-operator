@@ -73,6 +73,7 @@ tasks:
   env: env
   
   watch: watch kubectl -n nuvolaris get nodes,pod,svc
+  watch: watch kubectl -n nuvolaris get deploy,pod,service,cronjob,ingress 
 
   logs: >
     rm -f nuvolaris-operator.log ;

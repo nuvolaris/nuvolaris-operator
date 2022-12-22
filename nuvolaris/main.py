@@ -28,6 +28,7 @@ import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
 import nuvolaris.certmanager as cm
 import nuvolaris.ingress as ingress
+import nuvolaris.endpoint as endpoint
 
 # tested by an integration test
 @kopf.on.login()
@@ -60,7 +61,8 @@ def whisk_create(spec, name, **kwargs):
         "s3bucket": "?",   # S3-compatbile buckets
         "cron": "?",   # Cron based actions executor
         "tls": "?",   # Cron based actions executor
-        "ingress": "?"
+        "ingress": "?", # Ingress
+        "endpoint": "?" # Http/s controller endpoint
     }
 
     runtime = cfg.get('nuvolaris.kube')
@@ -115,11 +117,16 @@ def whisk_create(spec, name, **kwargs):
             msg = openwhisk.create(owner)
             state['openwhisk'] = "on"
             logging.info(msg)
+
+            #msg = endpoint.create(owner)
+            #state['endpoint'] = "on"
         except:
             logging.exception("cannot create openwhisk")
             state['openwhisk']= "error"
+            state['endpoint'] = "error"
     else:
         state['openwhisk'] = "off"
+        state['endpoint'] = "off"
 
     if cfg.get('components.cron'):
         try:
@@ -175,6 +182,8 @@ def whisk_delete(spec, **kwargs):
     if cfg.get("components.openwhisk"):
         msg = openwhisk.delete()
         logging.info(msg)
+        #msg = endpoint.delete()
+        #logging.info(msg)
 
     if cfg.get("components.mongodb"):
         msg = mongodb.delete()
@@ -198,7 +207,7 @@ def service_update(old, new, name, **kwargs):
     if not name == "apihost":
         return
 
-    logging.debug(f"service_update: {json.dumps(new)}")
+    logging.info(f"service_update: {json.dumps(new)}")
     ingress = []
     if "ingress" in new and len(new['ingress']) >0:
         ingress = new['ingress']

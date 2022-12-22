@@ -20,50 +20,84 @@ import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 
-def get_ingress_pod_name():
+def get_ingress_pod_name(runtime, namespace="ingress-nginx"):
+    jpath = "{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'controller')].metadata.name}"
+
+    if runtime == "microk8s":
+         jpath= "{.items[?(@.metadata.labels.name == 'nginx-ingress-microk8s')].metadata.name}"
+
     # pod_name is retuned as a string array
-    pod_name = kube.kubectl("get", "pods", namespace="ingress-nginx", jsonpath="{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'controller')].metadata.name}")
+    pod_name = kube.kubectl("get", "pods", namespace=namespace, jsonpath=jpath)
     if pod_name:
         return pod_name[0]
     
     return None
 
-def wait_for_ingress_ready():
-    pod_name = get_ingress_pod_name()
+def wait_for_ingress_ready(runtime, namespace="ingress-nginx"):
+    pod_name = get_ingress_pod_name(runtime, namespace)
 
     if pod_name:
         logging.info(f"checking for {pod_name}")
-        while not kube.wait(f"pod/{pod_name}", "condition=ready",namespace="ingress-nginx"):
+        while not kube.wait(f"pod/{pod_name}", "condition=ready",namespace=namespace):
             logging.info(f"waiting for {pod_name} to be ready...")
             time.sleep(1)
     else:
         logging.error("*** could not determine if ingress-nginx pod is up and running")
 
-def get_ingress_yaml():
-    runtime = cfg.get('nuvolaris.kube')
-    return runtime == "eks" and "eks-nginx-ingress.yaml" or "generic-nginx-ingress.yaml"
-
-def create(owner=None):
-    ingress = kube.get("service/ingress-nginx-controller","ingress-nginx")
-    if ingress:
-        return "*** ingress-nginx already installed...skipping setup"
+# determine the ingress-nginx flavour
+def get_ingress_yaml(runtime):
+    if runtime == "eks":
+        return "eks-nginx-ingress.yaml"
+    elif runtime == "kind":
+        return  "kind-nginx-ingress.yaml"  
     else:
-        ingress_yaml = get_ingress_yaml()
-        logging.info(f"*** Configuring ingress-nginx {ingress_yaml}")
+        return  "cloud-nginx-ingress.yaml"
 
-        # we apply the ingress specs as they are
-        spec = kus.raw("ingress-nginx",ingress_yaml)
-        cfg.put("state.ingress.spec", spec)        
-        res = kube.kubectl("apply", "-f", f"deploy/ingress-nginx/{ingress_yaml}",namespace=None)
+# determine the ingress-nginx flavour
+def get_ingress_namespace(runtime):
+    if runtime == "microk8s":
+        return "ingress" 
+    else:
+        return  "ingress-nginx"    
 
-        #we need to be sure that the ingress is ready
-        wait_for_ingress_ready()
-        return res
+# determine the ingress-nginx flavour
+def get_ingress_service(runtime):
+    return "service/ingress-nginx-controller"
+
+def create(owner=None): 
+    runtime = cfg.get('nuvolaris.kube')
+    namespace = get_ingress_namespace(runtime)
+    service = get_ingress_service(runtime)
+
+    if(runtime == "microk8s"):
+        logging.info("*** checking availability of microk82 ingressa addon")
+        pod_name = get_ingress_pod_name(runtime, namespace)
+
+        if pod_name:
+            return f"*** ingress-nginx {pod_name} already installed...skipping setup"
+        else:
+            # TODO find a way to setup the standard ingress-nginx also on microk8s. For the moment we ask to enable it.
+            return "*** microk8s ingress missing. Enable it using microk8s enable ingress on your cluster"
+    else:
+        ingress = kube.get(service,namespace)
+        if ingress:
+            return "*** ingress-nginx already installed...skipping setup"
+
+    ingress_yaml = get_ingress_yaml(runtime)
+    logging.info(f"*** Configuring ingress-nginx {ingress_yaml}")
+
+    # we apply the ingress specs as they are
+    spec = f"deploy/ingress-nginx/{ingress_yaml}"
+    cfg.put("state.ingress.spec", spec)        
+    res = kube.kubectl("apply", "-f", spec, namespace=None)
+
+    #we need to be sure that the ingress is ready
+    wait_for_ingress_ready(runtime, namespace)
+    return res
 
 def delete():
     spec = cfg.get("state.ingress.spec")
     res = False
-    ingress_yaml = get_ingress_yaml()
     if spec:
-        res = kube.kubectl("delete", "-f", f"deploy/ingress-nginx/{ingress_yaml}",namespace=None)
+        res = kube.kubectl("delete", "-f", spec, namespace=None)
         return res
