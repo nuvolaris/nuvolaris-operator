@@ -137,18 +137,18 @@ def get(name, namespace="nuvolaris"):
     except:
         return None
 
-def get_pods(selector):
+def get_pods(selector, namespace="nuvolaris"):
     """
     filter the existing pods using the given selector expression. (ex name=mongodb-kubernetes-operator)
     """
     try:
-        return json.loads(kubectl("get", "pods", f"--selector={selector}","-ojson"))
+        return json.loads(kubectl("get", "pods", f"--selector={selector}","-ojson",namespace=namespace))
     except:
         return None        
 
-def wait(name, condition, timeout="600s"):
+def wait(name, condition, timeout="600s", namespace="nuvolaris"):
     try:
-        return kubectl("wait", name, f"--for={condition}", f"--timeout={timeout}")
+        return kubectl("wait", name, f"--for={condition}", f"--timeout={timeout}",namespace=namespace)
     except:
         return None
 
