@@ -38,3 +38,4 @@ run.pid
 actions/*/nuvolaris/
 _*.yaml
 apihost.txt
+.git-hooks/
