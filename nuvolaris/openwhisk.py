@@ -18,6 +18,7 @@
 import nuvolaris.kustomize as kus
 import nuvolaris.kube as kube
 import nuvolaris.config as cfg
+import nuvolaris.endpoint as endpoint
 import os, os.path
 import urllib.parse
 import logging
@@ -25,7 +26,7 @@ import kopf
 
 CONTROLLER_SPEC = "state.controller.spec"
 
-# this functtions returns the apihost to be stored as annotation
+# this functions returns the apihost to be stored as annotation
 def apihost(apiHost):
     logging.info(f"*** openwhish received ingress {apiHost}")
     url = urllib.parse.urlparse("https://pending")
@@ -41,6 +42,8 @@ def apihost(apiHost):
         url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
     if cfg.exists("nuvolaris.apiport"):
         url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
+
+    endpoint.create(owner=None,apihost=url.hostname)
     return url.geturl()
 
 def create(owner=None):

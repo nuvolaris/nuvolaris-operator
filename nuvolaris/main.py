@@ -29,6 +29,7 @@ import nuvolaris.mongodb as mongodb
 import nuvolaris.certmanager as cm
 import nuvolaris.ingress as ingress
 import nuvolaris.endpoint as endpoint
+import nuvolaris.issuer as issuer
 
 # tested by an integration test
 @kopf.on.login()
@@ -62,7 +63,8 @@ def whisk_create(spec, name, **kwargs):
         "cron": "?",   # Cron based actions executor
         "tls": "?",   # Cron based actions executor
         "ingress": "?", # Ingress
-        "endpoint": "?" # Http/s controller endpoint
+        "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
+        "issuer": "?" # ClusterIssuer configuration
     }
 
     runtime = cfg.get('nuvolaris.kube')
@@ -89,6 +91,19 @@ def whisk_create(spec, name, **kwargs):
         state['cm'] = "off"
         if runtime == "kind" and cfg.get('components.tls'):
             logging.info("*** cert-manager support will not be activated with kind runtime")
+
+    if cfg.get('components.tls') and not runtime == "kind":        
+        try:
+            msg = issuer.create(owner)
+            state['issuer'] = "on"
+            logging.info(msg)
+        except:
+            logging.exception("cannot configure issuer")
+            state['issuer']= "error"
+    else:
+        state['issuer'] = "off"
+        if runtime == "kind" and cfg.get('components.tls'):
+            logging.info("*** cluster issuer will not be deployed with kind runtime")        
 
     if cfg.get('components.couchdb'):
         try:
@@ -118,8 +133,6 @@ def whisk_create(spec, name, **kwargs):
             state['openwhisk'] = "on"
             logging.info(msg)
 
-            #msg = endpoint.create(owner)
-            #state['endpoint'] = "on"
         except:
             logging.exception("cannot create openwhisk")
             state['openwhisk']= "error"
@@ -169,6 +182,7 @@ def whisk_create(spec, name, **kwargs):
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
 def whisk_delete(spec, **kwargs):
+    runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
 
     if cfg.get("components.redis"):
@@ -182,8 +196,8 @@ def whisk_delete(spec, **kwargs):
     if cfg.get("components.openwhisk"):
         msg = openwhisk.delete()
         logging.info(msg)
-        #msg = endpoint.delete()
-        #logging.info(msg)
+        msg = endpoint.delete()
+        logging.info(msg)
 
     if cfg.get("components.mongodb"):
         msg = mongodb.delete()
@@ -196,6 +210,10 @@ def whisk_delete(spec, **kwargs):
     if cfg.get("components.tls"):
         msg = cm.delete()
         logging.info(msg)
+
+        msg = issuer.delete()
+        logging.info(msg)
+    
     # delete the ingress if it has been created by the deployment
     msg = ingress.delete()
     logging.info(msg)                         
@@ -214,7 +232,6 @@ def service_update(old, new, name, **kwargs):
     
     apihost = openwhisk.apihost(ingress)
     openwhisk.annotate(f"apihost={apihost}")
-    
 
 #@kopf.on.field("sts", field='status.availableReplicas')
 def deploy_update(old, new, name, **kwargs):
