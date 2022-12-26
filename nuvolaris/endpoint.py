@@ -32,6 +32,7 @@ def create(owner=None,apihost="localhost"):
         res = kube.kubectl("apply", "-f", spec)
         return res
     
+    logging.info(f"*** Configuring host {apihost} as https endpoint for openwhisk controller")
     data = {
         "apihost":apihost
     }
