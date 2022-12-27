@@ -232,6 +232,7 @@ def service_update(old, new, name, **kwargs):
     
     apihost = openwhisk.apihost(ingress)
     openwhisk.annotate(f"apihost={apihost}")
+    endpoint.create(owner=None, url=apihost)
 
 #@kopf.on.field("sts", field='status.availableReplicas')
 def deploy_update(old, new, name, **kwargs):
