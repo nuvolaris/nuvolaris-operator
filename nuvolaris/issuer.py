@@ -22,10 +22,13 @@ import nuvolaris.config as cfg
 
 def create(owner=None):
     logging.info(f"*** Configuring cluster issuer")
-    
     # We deploy a cluster-issuer
+    runtime = cfg.get('nuvolaris.kube')
     acme_registered_email = cfg.get('tls.acme-registered-email') or "nuvolaris@nuvolaris.io"
     acme_server_url = cfg.get('tls.acme-server-url') or "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+    # On microk8s cluster issuer class must be public
+    issuer_class = runtime == "microk8s" and "public" or "nginx"
     
     logging.info(f"*** Configuring cluster issuer using email {acme_registered_email}")
     logging.info(f"*** Configuring cluster issuer using let's encrypt server {acme_server_url}")
@@ -33,21 +36,21 @@ def create(owner=None):
     data = {
         "acme_registered_email": acme_registered_email,
         "acme_server_url": acme_server_url,
+        "issuer_class":issuer_class,
         "name": "tls"
     }
     
-    kust = kus.patchTemplate("issuer", ["cluster-issuer.yaml"], data)
-    spec = kus.kustom_list("issuer", kust, templates=[], data=data)
+    kust = kus.patchTemplate("issuer", "cluster-issuer.yaml", data)
+    spec = "deploy/issuer/__cluster-issuer.yaml"
+
     cfg.put("state.issuer.spec", spec)
-        
-    # create a cluster issuer
-    res = kube.apply(spec, namespace=None)
+    res = kube.kubectl("apply", "-f", spec,namespace=None)
     return res
 
 def delete():
     spec = cfg.get("state.issuer.spec")
     res = False
     if spec:
-        res = kube.delete(spec, namespace=None)
+        res = kube.kubectl("delete", "-f", spec,namespace=None)
         return res
 

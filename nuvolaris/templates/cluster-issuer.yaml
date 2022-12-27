@@ -33,4 +33,4 @@ spec:
     solvers:
     - http01:
         ingress:
-          class: nginx
+          class: {{issuer_class}}

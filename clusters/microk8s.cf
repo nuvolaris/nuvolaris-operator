@@ -45,7 +45,7 @@ Resources:
             apt update
             apt install -y snapd
             snap install microk8s --classic
-            microk8s enable hostpath-storage dns ingress
+            microk8s enable hostpath-storage dns ingress cert-manager
             while microk8s kubectl get nodes | grep NotReady
             do sleep 5
             done
