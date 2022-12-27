@@ -30,7 +30,7 @@ URL="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F
 curl -sL $URL | tar tzvf - -C ~/.local/bin
 YQ_VER=v4.27.2
 YQ_BIN=yq_linux_amd64
-sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VER}/${YQ_BIN} -O /usr/bin/yq && chmod +x /usr/bin/yq
+sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VER}/${YQ_BIN} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
 #URL="https://dl.k8s.io/release/$VER/bin/linux/$ARCH/kubectl"
 #curl -sSL "$URL" | sudo tee /usr/local/bin/kubectl && sudo chmod +x /usr/bin/kubectl
 #kubectl version
