@@ -87,8 +87,12 @@ def create(owner=None):
     logging.info(f"*** Configuring ingress-nginx {ingress_yaml}")
 
     # we apply the ingress specs as they are
+    spec_setup = f"deploy/ingress-nginx/operator-ingress-setup.yaml"
     spec = f"deploy/ingress-nginx/{ingress_yaml}"
-    cfg.put("state.ingress.spec", spec)        
+    cfg.put("state.ingress.spec", spec)
+    cfg.put("state.ingress.spec_setup", spec_setup)
+
+    res = kube.kubectl("apply", "-f", spec_setup, namespace=None)        
     res = kube.kubectl("apply", "-f", spec, namespace=None)
 
     #we need to be sure that the ingress is ready
@@ -97,7 +101,9 @@ def create(owner=None):
 
 def delete():
     spec = cfg.get("state.ingress.spec")
+    spec_setup = cfg.get("state.ingress.spec_setup")
     res = False
     if spec:
         res = kube.kubectl("delete", "-f", spec, namespace=None)
+        res = kube.kubectl("delete", "-f", spec_setup, namespace=None)
         return res
