@@ -19,24 +19,27 @@ import kopf, logging, json, time
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
+import urllib.parse
 
-def create(owner=None,apihost="localhost"):
+def create(owner=None,url="http://localhost:3233"):
     runtime = cfg.get('nuvolaris.kube')
-    tls = cfg.get('components.tls') 
+    tls = cfg.get('components.tls')
+    url = urllib.parse.urlparse(url)
+    hostname = url.hostname
 
     if(runtime == "kind" or not tls):
-        logging.info(f"*** Configuring host {apihost} as http endpoint for openwhisk controller")
+        logging.info(f"*** Configuring host {hostname} as http endpoint for openwhisk controller")
         spec = "deploy/openwhisk-endpoint/standalone-in-http.yaml"
         cfg.put("state.endpoint.spec", spec)
         cfg.put("state.endpoint.apply", "file")
         res = kube.kubectl("apply", "-f", spec)
         return res
     
-    logging.info(f"*** Configuring host {apihost} as https endpoint for openwhisk controller")
+    logging.info(f"*** Configuring host {hostname} as https endpoint for openwhisk controller")
     # On microk8s cluster issuer class must be public
     ingress_class = runtime == "microk8s" and "public" or "nginx"
     data = {
-        "apihost":apihost,
+        "apihost":hostname,
         "ingress_class":ingress_class
     }
 

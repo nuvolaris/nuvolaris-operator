@@ -18,7 +18,6 @@
 import nuvolaris.kustomize as kus
 import nuvolaris.kube as kube
 import nuvolaris.config as cfg
-import nuvolaris.endpoint as endpoint
 import os, os.path
 import urllib.parse
 import logging
@@ -42,8 +41,6 @@ def apihost(apiHost):
         url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
     if cfg.exists("nuvolaris.apiport"):
         url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
-
-    endpoint.create(owner=None,apihost=url.hostname)
     return url.geturl()
 
 def create(owner=None):
