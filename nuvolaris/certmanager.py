@@ -32,28 +32,6 @@ def create(owner=None):
         cfg.put("state.cm.spec", spec)        
         res = kube.kubectl("apply", "-f", spec, namespace=None)
         return res
-    
-    # We deploy a cluster-issuer
-    #acme_registered_email = cfg.get('tls.acme-registered-email') or "nuvolaris@nuvolaris.io"
-    #acme_server_url = cfg.get('tls.acme-server-url') or "https://acme-staging-v02.api.letsencrypt.org/directory"
-    
-    #logging.info(f"*** Configuring cluster issuer using email {acme_registered_email}")
-    #logging.info(f"*** Configuring cluster issuer using let's encrypt server {acme_server_url}")
-
-    #config = json.dumps(cfg.getall())
-    #data = {
-    #    "acme_registered_email": acme_registered_email,
-    #    "acme_server_url": acme_server_url,
-    #    "name": "tls"
-    #}
-    
-    #kus.patchTemplates("cert-manager", ["cluster-issuer.yaml"], data)
-    #spec = kus.raw("cert-manager","__cluster-issuer.yaml")
-    #cfg.put("state.issuer.spec", spec)
-        
-    # create a cluster issuer
-    #res = kube.kubectl("apply", "-f", "deploy/cert-manager/__cluster-issuer.yaml",namespace=None)
-    #return res
 
 def delete():
     spec = cfg.get("state.cm.spec")

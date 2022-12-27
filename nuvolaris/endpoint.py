@@ -33,8 +33,11 @@ def create(owner=None,apihost="localhost"):
         return res
     
     logging.info(f"*** Configuring host {apihost} as https endpoint for openwhisk controller")
+    # On microk8s cluster issuer class must be public
+    ingress_class = runtime == "microk8s" and "public" or "nginx"
     data = {
-        "apihost":apihost
+        "apihost":apihost,
+        "ingress_class":ingress_class
     }
 
     ikust = kus.patchTemplates("openwhisk-endpoint", ["standalone-in-https.yaml"], data)
@@ -53,7 +56,7 @@ def delete():
     apply = cfg.get("state.endpoint.apply")
     res = False
     if spec:
-        if(apply == "direct"):
+        if(apply == "file"):
             res = kube.kubectl("delete", "-f", spec)
             return res
         else:
