@@ -17,7 +17,7 @@
 # under the License.
 #
 sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-sudo apt-get -y install python3.9 python3.9-venv curl wget jq
+sudo apt-get -y install python3.11 python3.11-venv curl wget jq
 WSK_VERSION=1.2.0
 WSK_BASE=https://github.com/apache/openwhisk-cli/releases/download
 ARCH=amd64
