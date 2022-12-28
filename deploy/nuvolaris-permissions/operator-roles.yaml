@@ -30,6 +30,10 @@ rules:
   resources: ["configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
+- apiGroups: [""]
+  resources: ["services/status"]
+  verbs: ["update", "patch"]
+
 # read logs
 - apiGroups: [""]
   resources: ["pods/log"]

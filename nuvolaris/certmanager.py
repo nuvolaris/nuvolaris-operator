@@ -29,7 +29,7 @@ def create(owner=None):
     else:
         # we apply the cert-manager.yaml as is
         spec = "deploy/cert-manager/cert-manager.yaml"
-        cfg.put("state.cm.spec", spec)        
+        cfg.put("state.cm.spec", spec)       
         res = kube.kubectl("apply", "-f", spec, namespace=None)
         return res
 

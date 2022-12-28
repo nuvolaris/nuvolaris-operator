@@ -70,7 +70,7 @@ def create(owner=None):
     service = get_ingress_service(runtime)
 
     if(runtime == "microk8s"):
-        logging.info("*** checking availability of microk82 ingressa addon")
+        logging.info("*** checking availability of microk8s ingress addon")
         pod_name = get_ingress_pod_name(runtime, namespace)
 
         if pod_name:
@@ -87,23 +87,23 @@ def create(owner=None):
     logging.info(f"*** Configuring ingress-nginx {ingress_yaml}")
 
     # we apply the ingress specs as they are
-    spec_setup = f"deploy/ingress-nginx/operator-ingress-setup.yaml"
+    spec_setup = "deploy/ingress-nginx/operator-ingress-rbac.yaml"
+    cfg.put("state.ingress.spec_setup", spec_setup)
+    res = kube.kubectl("apply", "-f", spec_setup, namespace=None)
+    logging.info(res)
+
     spec = f"deploy/ingress-nginx/{ingress_yaml}"
     cfg.put("state.ingress.spec", spec)
-    cfg.put("state.ingress.spec_setup", spec_setup)
-
-    res = kube.kubectl("apply", "-f", spec_setup, namespace=None)        
+    
+    # apply and waits for ingress to be ready  
     res = kube.kubectl("apply", "-f", spec, namespace=None)
-
-    #we need to be sure that the ingress is ready
     wait_for_ingress_ready(runtime, namespace)
     return res
 
 def delete():
     spec = cfg.get("state.ingress.spec")
-    spec_setup = cfg.get("state.ingress.spec_setup")
     res = False
+
     if spec:
         res = kube.kubectl("delete", "-f", spec, namespace=None)
-        res = kube.kubectl("delete", "-f", spec_setup, namespace=None)
         return res

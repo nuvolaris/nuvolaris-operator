@@ -38,11 +38,11 @@ def create(owner=None,url="http://localhost:3233"):
     logging.info(f"*** Configuring host {hostname} as https endpoint for openwhisk controller")
     # On microk8s cluster issuer class must be public
     ingress_class = runtime == "microk8s" and "public" or "nginx"
+    
     data = {
         "apihost":hostname,
         "ingress_class":ingress_class
     }
-
     ikust = kus.patchTemplates("openwhisk-endpoint", ["standalone-in-https.yaml"], data)
     ispec = kus.restricted_kustom_list("openwhisk-endpoint", ikust, templates=[],templates_filter=["standalone-in-https.yaml"],data=data)
      
