@@ -1,0 +1,403 @@
+CONTROLLER: ghcr.io/nuvolaris/openwhisk-standalone:0.2.1-trinity.22062010
+OPERATOR: ghcr.io/francescotimperi/nuvolaris-operator:0.3.0-morpheus.22122823
+namespace/nuvolaris unchanged
+configmap/config unchanged
+serviceaccount/nuvolaris-operator unchanged
+clusterrole.rbac.authorization.k8s.io/nuvolaris-operator-cr unchanged
+clusterrolebinding.rbac.authorization.k8s.io/nuvolaris-operator-crb unchanged
+role.rbac.authorization.k8s.io/nuvolaris-operator-role unchanged
+rolebinding.rbac.authorization.k8s.io/nuvolaris-operator-rb unchanged
+serviceaccount/controller unchanged
+role.rbac.authorization.k8s.io/controller unchanged
+rolebinding.rbac.authorization.k8s.io/controller unchanged
+customresourcedefinition.apiextensions.k8s.io/whisks.nuvolaris.org configured
+[2022-12-28 23:07:17,330] kopf._core.reactor.r [DEBUG   ] Starting Kopf 1.35.6.
+[2022-12-28 23:07:17,330] kopf._core.engines.a [INFO    ] Initial authentication has been initiated.
+[2022-12-28 23:07:17,330] kopf.activities.auth [DEBUG   ] Activity 'login' is invoked.
+[2022-12-28 23:07:17,332] root                 [DEBUG   ] found serviceaccount token: login via pykube in kubernetes
+[2022-12-28 23:07:17,332] kopf.activities.auth [DEBUG   ] Pykube is configured in cluster with service account.
+[2022-12-28 23:07:17,333] kopf.activities.auth [INFO    ] Activity 'login' succeeded.
+[2022-12-28 23:07:17,333] kopf._core.engines.a [INFO    ] Initial authentication has finished.
+[2022-12-28 23:07:17,439] kopf._cogs.clients.w [DEBUG   ] Starting the watch-stream for customresourcedefinitions.v1.apiextensions.k8s.io cluster-wide.
+[2022-12-28 23:07:17,446] kopf._cogs.clients.w [DEBUG   ] Starting the watch-stream for namespaces.v1 cluster-wide.
+[2022-12-28 23:07:17,447] kopf._cogs.clients.w [DEBUG   ] Starting the watch-stream for services.v1 in 'nuvolaris'.
+[2022-12-28 23:07:17,448] kopf._cogs.clients.w [DEBUG   ] Starting the watch-stream for whisks.v1.nuvolaris.org in 'nuvolaris'.
+[2022-12-28 23:07:17,562] kopf.objects         [DEBUG   ] [nuvolaris/controller] Deletion is in progress: {'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"components":{"couchdb":true,"cron":true,"invoker":false,"kafka":false,"mongodb":true,"openwhisk":true,"redis":true,"s3bucket":false,"tls":true},"couchdb":{"admin":{"password":"some_passw0rd","user":"whisk_admin"},"controller":{"password":"s0meP@ass1","user":"invoker_admin"},"host":"couchdb","invoker":{"password":"s0meP@ass2","user":"controller_admin"},"port":5984,"volume-size":10},"kafka":{"host":"kafka","volume-size":10},"mongodb":{"admin":{"password":"0therPa55","user":"whisk_admin"},"host":"mongodb","nuvolaris":{"password":"s0meP@ass3","user":"nuvolaris"},"volume-size":10},"openwhisk":{"limits":{"actions":{"invokes-concurrent":250,"invokes-perMinute":999,"sequence-maxLength":50},"triggers":{"fires-perMinute":999}},"namespaces":{"nuvolaris":"cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP","whisk-system":"789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"}},"redis":{"volume-size":10},"s3":{"id":"AKIAIOSFODNN7EXAMPLE","key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY","region":"eu-central-1","volume-size":10},"scheduler":{"schedule":"* * * * *"},"tls":{"acme-registered-email":"francesco@nuvolaris.io","acme-server-url":"https://acme-staging-v02.api.letsencrypt.org/directory"}}}\n', 'kopf.zalando.org/whisk_delete': '{"started":"2022-12-28T22:57:49.763357","delayed":"2022-12-28T23:01:45.651064","purpose":"delete","retries":3,"success":false,"failure":false,"message":"Error from server (NotFound): error when deleting \\"STDIN\\": ingresses.networking.k8s.io \\"standalone\\" not found\\n"}', 'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"nuvolaris.org/v1","kind":"Whisk","metadata":{"annotations":{},"name":"controller","namespace":"nuvolaris"},"spec":{"components":{"couchdb":true,"cron":true,"invoker":false,"kafka":false,"mongodb":true,"openwhisk":true,"redis":true,"s3bucket":false,"tls":true},"couchdb":{"admin":{"password":"some_passw0rd","user":"whisk_admin"},"controller":{"password":"s0meP@ass1","user":"invoker_admin"},"host":"couchdb","invoker":{"password":"s0meP@ass2","user":"controller_admin"},"port":5984,"volume-size":10},"kafka":{"host":"kafka","volume-size":10},"mongodb":{"admin":{"password":"0therPa55","user":"whisk_admin"},"host":"mongodb","nuvolaris":{"password":"s0meP@ass3","user":"nuvolaris"},"volume-size":10},"openwhisk":{"limits":{"actions":{"invokes-concurrent":250,"invokes-perMinute":999,"sequence-maxLength":50},"triggers":{"fires-perMinute":999}},"namespaces":{"nuvolaris":"cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP","whisk-system":"789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"}},"redis":{"volume-size":10},"s3":{"id":"AKIAIOSFODNN7EXAMPLE","key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY","region":"eu-central-1","volume-size":10},"scheduler":{"schedule":"* * * * *"},"tls":{"acme-registered-email":"francesco@nuvolaris.io","acme-server-url":"https://acme-staging-v02.api.letsencrypt.org/directory"}}}\n'}, 'creationTimestamp': '2022-12-28T22:53:29Z', 'deletionGracePeriodSeconds': 0, 'deletionTimestamp': '2022-12-28T22:57:49Z', 'finalizers': ['kopf.zalando.org/KopfFinalizerMarker'], 'generation': 2, 'managedFields': [{'apiVersion': 'nuvolaris.org/v1', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}}, 'f:spec': {'.': {}, 'f:components': {}, 'f:couchdb': {}, 'f:kafka': {}, 'f:mongodb': {}, 'f:openwhisk': {}, 'f:redis': {}, 'f:s3': {}, 'f:scheduler': {}, 'f:tls': {}}}, 'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'time': '2022-12-28T22:53:29Z'}, {'apiVersion': 'nuvolaris.org/v1', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:status': {}}, 'manager': 'kopf', 'operation': 'Update', 'subresource': 'status', 'time': '2022-12-28T22:54:49Z'}, {'apiVersion': 'nuvolaris.org/v1', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'f:kopf.zalando.org/last-handled-configuration': {}, 'f:kopf.zalando.org/whisk_delete': {}}, 'f:finalizers': {'.': {}, 'v:"kopf.zalando.org/KopfFinalizerMarker"': {}}}}, 'manager': 'kopf', 'operation': 'Update', 'time': '2022-12-28T23:00:45Z'}], 'name': 'controller', 'namespace': 'nuvolaris', 'resourceVersion': '161033', 'uid': '91b28b46-7a8e-447a-b05e-1efc48942a54'}, 'spec': {'components': {'couchdb': True, 'cron': True, 'invoker': False, 'kafka': False, 'mongodb': True, 'openwhisk': True, 'redis': True, 's3bucket': False, 'tls': True}, 'couchdb': {'admin': {'password': 'some_passw0rd', 'user': 'whisk_admin'}, 'controller': {'password': 's0meP@ass1', 'user': 'invoker_admin'}, 'host': 'couchdb', 'invoker': {'password': 's0meP@ass2', 'user': 'controller_admin'}, 'port': 5984, 'volume-size': 10}, 'kafka': {'host': 'kafka', 'volume-size': 10}, 'mongodb': {'admin': {'password': '0therPa55', 'user': 'whisk_admin'}, 'host': 'mongodb', 'nuvolaris': {'password': 's0meP@ass3', 'user': 'nuvolaris'}, 'volume-size': 10}, 'openwhisk': {'limits': {'actions': {'invokes-concurrent': 250, 'invokes-perMinute': 999, 'sequence-maxLength': 50}, 'triggers': {'fires-perMinute': 999}}, 'namespaces': {'nuvolaris': 'cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP', 'whisk-system': '789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP'}}, 'redis': {'volume-size': 10}, 's3': {'id': 'AKIAIOSFODNN7EXAMPLE', 'key': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', 'region': 'eu-central-1', 'volume-size': 10}, 'scheduler': {'schedule': '* * * * *'}, 'tls': {'acme-registered-email': 'francesco@nuvolaris.io', 'acme-server-url': 'https://acme-staging-v02.api.letsencrypt.org/directory'}}, 'status': {'kopf': {'progress': {'whisk_delete': {'delayed': '2022-12-28T23:01:45.651064', 'failure': False, 'message': 'Error from server (NotFound): error when deleting "STDIN": ingresses.networking.k8s.io "standalone" not found\n', 'purpose': 'delete', 'retries': 3, 'started': '2022-12-28T22:57:49.763357', 'success': False}}}, 'whisk_create': {'cm': 'on', 'couchdb': 'on', 'cron': 'on', 'endpoint': '?', 'ingress': 'on', 'invoker': 'off', 'issuer': 'error', 'kafka': 'off', 'mongodb': 'on', 'openwhisk': 'on', 'redis': 'on', 's3bucket': 'off', 'tls': '?'}}}
+[2022-12-28 23:07:17,562] kopf.objects         [DEBUG   ] [nuvolaris/controller] Handler 'whisk_delete' is invoked.
+[2022-12-28 23:07:17,563] root                 [INFO    ] whisk_delete
+[2022-12-28 23:07:17,563] root                 [INFO    ] None
+[2022-12-28 23:07:17,563] kopf.objects         [INFO    ] [nuvolaris/controller] Handler 'whisk_delete' succeeded.
+[2022-12-28 23:07:17,564] kopf.objects         [INFO    ] [nuvolaris/controller] Deletion is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:17,564] kopf.objects         [DEBUG   ] [nuvolaris/controller] Removing the finalizer, thus allowing the actual deletion.
+[2022-12-28 23:07:17,564] kopf.objects         [DEBUG   ] [nuvolaris/controller] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/whisk_delete': None}, 'finalizers': []}, 'status': {'kopf': {'progress': {'whisk_delete': None}}}}
+[2022-12-28 23:07:17,594] kopf.objects         [DEBUG   ] [nuvolaris/controller] Patching was skipped: the object does not exist anymore.
+[2022-12-28 23:07:17,696] kopf.objects         [DEBUG   ] [nuvolaris/controller] Deleted, really deleted, and we are notified.
+[2022-12-28 23:07:17,696] kopf.objects         [DEBUG   ] [nuvolaris/controller] Removing the finalizer, thus allowing the actual deletion.
+[2022-12-28 23:07:20,518] kopf.objects         [DEBUG   ] [nuvolaris/controller] Adding the finalizer, thus preventing the actual deletion.
+[2022-12-28 23:07:20,519] kopf.objects         [DEBUG   ] [nuvolaris/controller] Patching with: {'metadata': {'finalizers': ['kopf.zalando.org/KopfFinalizerMarker']}}
+[2022-12-28 23:07:20,645] kopf.objects         [DEBUG   ] [nuvolaris/controller] Creation is in progress: {'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'metadata': {'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"nuvolaris.org/v1","kind":"Whisk","metadata":{"annotations":{},"name":"controller","namespace":"nuvolaris"},"spec":{"components":{"couchdb":true,"cron":true,"invoker":false,"kafka":false,"mongodb":true,"openwhisk":true,"redis":true,"s3bucket":false,"tls":true},"couchdb":{"admin":{"password":"some_passw0rd","user":"whisk_admin"},"controller":{"password":"s0meP@ass1","user":"invoker_admin"},"host":"couchdb","invoker":{"password":"s0meP@ass2","user":"controller_admin"},"port":5984,"volume-size":10},"kafka":{"host":"kafka","volume-size":10},"mongodb":{"admin":{"password":"0therPa55","user":"whisk_admin"},"host":"mongodb","nuvolaris":{"password":"s0meP@ass3","user":"nuvolaris"},"volume-size":10},"openwhisk":{"limits":{"actions":{"invokes-concurrent":250,"invokes-perMinute":999,"sequence-maxLength":50},"triggers":{"fires-perMinute":999}},"namespaces":{"nuvolaris":"cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP","whisk-system":"789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"}},"redis":{"volume-size":10},"s3":{"id":"AKIAIOSFODNN7EXAMPLE","key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY","region":"eu-central-1","volume-size":10},"scheduler":{"schedule":"* * * * *"},"tls":{"acme-registered-email":"francesco@nuvolaris.io","acme-server-url":"https://acme-staging-v02.api.letsencrypt.org/directory"}}}\n'}, 'creationTimestamp': '2022-12-28T23:07:20Z', 'finalizers': ['kopf.zalando.org/KopfFinalizerMarker'], 'generation': 1, 'managedFields': [{'apiVersion': 'nuvolaris.org/v1', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:finalizers': {'.': {}, 'v:"kopf.zalando.org/KopfFinalizerMarker"': {}}}}, 'manager': 'kopf', 'operation': 'Update', 'time': '2022-12-28T23:07:20Z'}, {'apiVersion': 'nuvolaris.org/v1', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}}, 'f:spec': {'.': {}, 'f:components': {}, 'f:couchdb': {}, 'f:kafka': {}, 'f:mongodb': {}, 'f:openwhisk': {}, 'f:redis': {}, 'f:s3': {}, 'f:scheduler': {}, 'f:tls': {}}}, 'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'time': '2022-12-28T23:07:20Z'}], 'name': 'controller', 'namespace': 'nuvolaris', 'resourceVersion': '162829', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50'}, 'spec': {'components': {'couchdb': True, 'cron': True, 'invoker': False, 'kafka': False, 'mongodb': True, 'openwhisk': True, 'redis': True, 's3bucket': False, 'tls': True}, 'couchdb': {'admin': {'password': 'some_passw0rd', 'user': 'whisk_admin'}, 'controller': {'password': 's0meP@ass1', 'user': 'invoker_admin'}, 'host': 'couchdb', 'invoker': {'password': 's0meP@ass2', 'user': 'controller_admin'}, 'port': 5984, 'volume-size': 10}, 'kafka': {'host': 'kafka', 'volume-size': 10}, 'mongodb': {'admin': {'password': '0therPa55', 'user': 'whisk_admin'}, 'host': 'mongodb', 'nuvolaris': {'password': 's0meP@ass3', 'user': 'nuvolaris'}, 'volume-size': 10}, 'openwhisk': {'limits': {'actions': {'invokes-concurrent': 250, 'invokes-perMinute': 999, 'sequence-maxLength': 50}, 'triggers': {'fires-perMinute': 999}}, 'namespaces': {'nuvolaris': 'cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP', 'whisk-system': '789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP'}}, 'redis': {'volume-size': 10}, 's3': {'id': 'AKIAIOSFODNN7EXAMPLE', 'key': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', 'region': 'eu-central-1', 'volume-size': 10}, 'scheduler': {'schedule': '* * * * *'}, 'tls': {'acme-registered-email': 'francesco@nuvolaris.io', 'acme-server-url': 'https://acme-staging-v02.api.letsencrypt.org/directory'}}}
+[2022-12-28 23:07:20,645] kopf.objects         [DEBUG   ] [nuvolaris/controller] Handler 'whisk_create' is invoked.
+[2022-12-28 23:07:20,646] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'get', 'storageclass', '-o', 'jsonpath-as-json={.items}']
+[2022-12-28 23:07:20,709] root                 [DEBUG   ] result: [
+  [
+    {
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"storage.k8s.io/v1\",\"kind\":\"StorageClass\",\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"},\"name\":\"gp2\"},\"parameters\":{\"fsType\":\"ext4\",\"type\":\"gp2\"},\"provisioner\":\"kubernetes.io/aws-ebs\",\"volumeBindingMode\":\"WaitForFirstConsumer\"}\n",
+          "storageclass.kubernetes.io/is-default-class": "true"
+        },
+        "creationTimestamp": "2022-12-28T14:17:21Z",
+        "managedFields": [
+          {
+            "apiVersion": "storage.k8s.io/v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  ".": {},
+                  "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                  "f:storageclass.kubernetes.io/is-default-class": {}
+                }
+              },
+              "f:parameters": {
+                ".": {},
+                "f:fsType": {},
+                "f:type": {}
+              },
+              "f:provisioner": {},
+              "f:reclaimPolicy": {},
+              "f:volumeBindingMode": {}
+            },
+            "manager": "kubectl-client-side-apply",
+            "operation": "Update",
+            "time": "2022-12-28T14:17:21Z"
+          }
+        ],
+        "name": "gp2",
+        "resourceVersion": "318",
+        "uid": "37409efe-b7ab-4cee-9995-7767ed654f70"
+      },
+      "parameters": {
+        "fsType": "ext4",
+        "type": "gp2"
+      },
+      "provisioner": "kubernetes.io/aws-ebs",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    }
+  ]
+]
+[2022-12-28 23:07:20,710] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'get', 'nodes', '-o', 'jsonpath-as-json={.items[].metadata.labels}']
+[2022-12-28 23:07:20,784] root                 [DEBUG   ] result: [
+  {
+    "alpha.eksctl.io/cluster-name": "nuvolaris-cluster",
+    "alpha.eksctl.io/instance-id": "i-017c2c7db0c9ca34f",
+    "alpha.eksctl.io/nodegroup-name": "ng-1",
+    "beta.kubernetes.io/arch": "amd64",
+    "beta.kubernetes.io/instance-type": "t2.medium",
+    "beta.kubernetes.io/os": "linux",
+    "failure-domain.beta.kubernetes.io/region": "us-west-1",
+    "failure-domain.beta.kubernetes.io/zone": "us-west-1c",
+    "k8s.io/cloud-provider-aws": "be241ad300db8faa189245a391254aa0",
+    "kubernetes.io/arch": "amd64",
+    "kubernetes.io/hostname": "ip-192-168-40-166.us-west-1.compute.internal",
+    "kubernetes.io/os": "linux",
+    "node-lifecycle": "on-demand",
+    "node.kubernetes.io/instance-type": "t2.medium",
+    "topology.ebs.csi.aws.com/zone": "us-west-1c",
+    "topology.kubernetes.io/region": "us-west-1",
+    "topology.kubernetes.io/zone": "us-west-1c"
+  }
+]
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.couchdb = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.cron = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.invoker = None
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.kafka = None
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.mongodb = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.openwhisk = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.redis = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.s3bucket = None
+[2022-12-28 23:07:20,785] root                 [INFO    ] components.tls = True
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.admin.password = some_passw0rd
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.admin.user = whisk_admin
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.controller.password = s0meP@ass1
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.controller.user = invoker_admin
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.host = couchdb
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.invoker.password = s0meP@ass2
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.invoker.user = controller_admin
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.port = 5984
+[2022-12-28 23:07:20,785] root                 [INFO    ] couchdb.volume-size = 10
+[2022-12-28 23:07:20,785] root                 [INFO    ] kafka.host = kafka
+[2022-12-28 23:07:20,785] root                 [INFO    ] kafka.volume-size = 10
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.admin.password = 0therPa55
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.admin.user = whisk_admin
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.host = mongodb
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.nuvolaris.password = s0meP@ass3
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.nuvolaris.user = nuvolaris
+[2022-12-28 23:07:20,785] root                 [INFO    ] mongodb.volume-size = 10
+[2022-12-28 23:07:20,785] root                 [INFO    ] openwhisk.limits.actions.invokes-concurrent = 250
+[2022-12-28 23:07:20,786] root                 [INFO    ] openwhisk.limits.actions.invokes-perMinute = 999
+[2022-12-28 23:07:20,786] root                 [INFO    ] openwhisk.limits.actions.sequence-maxLength = 50
+[2022-12-28 23:07:20,786] root                 [INFO    ] openwhisk.limits.triggers.fires-perMinute = 999
+[2022-12-28 23:07:20,786] root                 [INFO    ] openwhisk.namespaces.nuvolaris = cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+[2022-12-28 23:07:20,786] root                 [INFO    ] openwhisk.namespaces.whisk-system = 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+[2022-12-28 23:07:20,786] root                 [INFO    ] redis.volume-size = 10
+[2022-12-28 23:07:20,786] root                 [INFO    ] s3.id = AKIAIOSFODNN7EXAMPLE
+[2022-12-28 23:07:20,786] root                 [INFO    ] s3.key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+[2022-12-28 23:07:20,786] root                 [INFO    ] s3.region = eu-central-1
+[2022-12-28 23:07:20,786] root                 [INFO    ] s3.volume-size = 10
+[2022-12-28 23:07:20,786] root                 [INFO    ] scheduler.schedule = * * * * *
+[2022-12-28 23:07:20,786] root                 [INFO    ] tls.acme-registered-email = francesco@nuvolaris.io
+[2022-12-28 23:07:20,786] root                 [INFO    ] tls.acme-server-url = https://acme-staging-v02.api.letsencrypt.org/directory
+[2022-12-28 23:07:20,786] root                 [INFO    ] nuvolaris.storageClass = gp2
+[2022-12-28 23:07:20,786] root                 [INFO    ] nuvolaris.provisioner = kubernetes.io/aws-ebs
+[2022-12-28 23:07:20,786] root                 [INFO    ] nuvolaris.kube = eks
+[2022-12-28 23:07:20,786] root                 [INFO    ] operator.image = ghcr.io/francescotimperi/nuvolaris-operator
+[2022-12-28 23:07:20,786] root                 [INFO    ] operator.tag = 0.3.0-morpheus.22122823
+[2022-12-28 23:07:20,786] root                 [INFO    ] controller.image = ghcr.io/nuvolaris/openwhisk-standalone
+[2022-12-28 23:07:20,786] root                 [INFO    ] controller.tag = 0.2.1-trinity.22062010
+[2022-12-28 23:07:20,786] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'get', 'wsk/controller', '-ojson']
+[2022-12-28 23:07:20,847] root                 [INFO    ] kubernetes engine in use=eks
+[2022-12-28 23:07:20,848] root                 [DEBUG   ] ['kubectl', '-n', 'ingress-nginx', 'get', 'service/ingress-nginx-controller', '-ojson']
+[2022-12-28 23:07:20,911] root                 [INFO    ] Error: kubectl f['kubectl', '-n', 'ingress-nginx', 'get', 'service/ingress-nginx-controller', '-ojson'] input='None' output='' error='Error from server (NotFound): namespaces "ingress-nginx" not found
+'
+[2022-12-28 23:07:20,911] root                 [INFO    ] *** Configuring ingress-nginx eks-nginx-ingress.yaml
+[2022-12-28 23:07:20,912] root                 [DEBUG   ] ['kubectl', 'apply', '-f', 'deploy/ingress-nginx/operator-ingress-rbac.yaml']
+[2022-12-28 23:07:21,208] root                 [INFO    ] namespace/ingress-nginx created
+role.rbac.authorization.k8s.io/nuvolaris-operator-ingress-role created
+rolebinding.rbac.authorization.k8s.io/nuvolaris-operator-ingress-rb created
+
+[2022-12-28 23:07:21,209] root                 [DEBUG   ] ['kubectl', 'apply', '-f', 'deploy/ingress-nginx/eks-nginx-ingress.yaml']
+[2022-12-28 23:07:22,077] root                 [DEBUG   ] ['kubectl', '-n', 'ingress-nginx', 'get', 'pods', '-o', "jsonpath-as-json={.items[?(@.metadata.labels.app\\.kubernetes\\.io\\/component == 'controller')].metadata.name}"]
+[2022-12-28 23:07:22,156] root                 [DEBUG   ] result: [
+  "ingress-nginx-controller-666f45c794-whs9m"
+]
+[2022-12-28 23:07:22,156] root                 [INFO    ] checking for ingress-nginx-controller-666f45c794-whs9m
+[2022-12-28 23:07:22,156] root                 [DEBUG   ] ['kubectl', '-n', 'ingress-nginx', 'wait', 'pod/ingress-nginx-controller-666f45c794-whs9m', '--for=condition=ready', '--timeout=600s']
+[2022-12-28 23:07:43,854] root                 [INFO    ] namespace/ingress-nginx configured
+serviceaccount/ingress-nginx created
+serviceaccount/ingress-nginx-admission created
+role.rbac.authorization.k8s.io/ingress-nginx created
+role.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx unchanged
+clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission unchanged
+rolebinding.rbac.authorization.k8s.io/ingress-nginx created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx unchanged
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission unchanged
+configmap/ingress-nginx-controller created
+service/ingress-nginx-controller created
+service/ingress-nginx-controller-admission created
+deployment.apps/ingress-nginx-controller created
+job.batch/ingress-nginx-admission-create created
+job.batch/ingress-nginx-admission-patch created
+ingressclass.networking.k8s.io/nginx unchanged
+validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission configured
+
+[2022-12-28 23:07:43,854] root                 [INFO    ] *** Configuring certificate manager
+[2022-12-28 23:07:43,854] root                 [DEBUG   ] ['kubectl', '-n', 'cert-manager', 'get', 'service/cert-manager', '-ojson']
+[2022-12-28 23:07:43,971] root                 [INFO    ] Error: kubectl f['kubectl', '-n', 'cert-manager', 'get', 'service/cert-manager', '-ojson'] input='None' output='' error='Error from server (NotFound): namespaces "cert-manager" not found
+'
+[2022-12-28 23:07:43,971] root                 [DEBUG   ] ['kubectl', 'apply', '-f', 'deploy/cert-manager/cert-manager.yaml']
+[2022-12-28 23:07:47,020] root                 [INFO    ] namespace/cert-manager created
+customresourcedefinition.apiextensions.k8s.io/clusterissuers.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/challenges.acme.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/certificaterequests.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/issuers.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/certificates.cert-manager.io created
+customresourcedefinition.apiextensions.k8s.io/orders.acme.cert-manager.io created
+serviceaccount/cert-manager-cainjector created
+serviceaccount/cert-manager created
+serviceaccount/cert-manager-webhook created
+configmap/cert-manager-webhook created
+clusterrole.rbac.authorization.k8s.io/cert-manager-cainjector created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-issuers created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-clusterissuers created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-certificates created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-orders created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-challenges created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-ingress-shim created
+clusterrole.rbac.authorization.k8s.io/cert-manager-view created
+clusterrole.rbac.authorization.k8s.io/cert-manager-edit created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-approve:cert-manager-io created
+clusterrole.rbac.authorization.k8s.io/cert-manager-controller-certificatesigningrequests created
+clusterrole.rbac.authorization.k8s.io/cert-manager-webhook:subjectaccessreviews created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-cainjector created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-issuers created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-clusterissuers created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-certificates created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-orders created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-challenges created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-ingress-shim created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-approve:cert-manager-io created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-controller-certificatesigningrequests created
+clusterrolebinding.rbac.authorization.k8s.io/cert-manager-webhook:subjectaccessreviews created
+role.rbac.authorization.k8s.io/cert-manager-cainjector:leaderelection created
+role.rbac.authorization.k8s.io/cert-manager:leaderelection created
+role.rbac.authorization.k8s.io/cert-manager-webhook:dynamic-serving created
+rolebinding.rbac.authorization.k8s.io/cert-manager-cainjector:leaderelection created
+rolebinding.rbac.authorization.k8s.io/cert-manager:leaderelection created
+rolebinding.rbac.authorization.k8s.io/cert-manager-webhook:dynamic-serving created
+service/cert-manager created
+service/cert-manager-webhook created
+deployment.apps/cert-manager-cainjector created
+deployment.apps/cert-manager created
+deployment.apps/cert-manager-webhook created
+mutatingwebhookconfiguration.admissionregistration.k8s.io/cert-manager-webhook created
+validatingwebhookconfiguration.admissionregistration.k8s.io/cert-manager-webhook created
+
+[2022-12-28 23:07:47,021] root                 [INFO    ] *** Configuring cluster issuer
+[2022-12-28 23:07:47,021] root                 [ERROR   ] cannot configure issuer
+Traceback (most recent call last):
+  File "/home/nuvolaris/nuvolaris/main.py", line 97, in whisk_create
+    msg = issuer.create(owner)
+  File "/home/nuvolaris/nuvolaris/issuer.py", line 55, in create
+    wait_for_cm_ready(runtime, controller_path)
+  File "/home/nuvolaris/nuvolaris/issuer.py", line 33, in wait_for_cm_ready
+    pod_name = get_webhook_pod_name(runtime, jpath, namespace)
+NameError: name 'get_webhook_pod_name' is not defined
+[2022-12-28 23:07:47,022] root                 [INFO    ] create couchdb
+[2022-12-28 23:07:48,530] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:50,181] root                 [INFO    ] create couchdb: secret/couchdb-auth-2h4228gm56 created
+service/couchdb created
+statefulset.apps/couchdb created
+job.batch/couchdb-init created
+
+[2022-12-28 23:07:50,181] root                 [INFO    ] None
+[2022-12-28 23:07:50,181] root                 [INFO    ] create redis
+[2022-12-28 23:07:50,209] kopf.objects         [DEBUG   ] [nuvolaris/couchdb] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'couchdb', 'namespace': 'nuvolaris', 'uid': '19f8fea8-f960-46c3-a1bf-5ed298e1d865', 'resourceVersion': '163178', 'creationTimestamp': '2022-12-28T23:07:50Z', 'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"couchdb","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"nodePort":30984,"port":5984,"targetPort":5984}],"selector":{"name":"couchdb"},"type":"NodePort"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:50Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":5984,"protocol":"TCP"}': {'.': {}, 'f:nodePort': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 5984, 'targetPort': 5984, 'nodePort': 30984}], 'selector': {'name': 'couchdb'}, 'clusterIP': '10.100.135.198', 'clusterIPs': ['10.100.135.198'], 'type': 'NodePort', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:07:50,209] kopf.objects         [DEBUG   ] [nuvolaris/couchdb] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:50,215] kopf.objects         [INFO    ] [nuvolaris/couchdb] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:07:50,216] kopf.objects         [INFO    ] [nuvolaris/couchdb] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:50,216] kopf.objects         [DEBUG   ] [nuvolaris/couchdb] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":5984,"targetPort":5984,"nodePort":30984}],"selector":{"name":"couchdb"},"clusterIP":"10.100.135.198","clusterIPs":["10.100.135.198"],"type":"NodePort","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:07:50,355] kopf.objects         [DEBUG   ] [nuvolaris/couchdb] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:07:50,355] kopf.objects         [DEBUG   ] [nuvolaris/couchdb] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:07:52,132] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:53,512] root                 [INFO    ] create redis: configmap/redis-cm created
+service/redis created
+statefulset.apps/redis created
+
+[2022-12-28 23:07:53,512] root                 [INFO    ] configmap/redis-cm created
+service/redis created
+statefulset.apps/redis created
+
+[2022-12-28 23:07:53,578] kopf.objects         [DEBUG   ] [nuvolaris/redis] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'redis', 'namespace': 'nuvolaris', 'uid': 'f898e04b-3fe8-4438-8458-39be72ad6d4d', 'resourceVersion': '163230', 'creationTimestamp': '2022-12-28T23:07:53Z', 'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"redis","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"nodePort":30379,"port":6379,"targetPort":6379}],"selector":{"name":"redis"},"type":"NodePort"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:53Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":6379,"protocol":"TCP"}': {'.': {}, 'f:nodePort': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 6379, 'targetPort': 6379, 'nodePort': 30379}], 'selector': {'name': 'redis'}, 'clusterIP': '10.100.148.233', 'clusterIPs': ['10.100.148.233'], 'type': 'NodePort', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:07:53,579] kopf.objects         [DEBUG   ] [nuvolaris/redis] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:53,580] kopf.objects         [INFO    ] [nuvolaris/redis] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:07:53,580] kopf.objects         [INFO    ] [nuvolaris/redis] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:53,580] kopf.objects         [DEBUG   ] [nuvolaris/redis] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":6379,"nodePort":30379}],"selector":{"name":"redis"},"clusterIP":"10.100.148.233","clusterIPs":["10.100.148.233"],"type":"NodePort","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:07:53,627] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:53,721] kopf.objects         [DEBUG   ] [nuvolaris/redis] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:07:53,721] kopf.objects         [DEBUG   ] [nuvolaris/redis] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:07:54,078] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'apihost', 'namespace': 'nuvolaris', 'uid': '35d2748b-6c2d-4ec8-9246-d4f139c5b5ab', 'resourceVersion': '163258', 'creationTimestamp': '2022-12-28T23:07:53Z', 'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"apihost","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"port":80,"targetPort":3233}],"selector":{"app":"controller"},"type":"LoadBalancer"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'finalizers': ['service.kubernetes.io/load-balancer-cleanup'], 'managedFields': [{'manager': 'aws-cloud-controller-manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:53Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:finalizers': {'.': {}, 'v:"service.kubernetes.io/load-balancer-cleanup"': {}}}}, 'subresource': 'status'}, {'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:53Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:allocateLoadBalancerNodePorts': {}, 'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":80,"protocol":"TCP"}': {'.': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 80, 'targetPort': 3233, 'nodePort': 30172}], 'selector': {'app': 'controller'}, 'clusterIP': '10.100.77.224', 'clusterIPs': ['10.100.77.224'], 'type': 'LoadBalancer', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'allocateLoadBalancerNodePorts': True, 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:07:54,078] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:54,079] root                 [INFO    ] service_update: {}
+[2022-12-28 23:07:54,079] root                 [INFO    ] *** openwhisk received ingress []
+[2022-12-28 23:07:54,079] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'annotate', 'cm/config', 'apihost=https://pending', '--overwrite']
+[2022-12-28 23:07:54,113] kopf.objects         [DEBUG   ] [nuvolaris/controller] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'controller', 'namespace': 'nuvolaris', 'uid': '3d779063-dac6-49f9-8e9e-183c07b937b0', 'resourceVersion': '163263', 'creationTimestamp': '2022-12-28T23:07:54Z', 'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"controller","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"nodePort":30233,"port":3233,"targetPort":3233}],"selector":{"app":"controller"},"type":"NodePort"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:53Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":3233,"protocol":"TCP"}': {'.': {}, 'f:nodePort': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 3233, 'targetPort': 3233, 'nodePort': 30233}], 'selector': {'app': 'controller'}, 'clusterIP': '10.100.152.7', 'clusterIPs': ['10.100.152.7'], 'type': 'NodePort', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:07:54,114] kopf.objects         [DEBUG   ] [nuvolaris/controller] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:54,115] kopf.objects         [INFO    ] [nuvolaris/controller] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:07:54,115] kopf.objects         [INFO    ] [nuvolaris/controller] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:54,115] kopf.objects         [DEBUG   ] [nuvolaris/controller] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":3233,"targetPort":3233,"nodePort":30233}],"selector":{"app":"controller"},"clusterIP":"10.100.152.7","clusterIPs":["10.100.152.7"],"type":"NodePort","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:07:54,150] kopf.objects         [DEBUG   ] [nuvolaris/debugger] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'debugger', 'namespace': 'nuvolaris', 'uid': 'a22c7130-1846-4c4a-97e9-35b68ce4ceef', 'resourceVersion': '163268', 'creationTimestamp': '2022-12-28T23:07:54Z', 'annotations': {'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"debugger","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"nodePort":30896,"port":7896,"targetPort":7896}],"selector":{"app":"controller"},"type":"NodePort"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:54Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":7896,"protocol":"TCP"}': {'.': {}, 'f:nodePort': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 7896, 'targetPort': 7896, 'nodePort': 30896}], 'selector': {'app': 'controller'}, 'clusterIP': '10.100.72.227', 'clusterIPs': ['10.100.72.227'], 'type': 'NodePort', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:07:54,151] kopf.objects         [DEBUG   ] [nuvolaris/debugger] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:54,152] kopf.objects         [INFO    ] [nuvolaris/debugger] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:07:54,152] kopf.objects         [INFO    ] [nuvolaris/debugger] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:54,156] kopf.objects         [DEBUG   ] [nuvolaris/debugger] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":7896,"targetPort":7896,"nodePort":30896}],"selector":{"app":"controller"},"clusterIP":"10.100.72.227","clusterIPs":["10.100.72.227"],"type":"NodePort","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:07:54,223] root                 [INFO    ] configmap/standalone-kcf created
+service/apihost created
+service/controller created
+service/debugger created
+statefulset.apps/controller created
+pod/preload-runtime-go117 created
+pod/preload-runtime-nodejs14 created
+pod/preload-runtime-python37 created
+
+[2022-12-28 23:07:54,223] root                 [INFO    ] creating cron
+[2022-12-28 23:07:54,223] root                 [INFO    ] cron using image ghcr.io/francescotimperi/nuvolaris-operator:0.3.0-morpheus.22122823
+[2022-12-28 23:07:54,246] kopf.objects         [DEBUG   ] [nuvolaris/controller] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:07:54,249] kopf.objects         [DEBUG   ] [nuvolaris/controller] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:07:54,252] root                 [INFO    ] *** Configuring host pending as https endpoint for openwhisk controller
+[2022-12-28 23:07:54,297] kopf.objects         [DEBUG   ] [nuvolaris/debugger] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:07:54,298] kopf.objects         [DEBUG   ] [nuvolaris/debugger] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:07:56,968] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:57,198] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:57,773] kopf.objects         [INFO    ] [nuvolaris/apihost] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:07:57,775] kopf.objects         [INFO    ] [nuvolaris/apihost] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:07:57,775] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":80,"targetPort":3233,"nodePort":30172}],"selector":{"app":"controller"},"clusterIP":"10.100.77.224","clusterIPs":["10.100.77.224"],"type":"LoadBalancer","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","allocateLoadBalancerNodePorts":true,"internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:07:57,897] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Updating is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'apihost', 'namespace': 'nuvolaris', 'uid': '35d2748b-6c2d-4ec8-9246-d4f139c5b5ab', 'resourceVersion': '163351', 'creationTimestamp': '2022-12-28T23:07:53Z', 'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":80,"targetPort":3233,"nodePort":30172}],"selector":{"app":"controller"},"clusterIP":"10.100.77.224","clusterIPs":["10.100.77.224"],"type":"LoadBalancer","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","allocateLoadBalancerNodePorts":true,"internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{}}}\n', 'kubectl.kubernetes.io/last-applied-configuration': '{"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"apihost","namespace":"nuvolaris","ownerReferences":[{"apiVersion":"nuvolaris.org/v1","blockOwnerDeletion":true,"controller":true,"kind":"Whisk","name":"controller","uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}]},"spec":{"ports":[{"port":80,"targetPort":3233}],"selector":{"app":"controller"},"type":"LoadBalancer"}}\n'}, 'ownerReferences': [{'apiVersion': 'nuvolaris.org/v1', 'kind': 'Whisk', 'name': 'controller', 'uid': 'ca709bbc-efa6-49f4-a6a7-0b4a0e683c50', 'controller': True, 'blockOwnerDeletion': True}], 'finalizers': ['service.kubernetes.io/load-balancer-cleanup'], 'managedFields': [{'manager': 'kubectl-client-side-apply', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:53Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'.': {}, 'f:kubectl.kubernetes.io/last-applied-configuration': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"ca709bbc-efa6-49f4-a6a7-0b4a0e683c50"}': {}}}, 'f:spec': {'f:allocateLoadBalancerNodePorts': {}, 'f:externalTrafficPolicy': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":80,"protocol":"TCP"}': {'.': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}, {'manager': 'aws-cloud-controller-manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:56Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:finalizers': {'.': {}, 'v:"service.kubernetes.io/load-balancer-cleanup"': {}}}, 'f:status': {'f:loadBalancer': {'f:ingress': {}}}}, 'subresource': 'status'}, {'manager': 'kopf', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:07:57Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:annotations': {'f:kopf.zalando.org/last-handled-configuration': {}}}}}]}, 'spec': {'ports': [{'protocol': 'TCP', 'port': 80, 'targetPort': 3233, 'nodePort': 30172}], 'selector': {'app': 'controller'}, 'clusterIP': '10.100.77.224', 'clusterIPs': ['10.100.77.224'], 'type': 'LoadBalancer', 'sessionAffinity': 'None', 'externalTrafficPolicy': 'Cluster', 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'allocateLoadBalancerNodePorts': True, 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {'ingress': [{'hostname': 'a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com'}]}}}
+[2022-12-28 23:07:57,897] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Updating diff: (('add', ('status', 'loadBalancer', 'ingress'), None, [{'hostname': 'a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com'}]),)
+[2022-12-28 23:07:57,897] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:07:57,898] root                 [INFO    ] service_update: {"ingress": [{"hostname": "a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com"}]}
+[2022-12-28 23:07:57,898] root                 [INFO    ] *** openwhisk received ingress [{'hostname': 'a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com'}]
+[2022-12-28 23:07:57,898] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'annotate', 'cm/config', 'apihost=https://a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com', '--overwrite']
+[2022-12-28 23:07:58,012] root                 [INFO    ] create cron: cronjob.batch/cron-init created
+
+[2022-12-28 23:07:58,012] root                 [INFO    ] cronjob.batch/cron-init created
+
+[2022-12-28 23:07:58,012] root                 [INFO    ] *** creating mongodb-operator
+[2022-12-28 23:07:58,137] root                 [INFO    ] *** Configuring host a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com as https endpoint for openwhisk controller
+[2022-12-28 23:07:58,372] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:07:59,386] root                 [INFO    ] *** created mongodb operator
+[2022-12-28 23:07:59,390] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'get', 'pods', '--selector=name=mongodb-kubernetes-operator', '-ojson']
+[2022-12-28 23:07:59,567] root                 [INFO    ] checking for mongodb-kubernetes-operator-78886f96dd-2qswt
+[2022-12-28 23:07:59,567] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'wait', 'pod/mongodb-kubernetes-operator-78886f96dd-2qswt', '--for=condition=ready', '--timeout=600s']
+[2022-12-28 23:08:01,851] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:08:02,493] kopf.objects         [INFO    ] [nuvolaris/apihost] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:08:02,493] kopf.objects         [INFO    ] [nuvolaris/apihost] Updating is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:02,494] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"protocol":"TCP","port":80,"targetPort":3233,"nodePort":30172}],"selector":{"app":"controller"},"clusterIP":"10.100.77.224","clusterIPs":["10.100.77.224"],"type":"LoadBalancer","sessionAffinity":"None","externalTrafficPolicy":"Cluster","ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","allocateLoadBalancerNodePorts":true,"internalTrafficPolicy":"Cluster"},"status":{"loadBalancer":{"ingress":[{"hostname":"a35d2748b6c2d4ec89246d4f139c5b5a-207547715.us-west-1.elb.amazonaws.com"}]}}}\n'}}}
+[2022-12-28 23:08:02,627] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:08:02,628] kopf.objects         [DEBUG   ] [nuvolaris/apihost] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:08:32,248] root                 [INFO    ] *** creating a mongodb instance
+[2022-12-28 23:08:33,634] root                 [DEBUG   ] ['kubectl', '-n', 'nuvolaris', 'apply', '-f', '-']
+[2022-12-28 23:08:34,079] root                 [INFO    ] secret/mongodb-admin-auth created
+secret/mongodb-nuvolaris-auth created
+mongodbcommunity.mongodbcommunity.mongodb.com/nuvolaris-mongodb created
+
+[2022-12-28 23:08:34,079] kopf.objects         [INFO    ] [nuvolaris/controller] Handler 'whisk_create' succeeded.
+[2022-12-28 23:08:34,080] kopf.objects         [INFO    ] [nuvolaris/controller] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:34,080] kopf.objects         [DEBUG   ] [nuvolaris/controller] Patching with: {'status': {'whisk_create': {'openwhisk': 'on', 'invoker': 'off', 'couchdb': 'on', 'kafka': 'off', 'redis': 'on', 'mongodb': 'on', 's3bucket': 'off', 'cron': 'on', 'tls': '?', 'ingress': 'on', 'endpoint': '?', 'issuer': 'error', 'cm': 'on'}}, 'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"components":{"couchdb":true,"cron":true,"invoker":false,"kafka":false,"mongodb":true,"openwhisk":true,"redis":true,"s3bucket":false,"tls":true},"couchdb":{"admin":{"password":"some_passw0rd","user":"whisk_admin"},"controller":{"password":"s0meP@ass1","user":"invoker_admin"},"host":"couchdb","invoker":{"password":"s0meP@ass2","user":"controller_admin"},"port":5984,"volume-size":10},"kafka":{"host":"kafka","volume-size":10},"mongodb":{"admin":{"password":"0therPa55","user":"whisk_admin"},"host":"mongodb","nuvolaris":{"password":"s0meP@ass3","user":"nuvolaris"},"volume-size":10},"openwhisk":{"limits":{"actions":{"invokes-concurrent":250,"invokes-perMinute":999,"sequence-maxLength":50},"triggers":{"fires-perMinute":999}},"namespaces":{"nuvolaris":"cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP","whisk-system":"789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP"}},"redis":{"volume-size":10},"s3":{"id":"AKIAIOSFODNN7EXAMPLE","key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY","region":"eu-central-1","volume-size":10},"scheduler":{"schedule":"* * * * *"},"tls":{"acme-registered-email":"francesco@nuvolaris.io","acme-server-url":"https://acme-staging-v02.api.letsencrypt.org/directory"}}}\n'}}}
+[2022-12-28 23:08:34,226] kopf.objects         [DEBUG   ] [nuvolaris/controller] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:08:34,227] kopf.objects         [DEBUG   ] [nuvolaris/controller] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:08:34,399] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163677', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:08:34,399] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:08:34,400] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:08:34,401] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:34,401] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:08:34,615] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163704', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:08:34,616] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:08:34,616] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:08:34,617] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:34,617] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:08:34,736] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:08:34,737] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:08:44,729] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163760', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:08:44,729] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:08:44,729] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:08:44,730] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:44,730] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:08:44,857] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:08:44,857] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:08:54,801] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163830', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:08:54,802] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:08:54,802] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:08:54,803] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:08:54,803] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:08:54,937] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:08:54,938] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:09:04,874] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163892', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:09:04,874] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:09:04,875] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:09:04,875] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:09:04,875] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:09:05,011] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:09:05,012] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handling cycle is finished, waiting for new changes.
+[2022-12-28 23:09:14,956] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Creation is in progress: {'kind': 'Service', 'apiVersion': 'v1', 'metadata': {'name': 'nuvolaris-mongodb-svc', 'namespace': 'nuvolaris', 'uid': '5c562d12-e868-494c-9a9e-bb16dbecea79', 'resourceVersion': '163941', 'creationTimestamp': '2022-12-28T23:08:34Z', 'labels': {'app': 'nuvolaris-mongodb-svc'}, 'ownerReferences': [{'apiVersion': 'mongodbcommunity.mongodb.com/v1', 'kind': 'MongoDBCommunity', 'name': 'nuvolaris-mongodb', 'uid': '583c785e-9262-4db9-9102-bb432e1f1f13', 'controller': True, 'blockOwnerDeletion': True}], 'managedFields': [{'manager': 'manager', 'operation': 'Update', 'apiVersion': 'v1', 'time': '2022-12-28T23:08:34Z', 'fieldsType': 'FieldsV1', 'fieldsV1': {'f:metadata': {'f:labels': {'.': {}, 'f:app': {}}, 'f:ownerReferences': {'.': {}, 'k:{"uid":"583c785e-9262-4db9-9102-bb432e1f1f13"}': {}}}, 'f:spec': {'f:clusterIP': {}, 'f:internalTrafficPolicy': {}, 'f:ports': {'.': {}, 'k:{"port":27017,"protocol":"TCP"}': {'.': {}, 'f:name': {}, 'f:port': {}, 'f:protocol': {}, 'f:targetPort': {}}}, 'f:publishNotReadyAddresses': {}, 'f:selector': {}, 'f:sessionAffinity': {}, 'f:type': {}}}}]}, 'spec': {'ports': [{'name': 'mongodb', 'protocol': 'TCP', 'port': 27017, 'targetPort': 27017}], 'selector': {'app': 'nuvolaris-mongodb-svc'}, 'clusterIP': 'None', 'clusterIPs': ['None'], 'type': 'ClusterIP', 'sessionAffinity': 'None', 'publishNotReadyAddresses': True, 'ipFamilies': ['IPv4'], 'ipFamilyPolicy': 'SingleStack', 'internalTrafficPolicy': 'Cluster'}, 'status': {'loadBalancer': {}}}
+[2022-12-28 23:09:14,957] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' is invoked.
+[2022-12-28 23:09:14,959] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Handler 'service_update/status.loadBalancer' succeeded.
+[2022-12-28 23:09:14,959] kopf.objects         [INFO    ] [nuvolaris/nuvolaris-mongodb-svc] Creation is processed: 1 succeeded; 0 failed.
+[2022-12-28 23:09:14,960] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Patching with: {'metadata': {'annotations': {'kopf.zalando.org/last-handled-configuration': '{"spec":{"ports":[{"name":"mongodb","protocol":"TCP","port":27017,"targetPort":27017}],"selector":{"app":"nuvolaris-mongodb-svc"},"clusterIP":"None","clusterIPs":["None"],"type":"ClusterIP","sessionAffinity":"None","publishNotReadyAddresses":true,"ipFamilies":["IPv4"],"ipFamilyPolicy":"SingleStack","internalTrafficPolicy":"Cluster"},"metadata":{"labels":{"app":"nuvolaris-mongodb-svc"}},"status":{"loadBalancer":{}}}\n'}}}
+[2022-12-28 23:09:15,090] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Something has changed, but we are not interested (the essence is the same).
+[2022-12-28 23:09:15,091] kopf.objects         [DEBUG   ] [nuvolaris/nuvolaris-mongodb-svc] Handling cycle is finished, waiting for new changes.

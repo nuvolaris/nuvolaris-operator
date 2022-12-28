@@ -27,7 +27,7 @@ CONTROLLER_SPEC = "state.controller.spec"
 
 # this functions returns the apihost to be stored as annotation
 def apihost(apiHost):
-    logging.info(f"*** openwhish received ingress {apiHost}")
+    logging.info(f"*** openwhisk received ingress {apiHost}")
     url = urllib.parse.urlparse("https://pending")
     if len(apiHost) > 0: 
         if "hostname" in apiHost[0]:

@@ -31,7 +31,7 @@ rules:
 
 - apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["get", "list", "watch","create", "update", "patch", "delete"]
+  verbs: ["get","list", "watch","create", "update", "patch", "delete"]
 
 - apiGroups: ["storage.k8s.io"]
   resources: ["storageclasses"]
@@ -47,7 +47,202 @@ rules:
 
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles","clusterrolebindings"]
+  verbs: ["get", "list", "watch","create", "update", "patch", "delete"]
+
+# ingress-nginx and cert-manager cluster wide rbac
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterroles","clusterrolebindings","rolebindings","roles"]
+  verbs: ["get", "list", "watch", "create", "delete","patch","update"]
+
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: [""]
+  resources: ["deployments"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "create","delete","patch","update"] 
+
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingressclasses"]
+  verbs: ["create","delete","patch","update"]
+
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["validatingwebhookconfigurations"]
+  verbs: ["get", "list", "watch", "create", "delete","patch","update"]
+
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get","list","watch"]
+
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get","create","patch","update"]
+
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list","watch"]
+
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get","list","watch","create","delete","patch","update"]
+
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
   verbs: ["get", "list", "watch"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get","list","watch","create","update","delete"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses/status"]
+  verbs: ["update","patch"]
+
+# cert-manager specific rbac
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create","delete"]
+
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations"]
+  verbs: ["get","list","watch","create","update","patch","delete"] 
+
+- apiGroups: ["apiregistration.k8s.io"]
+  resources: ["apiservices"]
+  verbs: ["get","list","watch","update"] 
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates"]
+  verbs: ["get","list","watch"]
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["issuers"]
+  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"] 
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["issuers/status"]
+  verbs: ["update","patch"]    
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["clusterissuers"]
+  verbs: ["create","update","patch","get","list","watch"]
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["clusterissuers/status"]
+  verbs: ["update","patch"] 
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificaterequests"]
+  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"]  
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificaterequests/finalizers"]
+  verbs: ["update"]  
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificaterequests/status"]
+  verbs: ["update","patch"]    
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates"]
+  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"]
+
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["signers"]
+  verbs: ["sign","approve"]  
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["signers"]
+  verbs: ["sign","approve"]    
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates/finalizers"]
+  verbs: ["update"] 
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates/status"]
+  verbs: ["update","patch"]   
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["orders"]
+  verbs: ["create","delete","get","list","update","patch","watch","deletecollection"]  
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["challenges"]
+  verbs: ["get","list","watch","create","delete","update","patch","deletecollection"]
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["challenges/finalizers"]
+  verbs: ["get","list","watch","create","delete","update","patch"]  
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["challenges/status"]
+  verbs: ["update","patch"]   
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["orders/finalizers"]
+  verbs: ["update"]  
+
+- apiGroups: ["acme.cert-manager.io"]
+  resources: ["orders/status"]
+  verbs: ["update","patch"] 
+
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["httproutes"]
+  verbs: ["get","list","watch","create","delete","update"]
+
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes/custom-host"]
+  verbs: ["create"] 
+
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["subjectaccessreviews"]
+  verbs: ["create"]
+
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gateways"]
+  verbs: ["get","list","watch"] 
+
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gateways/finalizers"]
+  verbs: ["update"]
+
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["httproutes/finalizers"]
+  verbs: ["update"]  
+
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests"]
+  verbs: ["get","list","watch","update"]
+
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests/status"]
+  verbs: ["update","patch"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses/finalizers"]
+  verbs: ["create","update","patch","delete"]                                
+
 
 ---
 kind: ClusterRoleBinding
