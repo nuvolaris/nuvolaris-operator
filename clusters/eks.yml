@@ -37,3 +37,8 @@ tasks:
   avail-addons: eksctl utils describe-addon-versions --cluster=nuvolaris-cluster
 
   list-addon: eksctl get addons --cluster=nuvolaris-cluster
+
+  enable-tls-support:
+    - task: config  
+    - kubectl apply -f ../deploy/cert-manager/cert-manager.yaml
+    - kubectl apply -f ../deploy/ingress-nginx/eks-nginx-ingress.yaml
