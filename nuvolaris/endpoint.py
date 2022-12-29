@@ -19,49 +19,44 @@ import kopf, logging, json, time
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
+import nuvolaris.openwhisk as openwhisk
 import urllib.parse
 
-def create(owner=None,url="http://localhost:3233"):
+def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     tls = cfg.get('components.tls')
-    url = urllib.parse.urlparse(url)
-    hostname = url.hostname
+    
+    apihost = openwhisk.apihost(None)
+    logging.info(f"*** Configuring ingress for apihost={apihost}")
+    
+    openwhisk.annotate(f"apihost={apihost}")
+    url = urllib.parse.urlparse(apihost)
 
-    if(runtime == "kind" or not tls):
-        logging.info(f"*** Configuring host {hostname} as http endpoint for openwhisk controller")
-        spec = "deploy/openwhisk-endpoint/standalone-in-http.yaml"
-        cfg.put("state.endpoint.spec", spec)
-        cfg.put("state.endpoint.apply", "file")
-        res = kube.kubectl("apply", "-f", spec)
-        return res
-    
-    logging.info(f"*** Configuring host {hostname} as https endpoint for openwhisk controller")
-    # On microk8s cluster issuer class must be public
+    hostname = url.hostname
+    # On microk8s ingress class must be public
     ingress_class = runtime == "microk8s" and "public" or "nginx"
-    
+
     data = {
         "apihost":hostname,
         "ingress_class":ingress_class
     }
-    ikust = kus.patchTemplates("openwhisk-endpoint", ["standalone-in-https.yaml"], data)
-    ispec = kus.restricted_kustom_list("openwhisk-endpoint", ikust, templates=[],templates_filter=["standalone-in-https.yaml"],data=data)
-     
+
+    tpl = (runtime == "kind" or not tls) and "standalone-in-http.yaml" or "standalone-in-https.yaml";
+    logging.info(f"*** Configuring host {hostname} endpoint for openwhisk controller using {tpl}")
+
+    kust = kus.patchTemplates("openwhisk-endpoint", [tpl], data)
+    spec = kus.restricted_kustom_list("openwhisk-endpoint", kust, templates=[],templates_filter=[tpl],data=data)
+
     if owner:
-            kopf.append_owner_reference(ispec['items'], owner)
+        kopf.append_owner_reference(spec['items'], owner)
     else:
-        cfg.put("state.endpoint.spec", ispec)
-        cfg.put("state.endpoint.apply", "spec")
+        cfg.put("state.endpoint.spec", spec)
         
-    return kube.apply(ispec)
+    return kube.apply(spec)
 
 def delete():
     spec = cfg.get("state.endpoint.spec")
-    apply = cfg.get("state.endpoint.apply")
     res = False
     if spec:
-        if(apply == "file"):
-            res = kube.kubectl("delete", "-f", spec)
-            return res
-        else:
-            res = kube.delete(spec)
-            return res
+        res = kube.delete(spec)
+        return res
