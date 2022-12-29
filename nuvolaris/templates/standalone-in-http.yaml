@@ -25,17 +25,10 @@ metadata:
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      kubernetes.io/ingress.class: "public"
-      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
-    
+      kubernetes.io/ingress.class: "{{ingress_class}}"
 spec:
-  tls:
-    - hosts:
-      - 52.91.252.51.nip.io
-      secretName: nuvolaris-letsencrypt-secret
   rules:
-    - host: 52.91.252.51.nip.io
+    - host: "{{apihost}}"
       http:
         paths:
           - path: /

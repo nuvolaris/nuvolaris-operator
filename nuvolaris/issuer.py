@@ -19,26 +19,6 @@ import kopf, logging, json
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
-import time
-
-def get_cm_pod_name(runtime, jpath, namespace="cert-manager"):
-    # pod_name is retuned as a string array
-    pod_name = kube.kubectl("get", "pods", namespace=namespace, jsonpath=jpath)
-    if pod_name:
-        return pod_name[0]
-    
-    return None
-
-def wait_for_cm_ready(runtime, jpath, namespace="cert-manager"):
-    pod_name = get_cm_pod_name(runtime, jpath, namespace)
-
-    if pod_name:
-        logging.info(f"checking for {pod_name}")
-        while not kube.wait(f"pod/{pod_name}", "condition=ready",namespace=namespace):
-            logging.info(f"waiting for {pod_name} to be ready...")
-            time.sleep(1)
-    else:
-        logging.error("*** could not determine if cert-manager webhook pod is up and running")
 
 def create(owner=None):
     logging.info(f"*** Configuring cluster issuer")
@@ -46,19 +26,6 @@ def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     acme_registered_email = cfg.get('tls.acme-registered-email') or "nuvolaris@nuvolaris.io"
     acme_server_url = cfg.get('tls.acme-server-url') or "https://acme-staging-v02.api.letsencrypt.org/directory"
-
-    # ensure the cert-manager pods are running
-    webhook_path = "{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'webhook')].metadata.name}"
-    controller_path = "{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'controller')].metadata.name}"
-    cainjector_path = "{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'cainjector')].metadata.name}"
-    
-    wait_for_cm_ready(runtime, controller_path)
-    wait_for_cm_ready(runtime, cainjector_path)
-    wait_for_cm_ready(runtime, webhook_path)
-
-    # wait for a minute before creating the issuer
-    logging.info("*** waiting 60 seconds before creating a cluster issuer")
-    time.sleep(60)
 
     # On microk8s cluster issuer class must be public
     issuer_class = runtime == "microk8s" and "public" or "nginx"

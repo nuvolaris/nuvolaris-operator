@@ -28,8 +28,8 @@ import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
 import nuvolaris.certmanager as cm
 import nuvolaris.ingress as ingress
-import nuvolaris.endpoint as endpoint
 import nuvolaris.issuer as issuer
+import nuvolaris.endpoint as endpoint
 
 # tested by an integration test
 @kopf.on.login()
@@ -70,15 +70,6 @@ def whisk_create(spec, name, **kwargs):
     runtime = cfg.get('nuvolaris.kube')
     logging.info(f"kubernetes engine in use={runtime}")
 
-    # ingress-nginx is required, installing it if needed before any other component
-    try:
-        msg = ingress.create(owner)
-        state['ingress'] = "on"
-        logging.info(msg)
-    except:
-        logging.exception("cannot configure ingress")
-        state['ingress']= "error"
-
     if cfg.get('components.tls') and not runtime == "kind":        
         try:
             msg = cm.create(owner)
@@ -92,18 +83,14 @@ def whisk_create(spec, name, **kwargs):
         if runtime == "kind" and cfg.get('components.tls'):
             logging.info("*** cert-manager support will not be activated with kind runtime")
 
-    if cfg.get('components.tls') and not runtime == "kind":        
-        try:
-            msg = issuer.create(owner)
-            state['issuer'] = "on"
-            logging.info(msg)
-        except:
-            logging.exception("cannot configure issuer")
-            state['issuer']= "error"
-    else:
-        state['issuer'] = "off"
-        if runtime == "kind" and cfg.get('components.tls'):
-            logging.info("*** cluster issuer will not be deployed with kind runtime")        
+    # ingress-nginx is required, installing it if needed before any other component
+    try:
+        msg = ingress.create(owner)
+        state['ingress'] = "on"
+        logging.info(msg)
+    except:
+        logging.exception("cannot configure ingress")
+        state['ingress']= "error"
 
     if cfg.get('components.couchdb'):
         try:
@@ -127,10 +114,27 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['redis'] = "off"
 
+    if cfg.get('components.tls') and not runtime == "kind":        
+        try:
+            msg = issuer.create(owner)
+            state['issuer'] = "on"
+            logging.info(msg)
+        except:
+            logging.exception("cannot configure issuer")
+            state['issuer']= "error"
+    else:
+        state['issuer'] = "off"
+        if runtime == "kind" and cfg.get('components.tls'):
+            logging.info("*** cluster issuer will not be deployed with kind runtime")       
+
     if cfg.get('components.openwhisk'):
         try:
             msg = openwhisk.create(owner)
             state['openwhisk'] = "on"
+            logging.info(msg)
+
+            msg = endpoint.create(owner)
+            state['endpoint'] = "on"
             logging.info(msg)
 
         except:
@@ -185,6 +189,17 @@ def whisk_delete(spec, **kwargs):
     runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
 
+    if cfg.get("components.tls"):
+        msg = cm.delete()
+        logging.info(msg)
+
+    # delete the ingress if it has been created by the deployment
+    msg = ingress.delete()
+    logging.info(msg)    
+
+    msg = issuer.delete()
+    logging.info(msg)
+
     if cfg.get("components.redis"):
         msg = redis.delete()
         logging.info(msg)
@@ -206,22 +221,13 @@ def whisk_delete(spec, **kwargs):
     if cfg.get("components.cron"):
         msg = cron.delete()
         logging.info(msg)
-
-    if cfg.get("components.tls"):
-        msg = cm.delete()
-        logging.info(msg)
-
-        msg = issuer.delete()
-        logging.info(msg)
     
-    # delete the ingress if it has been created by the deployment
-    msg = ingress.delete()
-    logging.info(msg)                         
+                         
 
 
 # tested by integration test
-@kopf.on.field("service", field='status.loadBalancer')
-def service_update(old, new, name, **kwargs):    
+#@kopf.on.field("service", field='status.loadBalancer')
+def service_update(old, new, name, **kwargs):
     if not name == "apihost":
         return
 
@@ -232,7 +238,6 @@ def service_update(old, new, name, **kwargs):
     
     apihost = openwhisk.apihost(ingress)
     openwhisk.annotate(f"apihost={apihost}")
-    endpoint.create(owner=None, url=apihost)
 
 #@kopf.on.field("sts", field='status.availableReplicas')
 def deploy_update(old, new, name, **kwargs):

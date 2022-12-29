@@ -145,15 +145,15 @@ rules:
 
 - apiGroups: ["cert-manager.io"]
   resources: ["clusterissuers"]
-  verbs: ["create","update","patch","get","list","watch"]
+  verbs: ["create","update","delete","patch","get","list","watch","deletecollection"]
 
 - apiGroups: ["cert-manager.io"]
   resources: ["clusterissuers/status"]
-  verbs: ["update","patch"] 
+  verbs: ["create","update","delete","patch","get","list","watch"]
 
 - apiGroups: ["cert-manager.io"]
   resources: ["certificaterequests"]
-  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"]  
+  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"]
 
 - apiGroups: ["cert-manager.io"]
   resources: ["certificaterequests/finalizers"]
