@@ -49,10 +49,10 @@ jobs:
       - name: Make envfile
         if: if “$GITHUB_USER !- “nuvolaris”
         uses: SpicyPizza/create-envfile@v1.3
-          with:
-            envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
-            file_name: .env
-            fail_on_empty: false        
+        with:
+          envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
+          file_name: .env
+          fail_on_empty: false        
       - name: Kind
         uses: helm/kind-action@v1.2.0
         with:

@@ -52,10 +52,10 @@ jobs:
       - name: Make envfile
         if: if “$GITHUB_USER !- “nuvolaris”
         uses: SpicyPizza/create-envfile@v1.3
-          with:
-            envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
-            file_name: .env
-            fail_on_empty: false         
+        with:
+          envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
+          file_name: .env
+          fail_on_empty: false         
       - name: Registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
