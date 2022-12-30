@@ -118,12 +118,15 @@ def whisk_create(spec, name, **kwargs):
         try:
             msg = issuer.create(owner)
             state['issuer'] = "on"
+            state['tls'] = "on"
             logging.info(msg)
         except:
             logging.exception("cannot configure issuer")
             state['issuer']= "error"
+            state['tls'] = "error"
     else:
         state['issuer'] = "off"
+        state['tls'] = "off"
         if runtime == "kind" and cfg.get('components.tls'):
             logging.info("*** cluster issuer will not be deployed with kind runtime")       
 

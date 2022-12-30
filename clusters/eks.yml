@@ -22,7 +22,9 @@ tasks:
   create: 
     - eksctl create cluster -f eks-cluster.yml 
 
-  destroy: 
+  destroy:
+    - kubectl delete -f ../deploy/cert-manager/cert-manager.yaml
+    - kubectl delete -f ../deploy/ingress-nginx/eks-nginx-ingress.yaml
     - eksctl delete cluster -f eks-cluster.yml
   
   #--name nuvolaris-cluster --region=eu-central-1
@@ -38,7 +40,7 @@ tasks:
 
   list-addon: eksctl get addons --cluster=nuvolaris-cluster
 
-  enable-tls-support:
+  setup:
     - task: config  
     - kubectl apply -f ../deploy/cert-manager/cert-manager.yaml
     - kubectl apply -f ../deploy/ingress-nginx/eks-nginx-ingress.yaml
