@@ -23,6 +23,7 @@ import nuvolaris.testutil as tu
 import nuvolaris.kube as kube
 import nuvolaris.actionexecutor as ae
 import nuvolaris.couchdb_util as cu
+import nuvolaris.couchdb as cb
 
 !kubectl apply -f deploy/couchdb
 !kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
@@ -34,6 +35,8 @@ assert(cfg.put("couchdb.host", "localhost"))
 
 db = cu.CouchDB()
 assert(db.wait_db_ready(60))
+
+cb.init()
 assert len (ae.get_cron_aware_actions(db, cfg.get('couchdb.controller.user'),cfg.get('couchdb.controller.password'))) == 0
 
 assert(cfg.get("controller.host") == "localhost")
