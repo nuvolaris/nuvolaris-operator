@@ -28,6 +28,8 @@ import logging
 cfg.detect()
 
 runtime = cfg.get('nuvolaris.kube')
-expected = "certificate manager is already installed...skipping setup"
-res = cm.create()
-assert(expected == res)
+
+if runtime != "kind" and cfg.get('components.tls'):
+    expected = "certificate manager is already installed...skipping setup"
+    res = cm.create()
+    assert(expected == res)
