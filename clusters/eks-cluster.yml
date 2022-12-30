@@ -27,7 +27,7 @@ iam:
 
 nodeGroups:
   - name: ng-1
-    instanceType: m5.large
+    instanceType: m5.xlarge
     desiredCapacity: 1
     volumeSize: 80
     ssh:
