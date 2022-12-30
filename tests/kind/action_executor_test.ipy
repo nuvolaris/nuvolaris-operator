@@ -24,16 +24,13 @@ import nuvolaris.kube as kube
 import nuvolaris.actionexecutor as ae
 import nuvolaris.couchdb_util as cu
 
-!kubectl apply -f deploy/nuvolaris-operator
-!kubectl -n nuvolaris wait --for=condition=ready pod nuvolaris-operator
-
 !kubectl apply -f deploy/couchdb
 !kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
 
 # init
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.put("couchdb.host", "localhost"))
-!nuv action create hello-cron-action tests/hello.js -a cron "*/2 * * * *"
+#!nuv action create hello-cron-action tests/hello.js -a cron "*/2 * * * *"
 
 db = cu.CouchDB()
 assert(db.wait_db_ready(60))
@@ -43,6 +40,5 @@ assert(cfg.get("controller.host") == "localhost")
 assert(cfg.get("controller.port") == "3233")
 
 # cleanup
-!kubectl delete -f deploy/nuvolaris-operator
 !kubectl delete -f deploy/couchdb
 !kubectl wait deploy/couchdb --for=delete
