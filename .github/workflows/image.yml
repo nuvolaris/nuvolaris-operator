@@ -86,6 +86,8 @@ jobs:
         run: task kind-ingress         
       - name: Test
         run: task test
+      - name: DockerLogin
+        run: task docker-login        
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
