@@ -102,7 +102,7 @@ tasks:
       fi
     done
     echo "*** $APIHOST ***"
-    AUTH=$(kubectl -n nuvolaris get wsk/controller -o yaml | awk '/nuvolaris:/{print $2}')
+    AUTH=$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
     echo $AUTH
     echo wsk property set --apihost $APIHOST --auth $AUTH
     wsk property set --apihost $APIHOST --auth $AUTH
