@@ -44,8 +44,8 @@ assert( ow.apihost(a) == "https://20.86.250.184")
 import doctest
 doctest.testfile("tests/openwhisk_test.txt", module_relative=False)
 
-!kubectl apply -f deploy/nuvolaris-operator/nuvolaris-common.yaml
-!kubectl apply -f deploy/nuvolaris-operator/whisk-crd.yaml
+!kubectl apply -f deploy/nuvolaris-permissions/nuvolaris-common.yaml
+!kubectl apply -f deploy/nuvolaris-permissions/whisk-crd.yaml
 !kubectl apply -f tests/whisk-dev.yaml
 
 wsk = kube.get("wsk/controller")

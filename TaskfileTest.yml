@@ -96,7 +96,7 @@ tasks:
   config: |-
     while true
     do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}')
-      if echo $APIHOST | grep pending
+      if [[ `echo $APIHOST | grep pending` || -z "$APIHOST" ]];
       then echo "apihost still pending..." ; sleep 5
       else break
       fi
