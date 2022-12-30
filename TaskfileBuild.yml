@@ -53,7 +53,7 @@ tasks:
       ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}} 
       --name=nuvolaris
 
-buildx-and-push:
+  buildx-and-push:
     - > 
       docker buildx build 
       --platform linux/amd64,linux/arm64 
