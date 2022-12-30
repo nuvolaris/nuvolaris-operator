@@ -80,6 +80,8 @@ jobs:
       - name: Wait
         if: ${{ env.NGROK == 'on' }}
         run: bash .github/wait.sh
+      - name: AddIngress
+        run: task kind-ingress         
       - name: Test
         run: task test
       - name: Buildx
