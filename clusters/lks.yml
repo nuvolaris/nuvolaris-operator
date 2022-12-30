@@ -24,7 +24,7 @@ tasks:
    create: >
       linode-cli lke cluster-create \
          --label=nuvolaris-cluster --region=eu-west \
-         --k8s_version=1.23 --node_pools.type=g6-standard-4 --node_pools.count=1
+         --k8s_version=1.24 --node_pools.type=g6-standard-4 --node_pools.count=1
 
    destroy: | 
       ID=$(linode-cli lke clusters-list --json | jq '.[0].id')
@@ -42,3 +42,11 @@ tasks:
    list: linode-cli lke clusters-list
    
    env: env
+
+   setup:
+      task: config
+      cmds:
+         - kubectl apply -f ../deploy/cert-manager/cert-manager.yaml
+         - kubectl apply -f ../deploy/ingress-nginx/cloud-nginx-ingress.yaml
+         - until kubectl get svc --all-namespaces ; do date; sleep 1; echo ""; done
+         - echo "$(kubectl -n ingress-nginx get service/ingress-nginx-controller -o json|jq '.status.loadBalancer.ingress[0].hostname')"

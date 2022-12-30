@@ -24,6 +24,9 @@ import nuvolaris.kube as kube
 import nuvolaris.actionexecutor as ae
 import nuvolaris.couchdb_util as cu
 
+!kubectl apply -f deploy/nuvolaris-operator
+!kubectl -n nuvolaris wait --for=condition=ready pod nuvolaris-operator
+
 !kubectl apply -f deploy/couchdb
 !kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
 
@@ -40,5 +43,6 @@ assert(cfg.get("controller.host") == "localhost")
 assert(cfg.get("controller.port") == "3233")
 
 # cleanup
+!kubectl delete -f deploy/nuvolaris-operator
 !kubectl delete -f deploy/couchdb
 !kubectl wait deploy/couchdb --for=delete
