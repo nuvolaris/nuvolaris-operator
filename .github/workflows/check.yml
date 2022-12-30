@@ -50,6 +50,8 @@ jobs:
         if: if “$GITHUB_USER !- “nuvolaris”
         uses: SpicyPizza/create-envfile@v1.3
           with:
+            envkey_GITHUB_USER: ${{ secrets.GT_USER }}
+            envkey_GITHUB_TOKEN: ${{ secrets.GT_TOKEN }}
             envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
             file_name: .env
             fail_on_empty: false        
