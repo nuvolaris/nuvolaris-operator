@@ -235,6 +235,10 @@ tasks:
     cmds:
       - task dtest 2>/dev/null >/dev/null
 
+  kind-ingress: 
+    cmds:
+      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml    
+
   use: 
     cmds:
     - |-
