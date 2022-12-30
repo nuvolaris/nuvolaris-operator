@@ -48,7 +48,7 @@ jobs:
       - name: License
         uses: apache/skywalking-eyes@main
       - name: Make envfile
-        if: $GITHUB_USER !- “nuvolaris”
+        if: "$GITHUB_USER !- "nuvolaris"
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
