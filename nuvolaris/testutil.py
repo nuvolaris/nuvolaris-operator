@@ -87,6 +87,11 @@ def nprint(out):
         if line.strip() != "":
             print(line)
 
+# print in yaml an obj
+def yprint(obj):
+    print(yaml.dump(obj))
+
+
 # load an YAML file
 def load_yaml(file):
     f = open(file)
@@ -94,6 +99,7 @@ def load_yaml(file):
     if len(l)  > 0:
         return l[0]
     return {}
+
 
 # mocking and spying kube support
 class MockKube:
