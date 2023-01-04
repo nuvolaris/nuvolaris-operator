@@ -23,11 +23,13 @@ import requests as req, os
 import nuvolaris.testutil as tu
 
 tu.read_dotenv()
-host = os.environ["MICROK8S_HOST"]
 
 obj = kus.kustom_list("test")
 print(kube.apply(obj).strip())
-assert( req.get(f"http://{host}").text.find("Thank you for using nginx.") == -1)
+
+check = !kubectl exec -i pod/test-pod -- curl -s http://localhost
+
+assert( "\n".join(check).find("Thank you for using nginx.") == -1)
 
 data = { "service": "test-svc", "path": "/"}
 print(kube.applyTemplate("ingress.yaml", data))
