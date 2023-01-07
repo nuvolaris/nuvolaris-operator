@@ -214,3 +214,13 @@ def get_with_retry(url, max_seconds):
         delta = int(time.time() - start)
         time.sleep(1)
     return ""
+
+# retry a function until it returns a given value
+# return true when the value is what is expected, false otherwise
+def retry(fn, value, max=10, delay=1):
+    for i in range(0, max):
+        if fn() == value:
+            return True
+        time.sleep(delay)
+        print(i, "retrying...")
+    return False

@@ -49,6 +49,7 @@ header:
     - 'ngrok'
     - 'ngrok.log'
     - 'poetry.lock'
+    - 'installer/**'
  
 dependency:
   files:

@@ -41,7 +41,7 @@ data = {"name": "test-nginx",
 }
 #print(data)
 patch = kus.patchTemplate("test-sts", "set-attach.yaml", data) 
-#print(patch)
+#kprint(patch)
 
 d = kus.kustom_list("test-sts", patch, data=data)
 
