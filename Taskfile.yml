@@ -72,15 +72,8 @@ tasks:
 
   env: env
   
-<<<<<<< HEAD
   watch: watch kubectl -n nuvolaris get nodes,pod,svc
-  watch: watch kubectl -n nuvolaris get deploy,pod,service,cronjob,ingress 
-||||||| parent of c259a1e (chore: working microk8s https enabled ingress)
-  watch: watch kubectl -n nuvolaris get deploy,pod,service,cronjob,ingress 
-=======
-  watch: watch kubectl -n nuvolaris get deploy,pod,service,cronjob,ingress
-  watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
->>>>>>> c259a1e (chore: working microk8s https enabled ingress)
+  watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges
 
   logs: >
     rm -f nuvolaris-operator.log ;
