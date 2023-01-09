@@ -51,7 +51,8 @@ tasks:
       __EOF__
 
 
-  permission: kubectl apply -f deploy/nuvolaris-permissions
+  permission: 
+    - kubectl apply -f deploy/nuvolaris-permissions
 
   operator:
   - task: kustomization

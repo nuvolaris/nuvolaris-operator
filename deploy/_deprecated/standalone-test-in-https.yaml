@@ -32,10 +32,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - {{hostname}}
+      - linode.nuvolaris.io
       secretName: nuvolaris-letsencrypt-secret
   rules:
-    - host: {{hostname}}
+    - host: linode.nuvolaris.io
       http:
         paths:
           - path: /

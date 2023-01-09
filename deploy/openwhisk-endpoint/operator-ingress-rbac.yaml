@@ -15,26 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-operator-ingress-role
+  namespace: ingress-nginx
+  labels:
+    app: nuvolaris-operator-ingress-role
+rules:
 
-import nuvolaris.ingress as ingress
-import nuvolaris.testutil as tu
-import nuvolaris.kube as kube
-import nuvolaris.config as cfg
-import logging
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch"]
 
-#
-# This test expect that ingress is already installed
-#
-cfg.detect()
-
-runtime = cfg.get('nuvolaris.kube')
-expected = "*** ingress-nginx already installed...skipping setup"
-res = ingress.create()
-
-if runtime == "microk8s":
-    namespace = ingress.get_ingress_namespace(runtime)
-    service = ingress.get_ingress_service(runtime)
-    pod_name = ingress.get_ingress_pod_name(runtime, namespace)
-    expected = f"*** ingress-nginx {pod_name} already installed...skipping setup"
-
-assert(expected == res)
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-operator-ingress-rb
+  namespace: ingress-nginx
+  labels:
+    app: nuvolaris-operator-ingress-rb
+subjects:
+- kind: ServiceAccount
+  namespace: nuvolaris
+  name:  nuvolaris-operator
+roleRef:
+  kind: Role
+  name: nuvolaris-operator-ingress-role
+  apiGroup: rbac.authorization.k8s.io
