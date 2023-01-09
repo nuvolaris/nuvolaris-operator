@@ -54,7 +54,7 @@ tasks:
   get-ip: 
     - |-
       aws ec2 describe-instances \
-      --filters 'Name=tag:Name,Values={{.STACK}}' \
+      --filters Name=tag:Name,Values={{.STACK}} Name=instance-state-name,Values=running \
       --region={{.REGION}} --output json \
       | jq -r '.Reservations[].Instances[].PublicIpAddress' | tee apihost.txt
       

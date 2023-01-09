@@ -15,24 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-!
 !kubectl config set-context --current --namespace nuvolaris
 import nuvolaris.kustomize as kus
 import nuvolaris.kube as kube
 import requests as req, os
 import nuvolaris.testutil as tu
 
-tu.read_dotenv()
-host = os.environ["MICROK8S_HOST"]
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
 
+host = !kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
+host = host[0]
+
+# test pod
 obj = kus.kustom_list("test")
 print(kube.apply(obj).strip())
-assert( req.get(f"http://{host}").text.find("Thank you for using nginx.") == -1)
+!kubectl wait --for=condition=Ready pod/test-pod
 
+check = !kubectl exec -i pod/test-pod -- curl -s http://localhost
+assert( "\n".join(check).find("Thank you for using nginx.") != -1)
+
+# test ingress
 data = { "service": "test-svc", "path": "/"}
 print(kube.applyTemplate("ingress.yaml", data))
-!sleep 3
-assert( req.get(f"http://{host}").text.find("Thank you for using nginx.") >= 0)
+
+assert(tu.retry(lambda: req.get(f"http://{host}").status_code, 200))
+assert( req.get(f"http://{host}").text.find("Thank you for using nginx.") != 0)
 
 print(kube.deleteTemplate("ingress.yaml", data))
 print(kube.delete(obj))

@@ -21,6 +21,7 @@ header:
     copyright-owner: Apache Software Foundation
 
   paths-ignore:
+    - '.git-hooks/pre-commit'
     - 'playground'
     - '**/*.off'
     - '**/*.excalidraw'
@@ -48,6 +49,7 @@ header:
     - 'ngrok'
     - 'ngrok.log'
     - 'poetry.lock'
+    - 'installer/**'
  
 dependency:
   files:

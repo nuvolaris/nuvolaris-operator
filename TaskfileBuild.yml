@@ -42,6 +42,7 @@ tasks:
       {{.CLI_ARGS}} .
 
   build-and-push:
+    - task: docker-login
     - task: build 
     - docker push ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
 
