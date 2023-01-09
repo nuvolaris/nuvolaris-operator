@@ -46,7 +46,7 @@ def create(owner=None):
     ingress_class = runtime == "microk8s" and "public" or "nginx"
 
     data = {
-        "apihost":hostname,
+        "hostname":hostname,
         "ingress_class":ingress_class
     }
 

@@ -26,8 +26,6 @@ import nuvolaris.bucket as bucket
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
-import nuvolaris.certmanager as cm
-import nuvolaris.ingress as ingress
 import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 
@@ -62,35 +60,13 @@ def whisk_create(spec, name, **kwargs):
         "s3bucket": "?",   # S3-compatbile buckets
         "cron": "?",   # Cron based actions executor
         "tls": "?",   # Cron based actions executor
-        "ingress": "?", # Ingress
         "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
-        "issuer": "?" # ClusterIssuer configuration
+        "issuer": "?", # ClusterIssuer configuration
+        "ingress": "?" 
     }
 
     runtime = cfg.get('nuvolaris.kube')
     logging.info(f"kubernetes engine in use={runtime}")
-
-    if cfg.get('components.tls') and not runtime == "kind":        
-        try:
-            msg = cm.create(owner)
-            state['cm'] = "on"
-            logging.info(msg)
-        except:
-            logging.exception("cannot configure tls")
-            state['cm']= "error"
-    else:
-        state['cm'] = "off"
-        if runtime == "kind" and cfg.get('components.tls'):
-            logging.info("*** cert-manager support will not be activated with kind runtime")
-
-    # ingress-nginx is required, installing it if needed before any other component
-    try:
-        msg = ingress.create(owner)
-        state['ingress'] = "on"
-        logging.info(msg)
-    except:
-        logging.exception("cannot configure ingress")
-        state['ingress']= "error"
 
     if cfg.get('components.couchdb'):
         try:
@@ -128,7 +104,7 @@ def whisk_create(spec, name, **kwargs):
         state['issuer'] = "off"
         state['tls'] = "off"
         if runtime == "kind" and cfg.get('components.tls'):
-            logging.info("*** cluster issuer will not be deployed with kind runtime")       
+            logging.info("*** cluster issuer will not be deployed with kind runtime")
 
     if cfg.get('components.openwhisk'):
         try:
@@ -192,16 +168,9 @@ def whisk_delete(spec, **kwargs):
     runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
 
-    if cfg.get("components.tls"):
-        msg = cm.delete()
+    if cfg.get('components.tls') and not runtime == "kind":
+        msg = issuer.delete()
         logging.info(msg)
-
-    # delete the ingress if it has been created by the deployment
-    msg = ingress.delete()
-    logging.info(msg)    
-
-    msg = issuer.delete()
-    logging.info(msg)
 
     if cfg.get("components.redis"):
         msg = redis.delete()
@@ -210,7 +179,7 @@ def whisk_delete(spec, **kwargs):
     if cfg.get('components.couchdb'):
         msg = couchdb.delete()
         logging.info(msg)
-
+    
     if cfg.get("components.openwhisk"):
         msg = openwhisk.delete()
         logging.info(msg)

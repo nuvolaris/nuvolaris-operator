@@ -1,0 +1,4 @@
+#!/bin/sh
+if test -e .licenserc.yaml
+then license-eye header check
+fi

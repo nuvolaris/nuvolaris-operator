@@ -25,7 +25,6 @@ spec:
       #apihost: $APIHOST
       #apiport: 80
       #protocol: http
-      dummy: value 
   components:
     # start openwhisk controller
     openwhisk: true

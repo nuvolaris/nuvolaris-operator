@@ -23,8 +23,6 @@ tasks:
     - eksctl create cluster -f eks-cluster.yml 
 
   destroy:
-    - kubectl delete -f ../deploy/cert-manager/cert-manager.yaml
-    - kubectl delete -f ../deploy/ingress-nginx/eks-nginx-ingress.yaml
     - eksctl delete cluster -f eks-cluster.yml
   
   #--name nuvolaris-cluster --region=eu-central-1
@@ -39,6 +37,10 @@ tasks:
   avail-addons: eksctl utils describe-addon-versions --cluster=nuvolaris-cluster
 
   list-addon: eksctl get addons --cluster=nuvolaris-cluster
+
+  reset:
+    - kubectl delete -f ../deploy/cert-manager/cert-manager.yaml
+    - kubectl delete -f ../deploy/ingress-nginx/eks-nginx-ingress.yaml    
 
   setup:
     - task: config  
