@@ -88,7 +88,7 @@ def detect_labels(labels=None):
             elif j.find("lke.linode.com") >=0:
                 kube = "lks"
             elif j.endswith("kubernetes.io/instance-type"): 
-                 kube = i[j]              
+                kube = i[j]               
             # assign all the 'nuvolaris.io' labels
             if j.startswith("nuvolaris.io/"):
                 key = f"nuvolaris.{j[13:]}"
