@@ -26,9 +26,16 @@ def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     acme_registered_email = cfg.get('tls.acme-registered-email') or "nuvolaris@nuvolaris.io"
     acme_server_url = cfg.get('tls.acme-server-url') or "https://acme-staging-v02.api.letsencrypt.org/directory"
+   
+    issuer_class = "nginx"
 
     # On microk8s cluster issuer class must be public
-    issuer_class = runtime == "microk8s" and "public" or "nginx"
+    if runtime == "microk8s":
+        issuer_class = "public"
+
+    # On k3s cluster issuer class must be traefik
+    if runtime == "k3s":
+        issuer_class = "traefik"        
     
     logging.info(f"*** Configuring cluster issuer using email {acme_registered_email}")
     logging.info(f"*** Configuring cluster issuer using let's encrypt server {acme_server_url}")

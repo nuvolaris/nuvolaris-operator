@@ -45,7 +45,7 @@ tasks:
       images:
       - name: ghcr.io/nuvolaris/nuvolaris-operator:latest
         newName: ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-        newTag: {{.OPERATOR_TAG}}
+        newTag: {{.OPERATOR_TAG}}                
       resources:
       - operator-pod.yaml
       __EOF__
