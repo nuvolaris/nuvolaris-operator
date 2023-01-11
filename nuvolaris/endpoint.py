@@ -33,17 +33,32 @@ def get_ingress(namespace="ingress-nginx"):
 def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     tls = cfg.get('components.tls')
-    namespace = ing.get_ingress_namespace(runtime)
     
-    apihost = runtime=="microk8s" and openwhisk.apihost(None) or openwhisk.apihost(get_ingress(namespace))
+    apihost = ""
+
+    if runtime in ["k3s","microk8s"]:
+        apihost = openwhisk.apihost(None)
+    else:
+        namespace = ing.get_ingress_namespace(runtime)
+        apihost = openwhisk.apihost(get_ingress(namespace))    
+
     logging.info(f"*** Configuring ingress for apihost={apihost}")
     
     openwhisk.annotate(f"apihost={apihost}")
     url = urllib.parse.urlparse(apihost)
 
     hostname = url.hostname
+
+    # ingress class default to nginx
+    ingress_class = "nginx"
+
     # On microk8s ingress class must be public
-    ingress_class = runtime == "microk8s" and "public" or "nginx"
+    if runtime == "microk8s":
+        ingress_class = "public"
+
+    # On k3s ingress class must be traefik
+    if runtime == "k3s":
+        ingress_class = "traefik" 
 
     data = {
         "hostname":hostname,
