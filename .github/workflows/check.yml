@@ -31,7 +31,8 @@
 name: nuvolaris-operator
 on: 
   push:
-    branches:
+    tags-ignore:
+       - '*'
 
 jobs:
   check:

@@ -35,6 +35,8 @@ on:
   push:
     tags:
     - '[0-9]*'
+    branches-ignore:
+    - '*'
 
 jobs:
   image:
