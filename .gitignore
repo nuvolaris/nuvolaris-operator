@@ -39,3 +39,4 @@ actions/*/nuvolaris/
 _*.yaml
 apihost.txt
 .git-hooks/
+installer
