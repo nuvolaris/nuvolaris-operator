@@ -17,12 +17,12 @@
 # under the License.
 #
 sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-sudo apt-get -y install python3.9 python3.9-venv curl wget jq
+sudo apt-get -y install python3.11 python3.11-venv curl wget jq
 WSK_VERSION=1.2.0
 WSK_BASE=https://github.com/apache/openwhisk-cli/releases/download
 ARCH=amd64
 WSK_URL="$WSK_BASE/$WSK_VERSION/OpenWhisk_CLI-$WSK_VERSION-linux-$ARCH.tgz"
-curl -sSL https://install.python-poetry.org | python3.10 -
+curl -sSL https://install.python-poetry.org | python3.11 -
 curl -sSL "$WSK_URL" | tar xzvf - -C ~/.local/bin/
 VER="v4.5.4"
 ARCH="$(dpkg --print-architecture)"

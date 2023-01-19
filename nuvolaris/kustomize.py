@@ -243,7 +243,7 @@ def kustom_list(where, *what, templates=[], data={}):
   return {"apiVersion": "v1", "kind": "List", "items": res }
 
 
-  # returns a list of kustomized objects restricting the deploy avaialbe templates to gven ones
+# returns a list of kustomized objects restricting the deploy available templates to given ones
 def restricted_kustom_list(where, *what, templates=[], templates_filter=[], data={}):
   """
   >>> import nuvolaris.kustomize as nku
@@ -259,3 +259,8 @@ def restricted_kustom_list(where, *what, templates=[], templates_filter=[], data
   stream = io.StringIO(yml)
   res = list(yaml.load_all(stream, yaml.Loader))
   return {"apiVersion": "v1", "kind": "List", "items": res }
+
+# load the given yaml file under deploy/{where} folder
+def raw(where, yamlfile):
+  with open(f"deploy/{where}/{yamlfile}", 'r') as f:
+    return list(yaml.load_all(f, yaml.Loader))

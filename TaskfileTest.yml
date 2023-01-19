@@ -45,13 +45,14 @@ tasks:
       images:
       - name: ghcr.io/nuvolaris/nuvolaris-operator:latest
         newName: ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-        newTag: {{.OPERATOR_TAG}}
+        newTag: {{.OPERATOR_TAG}}                
       resources:
       - operator-pod.yaml
       __EOF__
 
 
-  permission: kubectl apply -f deploy/nuvolaris-permissions
+  permission: 
+    - kubectl apply -f deploy/nuvolaris-permissions
 
   operator:
   - task: kustomization
@@ -95,14 +96,14 @@ tasks:
   
   config: |-
     while true
-    do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}' | sed -e 's/https:/http:/')
-      if echo $APIHOST | grep pending
+    do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}')
+      if [[ `echo $APIHOST | grep pending` || -z "$APIHOST" ]];
       then echo "apihost still pending..." ; sleep 5
       else break
       fi
     done
     echo "*** $APIHOST ***"
-    AUTH=$(kubectl -n nuvolaris get wsk/controller -o yaml | awk '/nuvolaris:/{print $2}')
+    AUTH=$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
     echo $AUTH
     echo wsk property set --apihost $APIHOST --auth $AUTH
     wsk property set --apihost $APIHOST --auth $AUTH

@@ -86,7 +86,7 @@ def init_system(db):
     cuser = cfg.get('couchdb.controller.user', "COUCHDB_CONTROLLER_USER", "controller_admin")
     cpasw = cfg.get('couchdb.controller.password', "COUCHDB_CONTROLLER_PASSWORD", "s0meP@ass1")
     iuser = cfg.get('couchdb.invoker.user', "COUCHDB_INVOKER_USER", "invoker_admin")
-    ipasw = cfg.get('couchdb.incvoker.password', "COUCHDB_INVOKER_PASSWORD", "s0meP@ass2")
+    ipasw = cfg.get('couchdb.invoker.password', "COUCHDB_INVOKER_PASSWORD", "s0meP@ass2")
     res = check(db.add_user(cuser, cpasw), "add_user: controller", res)
     return check(db.add_user(iuser, ipasw), "add_user: invoker", res)
 

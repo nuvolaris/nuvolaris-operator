@@ -15,26 +15,22 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
 metadata:
-  name: nuvolaris-cluster
-  region: us-west-1
-
-iam:
-  withOIDC: true
-
-nodeGroups:
-  - name: ng-1
-    instanceType: m5.xlarge
-    desiredCapacity: 1
-    volumeSize: 80
-    ssh:
-      publicKeyPath: id_rsa.pub
-    iam:
-      withAddonPolicies:
-        ebs: true
-addons:
-  - name: aws-ebs-csi-driver
-
+  name: letsencrypt-issuer
+spec:
+  acme:
+    # The ACME server URL
+    server: "{{acme_server_url}}"
+    # Email address used for ACME registration
+    email: "{{acme_registered_email}}"
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: nuvolaris-letsencrypt-secret
+    # Enable the HTTP-01 challenge provider
+    solvers:
+    - http01:
+        ingress:
+          class: {{issuer_class}}

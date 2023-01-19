@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,26 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
 
-metadata:
-  name: nuvolaris-cluster
-  region: us-west-1
-
-iam:
-  withOIDC: true
-
-nodeGroups:
-  - name: ng-1
-    instanceType: m5.xlarge
-    desiredCapacity: 1
-    volumeSize: 80
-    ssh:
-      publicKeyPath: id_rsa.pub
-    iam:
-      withAddonPolicies:
-        ebs: true
-addons:
-  - name: aws-ebs-csi-driver
-
+#!/bin/sh
+if test -e .licenserc.yaml
+then license-eye header check
+fi

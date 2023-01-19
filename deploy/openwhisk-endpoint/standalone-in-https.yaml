@@ -15,26 +15,32 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: nuvolaris-cluster
-  region: us-west-1
-
-iam:
-  withOIDC: true
-
-nodeGroups:
-  - name: ng-1
-    instanceType: m5.xlarge
-    desiredCapacity: 1
-    volumeSize: 80
-    ssh:
-      publicKeyPath: id_rsa.pub
-    iam:
-      withAddonPolicies:
-        ebs: true
-addons:
-  - name: aws-ebs-csi-driver
-
+  name: standalone
+  namespace: nuvolaris
+  annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "48m"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      kubernetes.io/ingress.class: "nginx"
+      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
+    
+spec:
+  tls:
+    - hosts:
+      - localhost
+      secretName: nuvolaris-letsencrypt-secret
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: controller
+                port: 
+                  number: 3233

@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -32,7 +31,7 @@ rules:
 
 - apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get","list", "watch","create", "update", "patch", "delete"]
 
 - apiGroups: ["storage.k8s.io"]
   resources: ["storageclasses"]
@@ -47,8 +46,45 @@ rules:
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]  
 
 - apiGroups: ["rbac.authorization.k8s.io"]
-  resources: ["clusterroles","clusterrolebindings"]
-  verbs: ["get", "list", "watch"]
+  resources: ["clusterroles","clusterrolebindings","rolebindings","roles"]
+  verbs: ["get", "list", "watch","create", "update", "patch", "delete"]
+
+# tls specific
+- apiGroups: ["cert-manager.io"]
+  resources: ["certificates"]
+  verbs: ["get","list","watch"]
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["issuers"]
+  verbs: ["update","patch","get","list","watch","create","delete","deletecollection"] 
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["issuers/status"]
+  verbs: ["update","patch"]    
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["clusterissuers"]
+  verbs: ["create","update","delete","patch","get","list","watch","deletecollection"]
+
+- apiGroups: ["cert-manager.io"]
+  resources: ["clusterissuers/status"]
+  verbs: ["create","update","delete","patch","get","list","watch"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get","list","watch","create","update","delete"]
+
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses/status"]
+  verbs: ["update","patch"]
+
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch"]
+
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]  
 
 ---
 kind: ClusterRoleBinding

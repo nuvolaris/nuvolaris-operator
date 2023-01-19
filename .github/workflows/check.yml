@@ -46,6 +46,13 @@ jobs:
       - name: License   
         uses: apache/skywalking-eyes@main
         continue-on-error: true
+      - name: Make envfile
+        if:  ${{ env.GITHUB_USER != 'nuvolaris'}}
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
+          file_name: .env
+          fail_on_empty: false        
       - name: Kind
         uses: helm/kind-action@v1.2.0
         with:
@@ -57,6 +64,8 @@ jobs:
         run: task setup
       - name: BuildAndLoad
         run: task build-and-load
+      - name: AddIngress
+        run: task kind-ingress        
       - name: Test
         run: task test
         continue-on-error: true

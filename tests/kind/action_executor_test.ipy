@@ -23,6 +23,7 @@ import nuvolaris.testutil as tu
 import nuvolaris.kube as kube
 import nuvolaris.actionexecutor as ae
 import nuvolaris.couchdb_util as cu
+import nuvolaris.couchdb as cb
 
 !kubectl apply -f deploy/couchdb
 !kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
@@ -30,10 +31,12 @@ import nuvolaris.couchdb_util as cu
 # init
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.put("couchdb.host", "localhost"))
-!nuv action create hello-cron-action tests/hello.js -a cron "*/2 * * * *"
+#!nuv action create hello-cron-action tests/hello.js -a cron "*/2 * * * *"
 
 db = cu.CouchDB()
 assert(db.wait_db_ready(60))
+
+cb.init()
 assert len (ae.get_cron_aware_actions(db, cfg.get('couchdb.controller.user'),cfg.get('couchdb.controller.password'))) == 0
 
 assert(cfg.get("controller.host") == "localhost")

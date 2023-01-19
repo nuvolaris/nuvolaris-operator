@@ -15,26 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
+---
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: nuvolaris-cluster
-  region: us-west-1
+  name: ingress-nginx
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-operator-ingress-role
+  namespace: ingress-nginx
+  labels:
+    app: nuvolaris-operator-ingress-role
+rules:
 
-iam:
-  withOIDC: true
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch"]
 
-nodeGroups:
-  - name: ng-1
-    instanceType: m5.xlarge
-    desiredCapacity: 1
-    volumeSize: 80
-    ssh:
-      publicKeyPath: id_rsa.pub
-    iam:
-      withAddonPolicies:
-        ebs: true
-addons:
-  - name: aws-ebs-csi-driver
-
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-operator-ingress-rb
+  namespace: ingress-nginx
+  labels:
+    app: nuvolaris-operator-ingress-rb
+subjects:
+- kind: ServiceAccount
+  namespace: nuvolaris
+  name:  nuvolaris-operator
+roleRef:
+  kind: Role
+  name: nuvolaris-operator-ingress-role
+  apiGroup: rbac.authorization.k8s.io

@@ -22,9 +22,9 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: $APIHOST
+      #apihost: $APIHOST
       #apiport: 80
-      #protocol: http 
+      #protocol: http
   components:
     # start openwhisk controller
     openwhisk: true
@@ -87,5 +87,5 @@ spec:
     schedule: "* * * * *"
   tls:
     acme-registered-email: francesco@nuvolaris.io
-    acme-server-url: https://acme-v02.api.letsencrypt.org/directory
+    acme-server-url: https://acme-v02.api.letsencrypt.org/directory  
 

@@ -16,7 +16,6 @@
 # under the License.
 #
 import os, logging, json
-import nuvolaris.config as cfg
 import nuvolaris.couchdb_util as cu
 import nuvolaris.kube as kube
 import croniter as cn
@@ -367,30 +366,28 @@ def get_auth(subjects, subjectName):
 # Implement the logic to query for actions and evaluate how to execute them
 #
 def start():
-    # load nuvolaris config from the named crd
-    config = os.environ.get("NUVOLARIS_CONFIG")
-    if config:        
+    # load scheduler config from the os environment
+    cfg = os.environ.get("SCHEDULER_CONFIG")
+    if cfg:        
         logging.basicConfig(level=logging.INFO)
-        spec = json.loads(config)
-        cfg.configure(spec)
-        for k in cfg.getall(): logging.info(f"{k} = {cfg.get(k)}")
+        config = json.loads(cfg)        
 
     currentDate = datetime.now()
-    interval = from_cron_to_seconds(currentDate, cfg.get('scheduler.schedule'))
+    interval = from_cron_to_seconds(currentDate, config['scheduler.schedule'])
     logging.info(f"interval in seconds between 2 execution is {interval} seconds")
 
     db = cu.CouchDB()
     res = check(db.wait_db_ready(30), "wait_db_ready", True)
 
     if(res):
-        ow_protocol = cfg.get('controller.protocol') or "http"
-        ow_host = cfg.get('controller.host') or "controller"
-        ow_port = cfg.get('controller.port') or "3233"
+        ow_protocol = config['controller.protocol']
+        ow_host = config['controller.host']
+        ow_port = config['controller.port']
         baseurl = f"{ow_protocol}://{ow_host}:{ow_port}/api/v1/namespaces/"                
-        actions = get_cron_aware_actions(db, cfg.get('couchdb.controller.user'),cfg.get('couchdb.controller.password'))
+        actions = get_cron_aware_actions(db, config['couchdb.controller.user'],config['couchdb.controller.password'])
 
         if(len(actions) > 0):
-            subjects = get_subjects(db, cfg.get('couchdb.controller.user'),cfg.get('couchdb.controller.password'))
+            subjects = get_subjects(db, config['couchdb.controller.user'],config['couchdb.controller.password'])
             for action in actions:
                 handle_action(baseurl, currentDate, interval, action, subjects)
         else:

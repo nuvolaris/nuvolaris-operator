@@ -25,10 +25,13 @@ import kopf
 
 CONTROLLER_SPEC = "state.controller.spec"
 
-# this functtions returns the apihost to be stored as annotation
+# this functions returns the apihost to be stored as annotation
 def apihost(apiHost):
+    logging.info(f"*** openwhisk received ingress {apiHost}")
+    runtime = cfg.get('nuvolaris.kube')
     url = urllib.parse.urlparse("https://pending")
-    if len(apiHost) > 0: 
+
+    if apiHost and len(apiHost) > 0: 
         if "hostname" in apiHost[0]:
             url = url._replace(netloc = apiHost[0]['hostname'])
         elif "ip" in apiHost[0]:
@@ -40,6 +43,13 @@ def apihost(apiHost):
         url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
     if cfg.exists("nuvolaris.apiport"):
         url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
+
+    # overrides the protocols in case tls is enabled
+    if cfg.get('components.tls') and not runtime=="kind":
+        url = url._replace(scheme = "https")
+    else:
+        url = url._replace(scheme = "http")    
+
     return url.geturl()
 
 def create(owner=None):

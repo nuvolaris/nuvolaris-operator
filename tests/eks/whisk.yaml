@@ -20,7 +20,9 @@ kind: Whisk
 metadata:
   name: controller
   namespace: nuvolaris
-spec: 
+spec:
+  nuvolaris:
+      apihost: eks.sciabarra.net
   components:
     # start openwhisk controller
     openwhisk: true
@@ -37,7 +39,9 @@ spec:
     # start s3ninja
     s3bucket: false
     # start cron based action parser
-    cron: true    
+    cron: true
+    # tls enabled or not
+    tls: true         
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -83,4 +87,7 @@ spec:
     volume-size: 10
   scheduler:
     schedule: "* * * * *"
+  tls:
+    acme-registered-email: francesco@nuvolaris.io
+    acme-server-url: https://acme-v02.api.letsencrypt.org/directory     
 

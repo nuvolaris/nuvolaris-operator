@@ -73,6 +73,7 @@ tasks:
   env: env
   
   watch: watch kubectl -n nuvolaris get nodes,pod,svc
+  watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
 
   logs: >
     rm -f nuvolaris-operator.log ;
@@ -234,6 +235,10 @@ tasks:
     cmds:
       - task dtest 2>/dev/null >/dev/null
 
+  kind-ingress: 
+    cmds:
+      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml    
+
   use: 
     cmds:
     - |-
@@ -256,6 +261,9 @@ tasks:
 
   buildx-and-push:
     - task: b:buildx-and-push
+
+  docker-login:
+    - task: b:docker-login   
 
   1: task use N=1
   2: task use N=2

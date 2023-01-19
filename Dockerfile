@@ -56,11 +56,15 @@ ADD nuvolaris/templates /home/nuvolaris/nuvolaris/templates
 ADD deploy/nuvolaris-operator /home/nuvolaris/deploy/nuvolaris-operator
 ADD deploy/nuvolaris-permissions /home/nuvolaris/deploy/nuvolaris-permissions
 ADD deploy/openwhisk-standalone /home/nuvolaris/deploy/openwhisk-standalone
+ADD deploy/openwhisk-endpoint /home/nuvolaris/deploy/openwhisk-endpoint
 ADD deploy/couchdb /home/nuvolaris/deploy/couchdb
 ADD deploy/redis /home/nuvolaris/deploy/redis
 ADD deploy/scheduler /home/nuvolaris/deploy/scheduler
 ADD deploy/mongodb-operator /home/nuvolaris/deploy/mongodb-operator
 ADD deploy/mongodb /home/nuvolaris/deploy/mongodb
+ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
+ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
+ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
 RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
 USER nuvolaris

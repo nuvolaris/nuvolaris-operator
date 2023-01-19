@@ -20,7 +20,7 @@ import flatdict, json, os
 _config = {}
 
 # define a configuration 
-# the configuratoin is a map, followed by a list of labels 
+# the configuration is a map, followed by a list of labels 
 # the map can be a serialized json and will be flattened to a map of values.
 # you can have only a configuration active at a time
 # if you want to set a new configuration you have to clean it
@@ -88,8 +88,7 @@ def detect_labels(labels=None):
             elif j.find("lke.linode.com") >=0:
                 kube = "lks"
             elif j.endswith("kubernetes.io/instance-type"): 
-                 kube = i[j]
-
+                kube = i[j]               
             # assign all the 'nuvolaris.io' labels
             if j.startswith("nuvolaris.io/"):
                 key = f"nuvolaris.{j[13:]}"

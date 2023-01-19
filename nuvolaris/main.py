@@ -26,6 +26,8 @@ import nuvolaris.bucket as bucket
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
+import nuvolaris.issuer as issuer
+import nuvolaris.endpoint as endpoint
 
 # tested by an integration test
 @kopf.on.login()
@@ -56,8 +58,15 @@ def whisk_create(spec, name, **kwargs):
         "redis": "?",  # Redis
         "mongodb": "?",  # MongoDB
         "s3bucket": "?",   # S3-compatbile buckets
-        "cron": "?"   # Cron based actions executor
+        "cron": "?",   # Cron based actions executor
+        "tls": "?",   # Cron based actions executor
+        "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
+        "issuer": "?", # ClusterIssuer configuration
+        "ingress": "?" 
     }
+
+    runtime = cfg.get('nuvolaris.kube')
+    logging.info(f"kubernetes engine in use={runtime}")
 
     if cfg.get('components.couchdb'):
         try:
@@ -81,16 +90,39 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['redis'] = "off"
 
+    if cfg.get('components.tls') and not runtime == "kind":        
+        try:
+            msg = issuer.create(owner)
+            state['issuer'] = "on"
+            state['tls'] = "on"
+            logging.info(msg)
+        except:
+            logging.exception("cannot configure issuer")
+            state['issuer']= "error"
+            state['tls'] = "error"
+    else:
+        state['issuer'] = "off"
+        state['tls'] = "off"
+        if runtime == "kind" and cfg.get('components.tls'):
+            logging.info("*** cluster issuer will not be deployed with kind runtime")
+
     if cfg.get('components.openwhisk'):
         try:
             msg = openwhisk.create(owner)
             state['openwhisk'] = "on"
             logging.info(msg)
+
+            msg = endpoint.create(owner)
+            state['endpoint'] = "on"
+            logging.info(msg)
+
         except:
             logging.exception("cannot create openwhisk")
             state['openwhisk']= "error"
+            state['endpoint'] = "error"
     else:
         state['openwhisk'] = "off"
+        state['endpoint'] = "off"
 
     if cfg.get('components.cron'):
         try:
@@ -101,7 +133,7 @@ def whisk_create(spec, name, **kwargs):
             logging.exception("cannot create cron")
             state['cron']= "error"
     else:
-        state['cron'] = "off"         
+        state['cron'] = "off" 
 
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -126,14 +158,19 @@ def whisk_create(spec, name, **kwargs):
         logging.info(msg)
         state['mongodb'] = "on"
     else:
-        state['mongodb'] = "off"          
+        state['mongodb'] = "off"
 
     return state
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
 def whisk_delete(spec, **kwargs):
+    runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
+
+    if cfg.get('components.tls') and not runtime == "kind":
+        msg = issuer.delete()
+        logging.info(msg)
 
     if cfg.get("components.redis"):
         msg = redis.delete()
@@ -142,9 +179,11 @@ def whisk_delete(spec, **kwargs):
     if cfg.get('components.couchdb'):
         msg = couchdb.delete()
         logging.info(msg)
-
+    
     if cfg.get("components.openwhisk"):
         msg = openwhisk.delete()
+        logging.info(msg)
+        msg = endpoint.delete()
         logging.info(msg)
 
     if cfg.get("components.mongodb"):
@@ -153,23 +192,24 @@ def whisk_delete(spec, **kwargs):
 
     if cfg.get("components.cron"):
         msg = cron.delete()
-        logging.info(msg)               
+        logging.info(msg)
+    
+                         
 
 
 # tested by integration test
-@kopf.on.field("service", field='status.loadBalancer')
-def service_update(old, new, name, **kwargs):    
+#@kopf.on.field("service", field='status.loadBalancer')
+def service_update(old, new, name, **kwargs):
     if not name == "apihost":
         return
 
-    logging.debug(f"service_update: {json.dumps(new)}")
+    logging.info(f"service_update: {json.dumps(new)}")
     ingress = []
     if "ingress" in new and len(new['ingress']) >0:
         ingress = new['ingress']
     
     apihost = openwhisk.apihost(ingress)
     openwhisk.annotate(f"apihost={apihost}")
-    
 
 #@kopf.on.field("sts", field='status.availableReplicas')
 def deploy_update(old, new, name, **kwargs):
