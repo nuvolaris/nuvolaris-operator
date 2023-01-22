@@ -34,3 +34,7 @@ tasks:
     - kubectl get nodes
 
   labels: kubectl get nodes -ojsonpath='{.items[].metadata.labels}' | jq .
+
+  ingress: 
+    cmds:
+      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml 

@@ -66,6 +66,8 @@ spec:
               #       cron:
               #         type: string
               #       tls:
+              #         type: string
+              #       minio:
               #         type: string                            
       additionalPrinterColumns:
         - name: OpenWhisk
@@ -112,4 +114,9 @@ spec:
           type: string
           priority: 0
           jsonPath: .status.whisk_create.tls
-          description: Tls                    
+          description: Tls 
+        - name: Minio
+          type: string
+          priority: 0
+          jsonPath: .status.whisk_create.minio
+          description: Minio                              

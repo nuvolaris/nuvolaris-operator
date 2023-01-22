@@ -15,16 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+---
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
-  name: nuvolaris-operator
+  name: nuvolaris-minio-headless
   namespace: nuvolaris
+  labels:
+    app: minio
 spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ghcr.io/nuvolaris/nuvolaris-operator:latest
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
+  clusterIP: None
+  ports:
+    - port: 9000
+      name: minio
+  selector:
+    app: minio

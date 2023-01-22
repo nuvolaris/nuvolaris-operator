@@ -15,16 +15,22 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nuvolaris-operator
-  namespace: nuvolaris
-spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ghcr.io/nuvolaris/nuvolaris-operator:latest
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.minio as minio
+import logging
+
+# test
+assert(cfg.configure(tu.load_sample_config()))
+assert(minio.create())
+
+while not kube.wait("pod/minio-0", "condition=ready"): pass
+actual_minio_root_user = kube.kubectl("get", "pod/minio-0", jsonpath="{.spec.containers[0].env[0].value}")
+configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
+
+assert(actual_minio_root_user[0] == configured_minio_root_user)
+assert(minio.delete())
