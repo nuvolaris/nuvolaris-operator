@@ -16,54 +16,44 @@
 # under the License.
 #
 ---
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: apps/v1 #  for k8s versions before 1.9.0 use apps/v1beta2  and before 1.8.0 use extensions/v1beta1
+kind: Deployment
 metadata:
-  name: minio
+  name: minio-deployment
   namespace: nuvolaris
-  labels:
-    app: minio
 spec:
-  serviceName: minio
-  replicas: 1
   selector:
     matchLabels:
       app: minio
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app: minio
     spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: minio-pv-claim
       containers:
       - name: minio
+        image: quay.io/minio/minio:RELEASE.2023-01-20T02-05-44Z
+        command:
+        - /bin/bash
+        - -c
+        args: 
+        - minio server /storage --console-address :9090
         env:
         - name: MINIO_ROOT_USER
-          value: "minio"
+          value: minio
         - name: MINIO_ROOT_PASSWORD
-          value: "minio123"
-        image: minio/minio:latest
-        args:
-        - server
-        - /data/minio
+          value: minio123
         ports:
         - containerPort: 9000
           hostPort: 9000
         - containerPort: 9090
           hostPort: 9090          
-        # These volume mounts are persistent. Each pod in the Statefulset
-        # gets a volume mounted based on this field.
         volumeMounts:
-        - name: data
-          mountPath: /data
-  # These are converted to volume claims by the controller
-  # and mounted at the paths mentioned above.
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: standard
-      resources:
-        requests:
-          storage: 1Gi
+        - name: storage # must match the volume name, above
+          mountPath: "/storage"

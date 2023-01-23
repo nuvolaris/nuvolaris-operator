@@ -15,23 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-!kubectl -n nuvolaris delete all --all
-!kubectl -n nuvolaris delete pvc --all
-
-import nuvolaris.config as cfg
-import nuvolaris.testutil as tu
-import nuvolaris.kube as kube
-import nuvolaris.minio as minio
-import logging
-
-# test
-assert(cfg.configure(tu.load_sample_config()))
-assert(minio.create())
-
-pod_name = kube.kubectl("get", "pods", jsonpath="{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
-while not kube.wait(f"pods/{pod_name[0]}", "condition=ready"): pass
-actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name[0]}", jsonpath="{.spec.containers[0].env[0].value}")
-configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
-
-assert(actual_minio_root_user[0] == configured_minio_root_user)
-assert(minio.delete())
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pv-claim
+  namespace: nuvolaris
+  labels:
+    app: minio-storage-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: {{minio_volume_size}}Gi

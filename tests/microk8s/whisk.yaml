@@ -93,6 +93,6 @@ spec:
   minio:
     volume-size: 2
     nuvolaris:
-      root-user: nuvolaris
-      root-password: s0meP@ass5    
+      root-user: minioadmin
+      root-password: minioadmin    
 

@@ -29,7 +29,7 @@ def create(owner=None):
         "minio_root_password": cfg.get('minio.nuvolaris.root-password') or "minio123"
     }
     
-    kust = kus.patchTemplate("minio", "minio-sts.yaml", data)    
+    kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml"], data)    
     spec = kus.kustom_list("minio", kust, templates=[], data=data)
 
     if owner:
