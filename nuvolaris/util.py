@@ -30,9 +30,9 @@ def get_default_storage_class():
 
 # get the default storage provisioner defined on the configured kubernetes environment
 def get_default_storage_provisioner():
-    storage_class = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].provisioner}")
-    if(storage_class):
-        return storage_class[0]
+    provisioner = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].provisioner}")
+    if(provisioner):
+        return provisioner[0]
 
     return ""
 
