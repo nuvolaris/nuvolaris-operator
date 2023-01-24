@@ -157,4 +157,4 @@ def patch(name, data, namespace="nuvolaris", tpe="merge"):
     if not type(data) == str:
         data = json.dumps(data)
     res = kubectl("patch", name, "--type", tpe, "-p", data)
-    return res
+    return res   

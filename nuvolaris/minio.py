@@ -19,6 +19,7 @@ import kopf, logging, json
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
+import nuvolaris.util as util
 
 def get_minio_standalone_pod_name():
     pod_name = kube.kubectl("get", "pods", jsonpath="{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
@@ -33,7 +34,8 @@ def create(owner=None):
     data = {
         "minio_volume_size": cfg.get('minio.volume-size') or "5",
         "minio_root_user": cfg.get('minio.nuvolaris.root-user') or "minio",
-        "minio_root_password": cfg.get('minio.nuvolaris.root-password') or "minio123"
+        "minio_root_password": cfg.get('minio.nuvolaris.root-password') or "minio123",
+        "storage_class": cfg.get("nuvolaris.storageClass")
     }
     
     kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml"], data)    

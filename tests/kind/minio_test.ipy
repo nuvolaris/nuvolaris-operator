@@ -22,10 +22,13 @@ import nuvolaris.config as cfg
 import nuvolaris.testutil as tu
 import nuvolaris.kube as kube
 import nuvolaris.minio as minio
+import nuvolaris.couchdb as cdb
+import nuvolaris.couchdb_util as cdbu
 import logging
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
+assert(cfg.detect_storage()["nuvolaris.storageClass"])
 assert(minio.create())
 
 pod_name = minio.get_minio_standalone_pod_name()
