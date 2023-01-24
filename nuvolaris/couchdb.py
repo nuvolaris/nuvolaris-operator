@@ -21,7 +21,6 @@ import nuvolaris.kube as kube
 import nuvolaris.couchdb_util as cu
 import nuvolaris.config as cfg
 import nuvolaris.couchdb_util
-import nuvolaris.util as util
 
 from jinja2 import Environment, FileSystemLoader
 loader = FileSystemLoader(["./nuvolaris/templates", "./nuvolaris/files"])
@@ -38,7 +37,6 @@ def create(owner=None):
     p = cfg.get('couchdb.admin.password', "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")
     user = f"db_username={u}"
     pasw = f"db_password={p}"
-    storage_class = util.get_default_storage_class()
 
     img = cfg.get('operator.image') or "missing-operator-image"
     tag = cfg.get('operator.tag') or "missing-operator-tag"
@@ -51,7 +49,7 @@ def create(owner=None):
         "name": "couchdb", 
         "size": cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 10), 
         "dir": "/opt/couchdb/data",
-        "storageClass": storage_class
+        "storageClass": cfg.get("nuvolaris.storageClass")
     }
 
     kust =  kus.secretLiteral("couchdb-auth", user, pasw)
