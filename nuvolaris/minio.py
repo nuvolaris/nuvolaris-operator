@@ -20,6 +20,13 @@ import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 
+def get_minio_standalone_pod_name():
+    pod_name = kube.kubectl("get", "pods", jsonpath="{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
+    if(pod_name):
+        return pod_name[0]
+
+    return None
+
 def create(owner=None):
     logging.info(f"*** configuring minio standalone")
 
@@ -38,6 +45,14 @@ def create(owner=None):
         cfg.put("state.minio.spec", spec)
 
     res = kube.apply(spec)
+
+    pod_name = get_minio_standalone_pod_name()
+    if pod_name:
+        logging.info(f"checking for {pod_name}")
+        while not kube.wait(f"pod/{pod_name}", "condition=ready"):
+            logging.info(f"waiting for {pod_name} to be ready...")
+            time.sleep(1)
+
     logging.info("*** configured minio standalone")
     return res
 

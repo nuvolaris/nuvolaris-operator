@@ -28,10 +28,11 @@ import logging
 assert(cfg.configure(tu.load_sample_config()))
 assert(minio.create())
 
-pod_name = kube.kubectl("get", "pods", jsonpath="{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
-while not kube.wait(f"pods/{pod_name[0]}", "condition=ready"): pass
-actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name[0]}", jsonpath="{.spec.containers[0].env[0].value}")
-configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
+pod_name = minio.get_minio_standalone_pod_name()
+assert(pod_name)
 
+actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name}", jsonpath="{.spec.containers[0].env[0].value}")
+configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
 assert(actual_minio_root_user[0] == configured_minio_root_user)
+
 assert(minio.delete())
