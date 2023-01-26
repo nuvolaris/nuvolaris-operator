@@ -18,33 +18,6 @@
  */
 const Minio = require('minio');
 
-async function exists(minioClient, bucketName) {
-    return new Promise((resolve, reject) => {
-        minioClient.bucketExists(bucketName,function(err, exists) {
-            if (err) return reject(err)
-            resolve(exists)
-        })
-      })
-}
-
-async function listBuckets(minioClient) {
-    return new Promise((resolve, reject) => {
-        minioClient.listBuckets(function(err, buckets) {
-            if (err) reject(err)
-            resolve(buckets)
-        })
-    })
-}
-
-async function createBucket(minioClient, bucketName) {
-    return new Promise((resolve, reject) => {
-        minioClient.makeBucket(bucketName, 'us-east-1', function(err) {
-            if (err) reject(`error creating ${bucketName}`)
-            resolve(`bucket ${bucketName} has been created`)
-        })
-    })
-}
-
 async function main(args) {        
     console.log(`connecting to ${args.minio_host}:${args.minio_port}`)
     let minioClient = new Minio.Client({
@@ -58,14 +31,14 @@ async function main(args) {
     let response = {};
     let bucketName = 'test-bucket';
 
-    let bucketExists = await exists(minioClient, bucketName)
+    let bucketExists = await minioClient.bucketExists(bucketName);
     console.log(`${bucketName} exists ${bucketExists}`);
 
     if(!bucketExists) {       
-        response.bucketOperation = await createBucket(minioClient, bucketName);
+        response.bucketOperation = await  minioClient.makeBucket(bucketName, 'us-east-1');
     }
 
-    response.buckets = await listBuckets(minioClient);
+    response.buckets = await minioClient.listBuckets();
     return {
         "body": response
     }
