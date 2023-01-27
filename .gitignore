@@ -39,3 +39,5 @@ run.pid
 actions/*/nuvolaris/
 _*.yaml
 clusters/openshift/
+.git-hooks/
+clusters/apihost.txt
