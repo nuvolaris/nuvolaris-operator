@@ -15,26 +15,27 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-version: '3'
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
 
-#dotenv: ['../.env']
-tasks:
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.minio as minio
+import nuvolaris.couchdb as cdb
+import nuvolaris.couchdb_util as cdbu
+import logging
 
-  create: init.sh
+# test
+assert(cfg.configure(tu.load_sample_config()))
+assert(cfg.detect_storage()["nuvolaris.storageClass"])
+assert(minio.create())
 
-  destroy: init.sh destroy
+pod_name = minio.get_minio_standalone_pod_name()
+assert(pod_name)
 
-  list: kind get clusters
+actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name}", jsonpath="{.spec.containers[0].env[0].value}")
+configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
+assert(actual_minio_root_user[0] == configured_minio_root_user)
 
-  get-config: kind get kubeconfig --name=nuvolaris >kind.kubeconfig
-  
-  config: 
-    - task: get-config
-    - cp kind.kubeconfig ~/.kube/config
-    - kubectl get nodes
-
-  labels: kubectl get nodes -ojsonpath='{.items[].metadata.labels}' | jq .
-
-  ingress: 
-    cmds:
-      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml 
+assert(minio.delete())

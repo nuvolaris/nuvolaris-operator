@@ -19,6 +19,7 @@ import kopf, logging, json, time
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
+import nuvolaris.util as util
 
 def get_ingress_pod_name(runtime, namespace="ingress-nginx"):
     jpath = "{.items[?(@.metadata.labels.app\.kubernetes\.io\/component == 'controller')].metadata.name}"
@@ -44,21 +45,7 @@ def wait_for_ingress_ready(runtime, namespace="ingress-nginx"):
     else:
         logging.error("*** could not determine if ingress-nginx pod is up and running")
 
-# determine the ingress-nginx flavour
-def get_ingress_yaml(runtime):
-    if runtime == "eks":
-        return "eks-nginx-ingress.yaml"
-    elif runtime == "kind":
-        return  "kind-nginx-ingress.yaml"  
-    else:
-        return  "cloud-nginx-ingress.yaml"
 
-# determine the ingress-nginx flavour
-def get_ingress_namespace(runtime):
-    if runtime == "microk8s":
-        return "ingress" 
-    else:
-        return  "ingress-nginx"    
 
 # determine the ingress-nginx flavour
 def get_ingress_service(runtime):
@@ -66,7 +53,7 @@ def get_ingress_service(runtime):
 
 def create(owner=None): 
     runtime = cfg.get('nuvolaris.kube')
-    namespace = get_ingress_namespace(runtime)
+    namespace = util.get_ingress_namespace(runtime)
     service = get_ingress_service(runtime)
 
     if(runtime == "microk8s"):
@@ -83,7 +70,7 @@ def create(owner=None):
         if ingress:
             return "*** ingress-nginx already installed...skipping setup"
 
-    ingress_yaml = get_ingress_yaml(runtime)
+    ingress_yaml = util.get_ingress_yaml(runtime)
     logging.info(f"*** Configuring ingress-nginx {ingress_yaml}")
 
     # we apply the ingress specs as they are

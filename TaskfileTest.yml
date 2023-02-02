@@ -32,6 +32,11 @@ vars:
   REDIS_URI: "redis://redis"
   MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?replicaSet=nuvolaris-mongodb&ssl=false"
   MONGO_RT: "ghcr.io/nuvolaris/action-nodejs-v14:0.3.0-morpheus.22081008"
+  MINIO_RT: "ghcr.io/francescotimperi/action-nodejs-v14:0.3.0-morpheus.23012416"
+  MINIO_HOST: "minio"
+  MINIO_PORT: 9000
+  MINIO_USER: "minioadmin"
+  MINIO_PWD : "minioadmin" 
   T: ""
   
 tasks:
@@ -136,6 +141,11 @@ tasks:
     - wsk package update mongo -p dburi {{.MONGO_URI}}
     - wsk action update mongo/mongo tests/mongo.js --docker {{.MONGO_RT}}
     - wsk action invoke mongo/mongo -r | grep "hello"
+
+  minio:
+    - wsk package update minio -p minio_host {{.MINIO_HOST}} -p minio_port {{.MINIO_PORT}} -p minio_user {{.MINIO_USER}} -p minio_pwd {{.MINIO_PWD}}
+    - wsk action update minio/minio tests/minio.js --docker {{.MINIO_RT}}
+    - wsk action invoke minio/minio -r
     
   mongo2:
     - wsk project deploy --manifest tests/mongo.yaml

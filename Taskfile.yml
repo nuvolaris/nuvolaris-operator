@@ -72,7 +72,7 @@ tasks:
 
   env: env
   
-  watch: watch kubectl -n nuvolaris get nodes,pod,svc
+  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc
   watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
 
   logs: >
@@ -98,7 +98,10 @@ tasks:
     - task: d:destroy
 
   mongo: 
-    - task: t:mongo    
+    - task: t:mongo 
+
+  minio: 
+    - task: t:minio        
 
   nuv:
     - task: kind:config
@@ -112,6 +115,7 @@ tasks:
     - task: hello
     - task: ping
     - task: mongo
+    - task: minio
 
   config:
     - task: t:config
@@ -234,10 +238,6 @@ tasks:
   kube-test: 
     cmds:
       - task dtest 2>/dev/null >/dev/null
-
-  kind-ingress: 
-    cmds:
-      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml    
 
   use: 
     cmds:

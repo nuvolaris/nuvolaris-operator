@@ -38,7 +38,9 @@ spec:
     s3bucket: false
     # start cron based action parser
     cron: true
-    tls: false    
+    tls: false
+    # minio enabled or not
+    minio: true          
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -86,5 +88,10 @@ spec:
     host : "localhost"
     port: "3233"
   scheduler:
-    schedule: "* * * * *"    
+    schedule: "* * * * *"
+  minio:
+    volume-size: 2
+    nuvolaris:
+      root-user: minioadmin
+      root-password: minioadmin  
 

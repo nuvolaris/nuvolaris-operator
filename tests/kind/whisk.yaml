@@ -40,6 +40,8 @@ spec:
     cron: true 
     # tls enabled or not
     tls: false
+    # minio enabled or not
+    minio: true    
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -86,4 +88,9 @@ spec:
     schedule: "* * * * *"
   tls:
     acme-registered-email: francesco@nuvolaris.io
-    acme-server-url: https://acme-staging-v02.api.letsencrypt.org/directory     
+    acme-server-url: https://acme-staging-v02.api.letsencrypt.org/directory
+  minio:
+    volume-size: 2
+    nuvolaris:
+      root-user: minioadmin
+      root-password: minioadmin   

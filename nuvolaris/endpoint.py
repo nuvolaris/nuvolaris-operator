@@ -20,7 +20,7 @@ import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk as openwhisk
-import nuvolaris.ingress as ing
+import nuvolaris.util as util
 import urllib.parse
 
 def get_ingress(namespace="ingress-nginx"):
@@ -39,7 +39,7 @@ def create(owner=None):
     if runtime in ["k3s","microk8s"]:
         apihost = openwhisk.apihost(None)
     else:
-        namespace = ing.get_ingress_namespace(runtime)
+        namespace = util.get_ingress_namespace(runtime)
         apihost = openwhisk.apihost(get_ingress(namespace))    
 
     logging.info(f"*** Configuring ingress for apihost={apihost}")

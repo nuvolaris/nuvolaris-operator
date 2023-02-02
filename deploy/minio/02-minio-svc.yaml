@@ -15,26 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-version: '3'
-
-#dotenv: ['../.env']
-tasks:
-
-  create: init.sh
-
-  destroy: init.sh destroy
-
-  list: kind get clusters
-
-  get-config: kind get kubeconfig --name=nuvolaris >kind.kubeconfig
-  
-  config: 
-    - task: get-config
-    - cp kind.kubeconfig ~/.kube/config
-    - kubectl get nodes
-
-  labels: kubectl get nodes -ojsonpath='{.items[].metadata.labels}' | jq .
-
-  ingress: 
-    cmds:
-      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      targetPort: 9000
+      nodePort: 32090
+      protocol: TCP
+      name: minio-api
+    - port: 9090
+      targetPort: 9090
+      nodePort: 32091
+      protocol: TCP
+      name: minio-console      
+  selector:
+    app: minio

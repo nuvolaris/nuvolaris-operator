@@ -28,6 +28,7 @@ import nuvolaris.cronjob as cron
 import nuvolaris.mongodb as mongodb
 import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
+import nuvolaris.minio as minio
 
 # tested by an integration test
 @kopf.on.login()
@@ -62,7 +63,8 @@ def whisk_create(spec, name, **kwargs):
         "tls": "?",   # Cron based actions executor
         "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
         "issuer": "?", # ClusterIssuer configuration
-        "ingress": "?" 
+        "ingress": "?", # Ingress configuration
+        "minio": "?" # Minio configuration
     }
 
     runtime = cfg.get('nuvolaris.kube')
@@ -160,6 +162,13 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['mongodb'] = "off"
 
+    if cfg.get('components.minio'):
+        msg = minio.create(owner)
+        logging.info(msg)
+        state['minio'] = "on"
+    else:
+        state['minio'] = "off"        
+
     return state
 
 # tested by an integration test
@@ -193,10 +202,12 @@ def whisk_delete(spec, **kwargs):
     if cfg.get("components.cron"):
         msg = cron.delete()
         logging.info(msg)
+
+    if cfg.get("components.minio"):
+        msg = minio.delete()
+        logging.info(msg)        
     
                          
-
-
 # tested by integration test
 #@kopf.on.field("service", field='status.loadBalancer')
 def service_update(old, new, name, **kwargs):

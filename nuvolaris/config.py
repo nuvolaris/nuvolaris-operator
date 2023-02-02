@@ -107,18 +107,19 @@ def detect_labels(labels=None):
 def detect_storage(storages=None):
     res = {}
     if not storages:
-        import nuvolaris.kube as kube
-        storages = kube.kubectl("get", "storageclass", jsonpath='{.items}')
-    for st1 in storages:
-        for st in st1:
-            try: 
-                if st['kind'] == "StorageClass" and st['metadata']['annotations']['storageclass.kubernetes.io/is-default-class'] == 'true':
-                    res['nuvolaris.storageClass'] = st['metadata']['name']
-                    _config['nuvolaris.storageClass'] = st['metadata']['name']
-                    res['nuvolaris.provisioner'] = st['provisioner']
-                    _config['nuvolaris.provisioner'] = st['provisioner']
-            except:
-                pass
+        import nuvolaris.util as util
+
+        try:
+            storage_class = util.get_default_storage_class()
+            provisioner = util.get_default_storage_provisioner()
+
+            if(storage_class):
+                res['nuvolaris.storageClass'] = storage_class
+                _config['nuvolaris.storageClass'] = storage_class
+                res['nuvolaris.provisioner'] = provisioner
+                _config['nuvolaris.provisioner'] = provisioner
+        except:
+            pass
     return res
 
 def detect_env():
