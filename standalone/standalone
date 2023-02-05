@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,15 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: preload-runtime-python37
-  namespace: nuvolaris
-spec:
-  containers:
-  - name: nodejs
-    image: "openwhisk/action-python-v3.7:nightly"
-    command: ["/bin/true"]
-  restartPolicy: Never
+cd "$(dirname $0)"/..
+java $JAVA_OPTS $STANDALONE_OPTS \
+  -Dwhisk.standalone.host.name="0.0.0.0" \
+  -Dwhisk.standalone.host.internal="$(hostname -f)" \
+  -jar lib/openwhisk-standalone.jar \
+    --manifest etc/runtimes.json \
+    --dev-kcf -c etc/standalone-kcf.conf \
+    --no-browser --disable-color-logging "$@"

@@ -14,15 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-apiVersion: v1
-kind: Pod
-metadata:
-  name: preload-runtime-nodejs14
-  namespace: nuvolaris
-spec:
-  containers:
-  - name: nodejs
-    image: "openwhisk/action-nodejs-v14:nightly"
-    command: ["/bin/true"]
-  restartPolicy: Never
+
+version: '3'
+
+vars:
+  IMAGE: ghcr.io/nuvolaris/openwhisk-standalone
+  TAG: 0.2.1-aruba.23020517
+
+tasks:
+  build: docker build . -t {{.IMAGE}}:{{.TAG}}
+  push: docker push {{.IMAGE}}:{{.TAG}}

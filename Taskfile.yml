@@ -21,7 +21,7 @@ vars:
   G: ""
   N: ""
   T: ""
-  BASETAG: 0.3.0-morpheus
+  BASETAG: 0.2.1-aruba
   KUBE:
     sh: ./detect.sh
 
@@ -78,7 +78,7 @@ tasks:
   logs: >
     rm -f nuvolaris-operator.log ;
     kubectl -n nuvolaris logs deploy/nuvolaris-operator -f | tee nuvolaris-operator.log
- 
+
   cli: 
     - task: d:cli
 
@@ -99,10 +99,6 @@ tasks:
 
   mongo: 
     - task: t:mongo    
-
-  nuv:
-    - task: kind:config
-    - nuv setup --context=kind-nuvolaris --apihost=auto --image-tag={{.TAG}}
 
   all:
     - task: permission
@@ -263,7 +259,18 @@ tasks:
     - task: b:buildx-and-push
 
   docker-login:
-    - task: b:docker-login   
+    - task: b:docker-login
+
+  nuv:
+    cmds:
+    #- nuv auth --apihost=$APIHOST --auth=$AUTH
+    - wsk property set --apihost=$APIHOST --auth=$AUTH
+    env:
+      APIHOST:
+        sh: kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}'
+      AUTH:
+        sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.nuvolaris}'
+
 
   1: task use N=1
   2: task use N=2

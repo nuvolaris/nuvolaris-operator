@@ -80,7 +80,7 @@ def check(f, what, res):
         return False
 
 def init_system(db):
-    res = check(db.wait_db_ready(60), "wait_db_ready", True)
+    res = check(db.wait_db_ready(600), "wait_db_ready", True)
     res = check(db.configure_single_node(), "configure_single_node", res)
     res = check(db.configure_no_reduce_limit(), "configure_no_reduce_limit", res)
     cuser = cfg.get('couchdb.controller.user', "COUCHDB_CONTROLLER_USER", "controller_admin")

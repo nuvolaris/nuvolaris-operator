@@ -33,8 +33,8 @@ vars:
     sh: awk -F= '/ENV CONTROLLER_IMAGE=/ { print $2 ; exit }' Dockerfile
 
 env:
-    APIHOST:
-      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
+  APIHOST:
+    sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
       
 tasks:
 
@@ -52,7 +52,13 @@ tasks:
       OPERATOR_TAG: "{{.OPERATOR_TAG}}"
 
   instance:
+    cmds:
     -  envsubst <{{.CONFIG}} | kubectl -n nuvolaris apply -f -
+    env:
+      SYSTEM_SECRET:
+        sh: python -c "import secrets ; print(secrets.token_hex(32))"
+      USER_SECRET:
+        sh: python -c "import secrets ; print(secrets.token_hex(32))"
 
   show:
     - echo "*** {{.CONFIG}}" 
