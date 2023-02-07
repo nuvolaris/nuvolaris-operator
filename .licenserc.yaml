@@ -50,6 +50,7 @@ header:
     - 'ngrok.log'
     - 'poetry.lock'
     - 'installer/**'
+    - 'demos/mongodb/*'
  
 dependency:
   files:

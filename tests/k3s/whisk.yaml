@@ -35,7 +35,7 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: true
+    mongodb: false
     # start redis
     redis: true
     # start s3ninja

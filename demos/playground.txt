@@ -1,0 +1,18 @@
+
+echo -e "use nuvolaris\ndb.test.insert({})" |\
+ mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" admin                  
+
+echo -n 'db.createUser({user: "nuvolaris", pwd: "s3cr3t", roles: [{role: "readWrite", db: "nuvolaris"}]})' |\
+    mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" nuvolaris --aute                 
+
+mongosh -u nuvolaris -p s3cr3t nuvolaris
+
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - >
+                  echo 'db.createUser({user: "nuvolaris", pwd: "s3cr3t", roles: [{role: "readWrite", db: "nuvolaris"}]})' |
+                  mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" admin                  
