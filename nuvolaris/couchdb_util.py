@@ -30,19 +30,22 @@ class CouchDB:
     self.db_auth = req.auth.HTTPBasicAuth(self.db_username,self.db_password)
     self.db_url = f"{self.db_protocol}://{self.db_host}:{self.db_port}"
     self.db_base = f"{self.db_url}/{self.db_prefix}"
+    self.db_session = req.Session()
+    self.db_session.auth = self.db_auth
 
   def wait_db_ready(self, max_seconds):
+      logging.info("entering CouchDB.wait_db_ready()")
       start = time.time()
       delta = 0
+      session = req.Session()
       while delta < max_seconds:
         try:
-          r = req.get(f"{self.db_url}/_utils", timeout=1)
-          print(r)
+          r = session.get(f"{self.db_url}/_utils", timeout=5)
+          logging.info(f"CouchDB.wait_db_ready() got response code = {r.status_code}")          
           if r.status_code == 200:
             return True
         except Exception as e:
-          #print(e)
-          print(f"waiting since: {delta} seconds")
+          logging.info(f"waiting since: {delta} seconds")
         delta = int(time.time() - start)
         time.sleep(1)
       return False
@@ -50,19 +53,19 @@ class CouchDB:
   # check if database exists, return boolean
   def check_db(self, database):
     url = f"{self.db_base}{database}"
-    r = req.head(url, auth=self.db_auth)
+    r = self.db_session.head(url)
     return r.status_code == 200
   
   # delete database, return true if ok
   def delete_db(self, database):
     url = f"{self.db_base}{database}"
-    r = req.delete(url, auth=self.db_auth)
+    r = self.db_session.delete(url)
     return r.status_code == 200
 
   # create db, return true if ok
   def create_db(self, database):
     url = f"{self.db_base}{database}"
-    r = req.put(url, auth=self.db_auth) 
+    r = self.db_session.put(url) 
     return r.status_code == 201
 
   # database="subjects"
@@ -79,13 +82,15 @@ class CouchDB:
 
   def get_doc(self, database, id, user=None, password="", no_auth=False):
     url = f"{self.db_base}{database}/{id}"
+    session = req.Session()
     if no_auth:
       db_auth=None
     elif user:
       db_auth=req.auth.HTTPBasicAuth(user, password)
     else:
       db_auth = self.db_auth
-    r = req.get(url, auth=db_auth) 
+    session.auth =  db_auth 
+    r = session.get(url) 
     if r.status_code == 200:
       return json.loads(r.text)
     return None
@@ -96,9 +101,9 @@ class CouchDB:
       cur = self.get_doc(database, doc['_id'])
       if cur and '_rev' in cur:
         doc['_rev'] = cur['_rev']
-        r = req.put(url, auth=self.db_auth, json=doc)
+        r = self.db_session.put(url, json=doc)
       else:
-        r = req.put(url, auth=self.db_auth, json=doc)
+        r = self.db_session.put(url,  json=doc)
       return r.status_code in [200,201]
     return False
 
@@ -106,33 +111,33 @@ class CouchDB:
     cur = self.get_doc(database, id)
     if cur and '_rev' in cur:
         url = f"{self.db_base}{database}/{cur['_id']}?rev={cur['_rev']}"
-        r = req.delete(url, auth=self.db_auth)
+        r = self.db_session.delete(url)
         return r.status_code == 200
     return False
 
   def configure_single_node(self):
     url = f"{self.db_url}/_cluster_setup"
     data = {"action": "enable_single_node", "singlenode": True, "bind_address": "0.0.0.0", "port": 5984}
-    r = req.post(url, auth=self.db_auth, json=data) 
+    r = self.db_session.post(url, json=data) 
     return r.status_code == 201
 
   def configure_no_reduce_limit(self):
     url = f"{self.db_url}/_node/_local/_config/query_server_config/reduce_limit"
     data=b'"false"'
-    r = req.put(url, auth=self.db_auth, data=data) 
+    r = self.db_session.put(url, data=data) 
     return r.status_code == 200
 
   def add_user(self, username: str, password: str):
     userpass = {"name": username, "password": password, "roles": [], "type": "user"}
     url = f"{self.db_url}/_users/org.couchdb.user:{username}"
-    res = req.put(url, auth=self.db_auth, json=userpass)
+    res = self.db_session.put(url, json=userpass)
     return res.status_code in [200, 201, 421]
 
   #def add_role(self, database: str, members: list[str] = [], admins: list[str] =[]):  
   def add_role(self, database: str, members = [], admins =[]):  
     roles =  {"admins": { "names": admins, "roles": [] }, "members": { "names": members, "roles": [] } }
     url = f"{self.db_base}{database}/_security"
-    res = req.put(url, auth=self.db_auth, json=roles)
+    res = self.db_session.put(url, json=roles)
     return res.status_code in [200, 201, 421]
 
 #
@@ -141,6 +146,7 @@ class CouchDB:
   def find_doc(self, database, selector, user=None, password="", no_auth=False):
     url = f"{self.db_base}{database}/_find"
     headers = {'Content-Type': 'application/json'}
+    session = req.Session()
 
     if no_auth:
       db_auth=None
@@ -148,7 +154,9 @@ class CouchDB:
       db_auth=req.auth.HTTPBasicAuth(user, password)
     else:
       db_auth = self.db_auth
-    r = req.post(url, auth=db_auth, headers=headers, data=selector)
+
+    session.auth=db_auth  
+    r = session.post(url, headers=headers, data=selector)
     if r.status_code == 200:
       return json.loads(r.text)
     

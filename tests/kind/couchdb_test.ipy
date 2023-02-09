@@ -57,8 +57,7 @@ assert(cdb.init_activations(db))
 assert(cdb.init_actions(db))
 assert(cdb.add_initial_subjects(db))
 
-!kubectl -n nuvolaris delete wsk/controller
-!kubectl -n nuvolaris wait wsk/controller --for=delete
+!kubectl -n nuvolaris delete all --all
 !kubectl -n nuvolaris delete pvc --all
 
 """

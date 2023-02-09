@@ -21,6 +21,7 @@ import nuvolaris.kube as kube
 import nuvolaris.couchdb_util as cu
 import nuvolaris.config as cfg
 import nuvolaris.couchdb_util
+import nuvolaris.util as util
 
 from jinja2 import Environment, FileSystemLoader
 loader = FileSystemLoader(["./nuvolaris/templates", "./nuvolaris/files"])
@@ -61,7 +62,7 @@ def create(owner=None):
     else:
         cfg.put("state.couchdb.spec", spec)
     res = kube.apply(spec)
-    logging.info(f"create couchdb: {res}")
+    return res
 
 def delete():
     spec = cfg.get("state.couchdb.spec")
@@ -155,15 +156,19 @@ def init():
         cfg.configure(spec)
         for k in cfg.getall(): logging.info(f"{k} = {cfg.get(k)}")
 
-    # wait for couchdb to be ready
-    while not kube.wait("po/couchdb-0", "condition=ready"):
-        print("waiting for couchdb-0 ready...")
-        time.sleep(1)
+    # dynamically detect couchdb pod and wait for readiness
+    util.wait_for_pod_ready("{.items[?(@.metadata.labels.name == 'couchdb')].metadata.name}")
 
     db = nuvolaris.couchdb_util.CouchDB()
     res = check(init_system(db), "init_system", True)
     res = check(init_subjects(db), "init_subjects", res) 
     res = check(init_activations(db), "init_activations", res)
     res = check(init_actions(db), "init_actions", res)
-    return check(add_initial_subjects(db), "add_subjects", res)
+    res = check(add_initial_subjects(db), "add_subjects", res)
+
+    # job process status code should be negated if the job is successfull
+    return not res
+
+    
+    
 

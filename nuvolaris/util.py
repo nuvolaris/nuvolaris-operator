@@ -18,6 +18,38 @@
 # this module wraps utilities functions
 import nuvolaris.kube as kube
 import logging
+import time, random, math
+
+# Implements truncated exponential backoff from
+# https://cloud.google.com/storage/docs/retry-strategy#exponential-backoff
+def nuv_retry(deadline_seconds=120, max_backoff=5):
+    def decorator(function):
+        from functools import wraps
+
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            deadline = time.time() + deadline_seconds
+            retry_number = 0
+
+            while True:
+                try:
+                    result = function(*args, **kwargs)
+                    return result
+                except Exception as e:
+                    current_t = time.time()
+                    backoff_delay = min(
+                            math.pow(2, retry_number) + random.random(), max_backoff
+                    )
+                    
+                    if current_t + backoff_delay < deadline:
+                        time.sleep(backoff_delay)
+                        retry_number += 1
+                        continue  # retry again
+                    else:
+                        raise
+        return wrapper
+
+    return decorator
 
 
 # get the default storage class defined on the configured kubernetes environment
@@ -50,4 +82,25 @@ def get_ingress_yaml(runtime):
     elif runtime == "kind":
         return  "kind-nginx-ingress.yaml"  
     else:
-        return  "cloud-nginx-ingress.yaml"            
+        return  "cloud-nginx-ingress.yaml"
+
+# wait for a pod name
+@nuv_retry()
+def get_pod_name(jsonpath,namespace="nuvolaris"):
+    pod_name = kube.kubectl("get", "pods", namespace=namespace, jsonpath=jsonpath)
+    if(pod_name):
+        return pod_name[0]
+
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")        
+
+# helper method waiting for a pod ready using the given jsonpath to retrieve the pod name
+def wait_for_pod_ready(pod_name_jsonpath, timeout="600s", namespace="nuvolaris"):
+    try:        
+        pod_name = get_pod_name(pod_name_jsonpath, namespace)
+        logging.info(f"checking pod {pod_name}")        
+        while not kube.wait(f"pod/{pod_name}", "condition=ready", timeout, namespace):
+            logging.info(f"waiting for {pod_name} to be ready...")
+            time.sleep(1)
+    except Exception as e:
+        logging.error(e)
+    
