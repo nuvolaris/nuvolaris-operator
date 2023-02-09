@@ -25,18 +25,18 @@ tasks:
   destroy:
     - eksctl delete cluster -f eks-cluster.yml
   
-  #--name nuvolaris-cluster --region=eu-central-1
+  #--name nuvolaris-cluster --region=us-east-1
 
-  list: eksctl get cluster
+  list: eksctl get cluster --region=us-east-1
 
   config: |-
-    aws eks update-kubeconfig --kubeconfig eks.kubeconfig --name=nuvolaris-cluster
+    aws eks update-kubeconfig --kubeconfig eks.kubeconfig --name=nuvolaris-eks --region=us-east-1
     cp eks.kubeconfig ~/.kube/config
-    kubectl get nodes
+    kubectl get nodes 
 
-  avail-addons: eksctl utils describe-addon-versions --cluster=nuvolaris-cluster
+  avail-addons: eksctl utils describe-addon-versions --cluster=nuvolaris-eks --region=us-east-1
 
-  list-addon: eksctl get addons --cluster=nuvolaris-cluster
+  list-addon: eksctl get addons --cluster=nuvolaris-eks --region=us-east-1
 
   reset:
     - kubectl delete -f ../deploy/cert-manager/cert-manager.yaml
