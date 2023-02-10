@@ -1,0 +1,84 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nuvolaris-mongodb
+  labels:
+    app: mongodb
+  namespace: nuvolaris
+spec:
+  serviceName: nuvolaris-mongodb-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nuvolaris-mongodb
+  template:
+    metadata:
+      labels:
+        app: nuvolaris-mongodb
+    spec:
+      containers:
+      - image: mongo
+        name: mongodb
+        args: ["--dbpath","/data/db", "--bind_ip", "0.0.0.0"]
+        livenessProbe:
+          exec:
+            command:
+              - mongosh
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        readinessProbe:
+          exec:
+            command:
+              - mongosh
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 6
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: whisk_admin              
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-admin-auth
+              key: mongodb_admin_psw
+        volumeMounts:
+        - name: "mongodb-data-dir"
+          mountPath: "/data/db"
+        - name: "mongodb-init-dir"
+          mountPath: "/docker-entrypoint-initdb.d"
+      volumes:
+      - name: "mongodb-data-dir"
+        persistentVolumeClaim:
+          claimName: "mongodb-data"
+      - name: "mongodb-init-dir"
+        configMap:
+          name: mongodb-cm
+          items:
+          - key: mongodb-js
+            path: init-mongo.js

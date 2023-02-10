@@ -15,29 +15,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-[tool.poetry]
-name = "nuvolaris"
-version = "0.3.0"
-description = "Nuvolaris operator"
-authors = ["Michele Sciabarra <michele@sciabarra.com>"]
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
 
-[tool.poetry.dependencies]
-python = "^3.9"
-kopf = {extras = ["full-auth"], version = "^1.35.3"}
-PyYAML = "^6.0"
-pykube = "^0.15.0"
-Jinja2 = "^3.0.3"
-requests = "^2.27.1"
-flatdict = "^4.0.1"
-croniter = "^1.3.5"
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.mongodb as mdb
+import logging
 
-[tool.poetry.dev-dependencies]
-ipython = "^7.31.0"
+# test
+assert(cfg.configure(tu.load_sample_config()))
+assert(cfg.put("mongodb.useOperator", True))
+assert(mdb.create())
+while not kube.wait("pod/nuvolaris-mongodb-0", "condition=ready"): pass
+assert(kube.get("service/nuvolaris-mongodb-svc"))
+assert(kube.get("mdbc/nuvolaris-mongodb"))
 
-[tool.poetry.scripts]
-dbinit = "nuvolaris.couchdb:init"
-actionexecutor = "nuvolaris.actionexecutor:start"
+!kubectl get secret -n nuvolaris -ojson nuvolaris-mongodb-nuvolaris-nuvolaris | jq -r '.data | with_entries(.value |= @base64d)'
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+assert(mdb.delete())
+
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

@@ -19,6 +19,7 @@
 import nuvolaris.kube as kube
 import logging
 import time, random, math
+import nuvolaris.config as cfg
 
 # Implements truncated exponential backoff from
 # https://cloud.google.com/storage/docs/retry-strategy#exponential-backoff
@@ -103,4 +104,14 @@ def wait_for_pod_ready(pod_name_jsonpath, timeout="600s", namespace="nuvolaris")
             time.sleep(1)
     except Exception as e:
         logging.error(e)
+
+# return mongodb configuration parameter with default valued if not configured
+def get_mongodb_config_data():
+    data = {
+        'mongo_admin_user': cfg.get('mongodb.admin.user') or "whisk_user",
+        'mongo_admin_password': cfg.get('mongodb.admin.password') or "0therPa55",
+        'mongo_nuvolaris_user': cfg.get('mongodb.nuvolaris.user') or "nuvolaris",
+        'mongo_nuvolaris_password': cfg.get('mongodb.nuvolaris.password') or "s0meP@ass3"
+    }
+    return data        
     

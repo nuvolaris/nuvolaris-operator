@@ -75,7 +75,8 @@ spec:
     nuvolaris:
       user: nuvolaris
       password: s0meP@ass3
-    exposedExternally: True
+    exposedExternally: False
+    useOperator: False
   kafka:
     host: kafka
     volume-size: 10

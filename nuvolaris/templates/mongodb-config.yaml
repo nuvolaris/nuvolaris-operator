@@ -54,6 +54,9 @@ spec:
     spec:
       template:
         spec:
+          metadata:
+            labels:
+              nuvolaris.mongodb.flavour: operator
           containers:
             - name: mongodb-agent
               readinessProbe:

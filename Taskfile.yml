@@ -263,7 +263,10 @@ tasks:
     - task: b:buildx-and-push
 
   docker-login:
-    - task: b:docker-login   
+    - task: b:docker-login
+
+  shell:
+    - kubectl -n nuvolaris exec --stdin --tty {{.POD}} -- /bin/bash     
 
   1: task use N=1
   2: task use N=2
