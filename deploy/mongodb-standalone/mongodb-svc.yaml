@@ -1,3 +1,4 @@
+
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,17 +15,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
 ---
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
-  name: mongocli
+  name: nuvolaris-mongodb-svc
   namespace: nuvolaris
 spec:
-  containers:
-  - name: mongocli
-    image: ghcr.io/nuvolaris/action-nodejs-v14:0.3.0-morpheus.22081008    
-    env:
-      - name: "MONGODB_URL" 
-        value: "mongodb://nuvolaris:s3cr3t@nuvolaris-mongodb-0.nuvolaris-mongodb-svc/nuvolaris"
+  clusterIP: None
+  ports:   
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: nuvolaris-mongodb
+    statefulset.kubernetes.io/pod-name: nuvolaris-mongodb-0

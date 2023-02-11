@@ -61,7 +61,8 @@ ADD deploy/couchdb /home/nuvolaris/deploy/couchdb
 ADD deploy/redis /home/nuvolaris/deploy/redis
 ADD deploy/scheduler /home/nuvolaris/deploy/scheduler
 ADD deploy/mongodb-operator /home/nuvolaris/deploy/mongodb-operator
-ADD deploy/mongodb /home/nuvolaris/deploy/mongodb
+ADD deploy/mongodb-operator-deploy /home/nuvolaris/deploy/mongodb-operator-deploy
+ADD deploy/mongodb-standalone /home/nuvolaris/deploy/mongodb-standalone
 ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
 ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer

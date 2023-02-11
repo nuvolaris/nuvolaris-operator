@@ -26,6 +26,7 @@ import logging
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
+assert(cfg.put("mongodb.useOperator", True))
 assert(mdb.create())
 while not kube.wait("pod/nuvolaris-mongodb-0", "condition=ready"): pass
 assert(kube.get("service/nuvolaris-mongodb-svc"))
