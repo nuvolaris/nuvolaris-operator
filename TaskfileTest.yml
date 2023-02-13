@@ -58,8 +58,6 @@ tasks:
 
   permission: 
     - kubectl apply -f deploy/nuvolaris-permissions
-    - kubectl -n nuvolaris delete cm/openwhisk-runtimes
-    - kubectl -n nuvolaris create configmap openwhisk-runtimes --from-file=runtimes.json=nuvolaris/files/runtimes.json
 
   operator:
   - task: kustomization
