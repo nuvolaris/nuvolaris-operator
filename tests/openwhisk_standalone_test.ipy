@@ -22,6 +22,9 @@ import nuvolaris.openwhisk_standalone as ow
 import nuvolaris.kube as kube
 import os
 
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.put("controller.image","ghcr.io/nuvolaris/openwhisk-controller"))
 assert(cfg.put("controller.tag","0.3.0-morpheus.22122609"))
@@ -35,12 +38,12 @@ assert(cfg.put("components.invoker",False))
 
 wsk = kube.get("wsk/controller")
 ow.create(wsk)
-
 assert(kube.get("statefulset.apps/controller"))
 
-!kubectl delete wsk/controller
-!kubectl wait wsk/controller --for=delete
-
-assert(not kube.get("statefulset.apps/controller"))
+cfg_value = kube.kubectl("get", "statefulset.apps/controller", jsonpath="{.spec.template.spec.containers[0].env[?(@.name=='LIMITS_ACTIONS_INVOKES_PERMINUTE')].value}")
+exp_value = cfg.get("openwhisk.limits.actions.invokes-perMinute")
+assert(f"{exp_value}" in cfg_value)
 
 ow.delete()
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

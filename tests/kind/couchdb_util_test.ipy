@@ -24,7 +24,7 @@ import nuvolaris.kube as kube
 import nuvolaris.couchdb as cdb
 import nuvolaris.couchdb_util as cu
 
-!kubectl apply -f deploy/nuvolaris-operator/nuvolaris-common.yaml
+!kubectl apply -f deploy/nuvolaris-permissions/nuvolaris-common.yaml
 !kubectl apply -f deploy/couchdb
 !kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
 
