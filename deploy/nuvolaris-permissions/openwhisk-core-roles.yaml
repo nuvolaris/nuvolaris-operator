@@ -16,6 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+---    
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nuvolaris-openwhisk-core
+  namespace: nuvolaris
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1

@@ -33,10 +33,4 @@ metadata:
   name: nuvolaris-operator
   namespace: nuvolaris
   labels:
-    app: nuvolaris-operator
----    
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: nuvolaris-openwhisk-core
-  namespace: nuvolaris    
+    app: nuvolaris-operator  

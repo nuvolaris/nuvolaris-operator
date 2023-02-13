@@ -28,7 +28,7 @@ assert(cfg.put("controller.tag","0.3.0-morpheus.22122609"))
 assert(cfg.put("components.invoker",False))
 
 !kubectl apply -f deploy/nuvolaris-permissions/nuvolaris-common.yaml
-!kubectl apply -f deploy/nuvolaris-permissions/openwhisk-controller-roles.yaml
+!kubectl apply -f deploy/nuvolaris-permissions/openwhisk-core-roles.yaml
 !kubectl apply -f deploy/nuvolaris-permissions/whisk-crd.yaml
 !kubectl apply -f tests/whisk.yaml
 
