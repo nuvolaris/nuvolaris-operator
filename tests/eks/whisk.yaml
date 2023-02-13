@@ -77,7 +77,7 @@ spec:
     nuvolaris:
       user: nuvolaris
       password: s0meP@ass3
-    useOperator: True  
+    useOperator: False  
   kafka:
     host: kafka
     volume-size: 10
