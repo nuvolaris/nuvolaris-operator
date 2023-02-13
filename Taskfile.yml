@@ -72,7 +72,7 @@ tasks:
 
   env: env
   
-  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc
+  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress
   watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
 
   logs: >

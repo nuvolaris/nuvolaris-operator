@@ -65,7 +65,7 @@ def create(owner=None):
         "ingress_class":ingress_class
     }
 
-    tpl = (runtime == "kind" or not tls) and "standalone-in-http.yaml" or "standalone-in-https.yaml";
+    tpl = (runtime == "kind" or not tls) and "apihost-in-http.yaml" or "apihost-in-https.yaml";
     logging.info(f"*** Configuring host {hostname} endpoint for openwhisk controller using {tpl}")
 
     kust = kus.patchTemplates("openwhisk-endpoint", [tpl], data)

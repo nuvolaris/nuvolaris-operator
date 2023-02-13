@@ -127,6 +127,8 @@ def detect_env():
     _config['operator.tag'] = os.environ.get("OPERATOR_TAG", "missing-OPERATOR_TAG")
     _config['controller.image'] = os.environ.get("CONTROLLER_IMAGE", "missing-CONTROLLER_IMAGE")
     _config['controller.tag'] = os.environ.get("CONTROLLER_TAG", "missing-CONTROLLER_TAG")
+    _config['invoker.image'] = os.environ.get("INVOKER_IMAGE", "missing-INVOKER_IMAGE")
+    _config['invoker.tag'] = os.environ.get("INVOKER_TAG", "missing-INVOKER_TAG")
 
 def detect():
     detect_storage()

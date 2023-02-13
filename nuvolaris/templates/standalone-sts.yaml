@@ -1,0 +1,238 @@
+---
+# Source: openwhisk/templates/controller-pod.yaml
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: controller
+  labels:
+    name: controller
+    app: controller
+spec:
+  serviceName: controller
+  podManagementPolicy: "Parallel"
+  replicas: 1
+  selector:
+    matchLabels:
+      name: controller
+  template:
+    metadata:
+      labels:
+        name: controller
+        app: controller
+
+    spec:
+      serviceAccountName: nuvolaris-openwhisk-core
+      restartPolicy: Always
+      containers:
+      - name: controller
+        imagePullPolicy: "IfNotPresent"
+        image: "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"       
+        command: ["/bin/bash", "-c", "/init.sh `hostname | awk -F '-' '{print $NF}'`"]     
+        ports:
+        - name: controller
+          containerPort: 8080
+        - name: axa-remoting
+          containerPort: 25520
+        - name: axa-mgmt-http
+          containerPort: 19999
+        livenessProbe:
+          httpGet:
+            path: "/ping"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: "/ping"
+            port: 8080
+            scheme: "HTTP"
+          initialDelaySeconds: 20        
+          periodSeconds: 10
+          timeoutSeconds: 10
+        env:
+
+        - name: "PORT"
+          value: "8080"
+
+        - name: "TZ"
+          value: "UTC"
+
+        - name: "POD_IP"
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+
+        # Java options
+        - name: "JAVA_OPTS"
+          value: "-Xmx1024M "
+
+        # specific controller arguments
+        - name: "CONTROLLER_OPTS"
+          value: " "
+
+        # action runtimes
+        - name: "RUNTIMES_MANIFEST"
+          value: "{\n    \"runtimes\": {\n        \"nodejs\": [\n            {\n                \"kind\": \"nodejs:14\",\n                \"default\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-nodejs-v14\",\n                    \"tag\": \"1.20.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                },\n                \"stemCells\": [\n                    {\n                        \"initialCount\": 2,\n                        \"memory\": \"256 MB\",\n                        \"reactive\": {\n                            \"minCount\": 1,\n                            \"maxCount\": 4,\n                            \"ttl\": \"2 minutes\",\n                            \"threshold\": 1,\n                            \"increment\": 1\n                        }\n                    }\n                ]\n            },\n            {\n                \"kind\": \"nodejs:16\",\n                \"default\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-nodejs-v16\",\n                    \"tag\": \"1.20.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ],\n        \"python\": [\n            {\n                \"kind\": \"python:3\",\n                \"default\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-python-v3.7\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ],\n        \"swift\": [\n            {\n                \"kind\": \"swift:4.2\",\n                \"default\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-swift-v4.2\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"swift:5.1\",\n                \"default\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-swift-v5.1\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"swift:5.3\",\n                \"default\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-swift-v5.3\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"swift:5.4\",\n                \"default\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-swift-v5.4\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ],\n        \"java\": [\n            {\n                \"kind\": \"java:8\",\n                \"default\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"java8action\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"jarfile\",\n                    \"attachmentType\": \"application/java-archive\"\n                },\n                \"requireMain\": true\n            }\n        ],\n        \"php\": [\n            {\n                \"kind\": \"php:7.3\",\n                \"default\": false,\n                \"deprecated\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-php-v7.3\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"php:7.4\",\n                \"default\": true,\n                \"deprecated\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-php-v7.4\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"php:8.0\",\n                \"default\": false,\n                \"deprecated\": false,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-php-v7.4\",\n                    \"tag\": \"1.17.0\"\n                },\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ],\n        \"ruby\": [\n            {\n                \"kind\": \"ruby:2.5\",\n                \"default\": true,\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                },\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-ruby-v2.5\",\n                    \"tag\": \"1.17.0\"\n                }\n            }\n        ],\n        \"go\": [\n            {\n                \"kind\": \"go:1.17\",\n                \"default\": true,\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                },\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-golang-v1.17\",\n                    \"tag\": \"1.20.0\"\n                }\n            }\n        ],\n        \"rust\": [\n            {\n                \"kind\": \"rust:1.34\",\n                \"default\": true,\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                },\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-rust-v1.34\",\n                    \"tag\": \"1.3.0\"\n                }\n            }\n        ],\n        \"dotnet\": [\n            {\n                \"kind\": \"dotnet:2.2\",\n                \"default\": true,\n                \"deprecated\": false,\n                \"requireMain\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-dotnet-v2.2\",\n                    \"tag\": \"1.16.0\"\n                },\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            },\n            {\n                \"kind\": \"dotnet:3.1\",\n                \"default\": false,\n                \"deprecated\": false,\n                \"requireMain\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-dotnet-v3.1\",\n                    \"tag\": \"1.16.0\"\n                },\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ],\n        \"ballerina\": [\n            {\n                \"kind\": \"ballerina:0.990\",\n                \"default\": true,\n                \"image\": {\n                    \"prefix\": \"openwhisk\",\n                    \"name\": \"action-ballerina-v0.990.2\",\n                    \"tag\": \"nightly\"\n                },\n                \"deprecated\": false,\n                \"attached\": {\n                    \"attachmentName\": \"codefile\",\n                    \"attachmentType\": \"text/plain\"\n                }\n            }\n        ]\n    },\n    \"blackboxes\": [\n        {\n            \"prefix\": \"openwhisk\",\n            \"name\": \"dockerskeleton\",\n            \"tag\": \"1.14.0\"\n        }\n    ]\n}\n"
+
+        # Action limits
+
+        - name:  "CONFIG_whisk_info_date"
+          value:  "01-01-2023"
+
+        - name: "CONFIG_whisk_info_buildNo"
+          value: "development-morpheus"
+
+        # Required properties from Entitlement Provider used by the controller
+        - name: "LIMITS_ACTIONS_INVOKES_PERMINUTE"
+          value: "{{actions_invokes_perMinute}}"
+        - name: "LIMITS_ACTIONS_INVOKES_CONCURRENT"
+          value: "{{actions_invokes_concurrent}}"
+        - name: "LIMITS_TRIGGERS_FIRES_PERMINUTE"
+          value: "{{triggers_fires_perMinute}}"
+        - name: "LIMITS_ACTIONS_SEQUENCE_MAXLENGTH"
+          value: "{{actions_sequence_maxLength}}"
+        - name: "CONTROLLER_INSTANCES"
+          value: "1"
+
+        - name: "CONFIG_whisk_timeLimit_min"
+          value: "100ms"
+        - name: "CONFIG_whisk_timeLimit_std"
+          value: "1m"
+        - name: "CONFIG_whisk_timeLimit_max"
+          value: "{{whisk_time_limit_max}}"
+
+
+        - name: "CONFIG_whisk_memory_min"
+          value: "128m"
+        - name: "CONFIG_whisk_memory_std"
+          value: "256m"
+        - name: "CONFIG_whisk_memory_max"
+          value: "{{whisk_memory_max}}"          
+
+        - name: "CONFIG_whisk_concurrencyLimit_min"
+          value: "1"
+        - name: "CONFIG_whisk_concurrencyLimit_max"
+          value: "1"
+        - name: "CONFIG_whisk_concurrencyLimit_std"
+          value: "1"
+
+        - name: "CONFIG_whisk_logLimit_min"
+          value: "0m"
+        - name: "CONFIG_whisk_logLimit_max"
+          value: "10m"
+        - name: "CONFIG_whisk_logLimit_std"
+          value: "10m"
+
+        - name: "CONFIG_whisk_activation_payload_max"
+          value: "1048576"
+
+        - name: "CONFIG_whisk_loadbalancer_blackboxFraction"
+          value: "10%"
+
+        - name: "CONFIG_whisk_loadbalancer_timeoutFactor"
+          value: "2"
+
+        # properties for DB connection
+        - name: "CONFIG_whisk_couchdb_username"
+          value: "{{admin_user}}"
+        - name: "CONFIG_whisk_couchdb_password"
+          value: "{{admin_password}}"
+        - name: "CONFIG_whisk_couchdb_port"
+          value: "{{couchdb_port}}"
+        - name: "CONFIG_whisk_couchdb_protocol"
+          value: "http"
+        - name: "CONFIG_whisk_couchdb_host"
+          value: "{{couchdb_host}}"
+          
+        - name: "CONFIG_whisk_couchdb_provider"
+          value: "CouchDB"
+        - name: "CONFIG_whisk_couchdb_databases_WhiskActivation"
+          value: "nuvolaris_activations"
+        - name: "CONFIG_whisk_couchdb_databases_WhiskEntity"
+          value: "nuvolaris_whisks"
+        - name: "CONFIG_whisk_couchdb_databases_WhiskAuth"
+          value: "nuvolaris_subjects"
+
+        - name: "CONFIG_whisk_couchdb_controller_username"
+          value: "{{controller_user}}"
+        - name: "CONFIG_whisk_couchdb_controller_password"
+          value: "{{controller_password}}"          
+
+        - name: "CONFIG_axa_cluster_seedNodes_0"
+          value: "axa://controller-actor-system@$(POD_IP):25520"
+        - name: "CONFIG_logback_log_level"
+          value: "INFO"
+
+        # lean mode
+        - name: "CONFIG_whisk_spi_MessagingProvider"
+          value: "org.apache.openwhisk.connector.lean.LeanMessagingProvider"  
+
+        - name: "CONFIG_whisk_spi_LoadBalancerProvider"
+          value: "org.apache.openwhisk.core.loadBalancer.LeanBalancer"
+
+        - name: "CONFIG_whisk_spi_ArtifactStoreProvider"
+          value: "org.apache.openwhisk.core.database.CouchDbStoreProvider"           
+
+        - name: "CONFIG_whisk_spi_ContainerFactoryProvider"
+          value: "org.apache.openwhisk.core.containerpool.kubernetes.KubernetesContainerFactoryProvider"             
+
+        - name: "CONFIG_whisk_spi_LogStoreProvider"
+          value: "org.apache.openwhisk.core.containerpool.logging.DockerToActivationLogStoreProvider"           
+
+        - name: "CONFIG_whisk_controller_protocol"
+          value: "http"  
+
+        - name: "CONFIG_whisk_controller_interface"
+          value: "0.0.0.0"  
+
+        - name: "CONFIG_whisk_kubernetes_timeouts_run"
+          value: "10 minute"                    
+
+        - name: "CONFIG_whisk_kubernetes_timeouts_logs"
+          value: "1 minute" 
+
+        - name: "CONFIG_whisk_kubernetes_userPodNodeAffinity_enabled"
+          value: "false" 
+
+        - name: "CONFIG_whisk_kubernetes_portForwardingEnabled"
+          value: "false"  
+
+        - name: "CONFIG_whisk_kubernetes_actionNamespace"
+          value: "nuvolaris" 
+
+        - name: "CONFIG_whisk_helm_release"
+          value: "release"  
+
+        - name: "CONFIG_kamon_modules_statsdReporter_enabled"
+          value: "false"
+
+        # Properties required by the LeanBalancer provider
+        - name: "WHISK_API_HOST_PROTO"
+          value: "http" 
+        
+        - name: "WHISK_API_HOST_PORT"
+          value: "8080"                                                                                             
+
+        - name: "WHISK_API_HOST_NAME"
+          value: "localhost"        
+
+        

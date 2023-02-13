@@ -113,5 +113,24 @@ def get_mongodb_config_data():
         'mongo_nuvolaris_user': cfg.get('mongodb.nuvolaris.user') or "nuvolaris",
         'mongo_nuvolaris_password': cfg.get('mongodb.nuvolaris.password') or "s0meP@ass3"
     }
-    return data        
+    return data
+
+# return configuration parameters for the standalone controller
+def get_standalone_config_data():
+    data = {
+        "couchdb_host": cfg.get("couchdb.host", "COUCHDB_SERVICE_HOST", "couchdb"),
+        "couchdb_port": cfg.get("couchdb.port", "COUCHDB_SERVICE_PORT", "5984"),
+        "admin_user": cfg.get("couchdb.admin.user"),
+        "admin_password": cfg.get("couchdb.admin.password"),
+        "controller_user": cfg.get("couchdb.controller.user"),
+        "controller_password": cfg.get("couchdb.controller.password"),
+        "triggers_fires_perMinute": cfg.get("openwhisk.limits.triggers.fires-perMinute") or "60",
+        "actions_sequence_maxLength": cfg.get("openwhisk.limits.actions.sequence-maxLength") or "50",
+        "actions_invokes_perMinute": cfg.get("openwhisk.limits.actions.invokes-perMinute") or "60",
+        "actions_invokes_concurrent": cfg.get("openwhisk.limits.actions.invokes-concurrent") or "30",
+        "whisk_time_limit_max": cfg.get("openwhisk.limits.time.max") or "5m",
+        "whisk_memory_max": cfg.get("openwhisk.limits.time.max") or "512m"
+    }
+    return data
+
     

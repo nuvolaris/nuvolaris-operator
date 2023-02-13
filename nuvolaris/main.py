@@ -108,24 +108,6 @@ def whisk_create(spec, name, **kwargs):
         if runtime == "kind" and cfg.get('components.tls'):
             logging.info("*** cluster issuer will not be deployed with kind runtime")
 
-    if cfg.get('components.openwhisk'):
-        try:
-            msg = openwhisk.create(owner)
-            state['openwhisk'] = "on"
-            logging.info(msg)
-
-            msg = endpoint.create(owner)
-            state['endpoint'] = "on"
-            logging.info(msg)
-
-        except:
-            logging.exception("cannot create openwhisk")
-            state['openwhisk']= "error"
-            state['endpoint'] = "error"
-    else:
-        state['openwhisk'] = "off"
-        state['endpoint'] = "off"
-
     if cfg.get('components.cron'):
         try:
             msg = cron.create(owner)
@@ -136,18 +118,6 @@ def whisk_create(spec, name, **kwargs):
             state['cron']= "error"
     else:
         state['cron'] = "off" 
-
-    if cfg.get('components.kafka'):
-        logging.warn("invoker not yet implemented")
-        state['kafka'] = "n/a"
-    else:
-        state['kafka'] = "off"
-
-    if cfg.get('components.invoker'):
-        logging.warn("invoker not yet implemented")
-        state['invoker'] = "n/a"
-    else:
-        state['invoker'] = "off"
 
     if cfg.get('components.s3bucket'):
         logging.warn("invoker not yet implemented")
@@ -167,7 +137,37 @@ def whisk_create(spec, name, **kwargs):
         logging.info(msg)
         state['minio'] = "on"
     else:
-        state['minio'] = "off"        
+        state['minio'] = "off"
+    
+    if cfg.get('components.kafka'):
+        logging.warn("invoker not yet implemented")
+        state['kafka'] = "n/a"
+    else:
+        state['kafka'] = "off"
+
+    if cfg.get('components.invoker'):
+        logging.warn("invoker not yet implemented")
+        state['invoker'] = "n/a"
+    else:
+        state['invoker'] = "off"        
+
+    if cfg.get('components.openwhisk'):
+        try:
+            msg = openwhisk.create(owner)
+            state['openwhisk'] = "on"
+            logging.info(msg)
+
+            msg = endpoint.create(owner)
+            state['endpoint'] = "on"
+            logging.info(msg)
+
+        except:
+            logging.exception("cannot create openwhisk")
+            state['openwhisk']= "error"
+            state['endpoint'] = "error"
+    else:
+        state['openwhisk'] = "off"
+        state['endpoint'] = "off"                
 
     return state
 
@@ -176,6 +176,12 @@ def whisk_create(spec, name, **kwargs):
 def whisk_delete(spec, **kwargs):
     runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
+
+    if cfg.get("components.openwhisk"):
+        msg = openwhisk.delete()
+        logging.info(msg)
+        msg = endpoint.delete()
+        logging.info(msg)    
 
     if cfg.get('components.tls') and not runtime == "kind":
         msg = issuer.delete()
@@ -187,12 +193,6 @@ def whisk_delete(spec, **kwargs):
 
     if cfg.get('components.couchdb'):
         msg = couchdb.delete()
-        logging.info(msg)
-    
-    if cfg.get("components.openwhisk"):
-        msg = openwhisk.delete()
-        logging.info(msg)
-        msg = endpoint.delete()
         logging.info(msg)
 
     if cfg.get("components.mongodb"):
