@@ -20,4 +20,5 @@ echo CONTROLLER: "$CONTROLLER_IMAGE:$CONTROLLER_TAG"
 echo OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
 
 kubectl apply -f deploy/nuvolaris-permissions/
+kubectl -n nuvolaris create configmap openwhisk-runtimes --from-file=runtimes.json=nuvolaris/files/runtimes.json
 poetry run kopf run -n nuvolaris -m nuvolaris nuvolaris/main.py "$@"
