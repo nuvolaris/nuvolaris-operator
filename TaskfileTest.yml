@@ -30,7 +30,7 @@ vars:
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "tests/{{.KUBE}}/{{.WHISK}}.yaml"
   REDIS_URI: "redis://redis"
-  MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris"
+  MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
   MONGO_RT: "ghcr.io/nuvolaris/action-nodejs-v14:0.3.0-morpheus.22081008"
   MINIO_RT: "ghcr.io/francescotimperi/action-nodejs-v14:0.3.0-morpheus.23012416"
   MINIO_HOST: "minio"
