@@ -84,3 +84,4 @@ roleRef:
   kind: Role
   name: nuvolaris-operator-role
   apiGroup: rbac.authorization.k8s.io
+---

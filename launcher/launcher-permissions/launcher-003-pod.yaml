@@ -17,21 +17,29 @@
 #
 ---
 apiVersion: v1
-kind: Namespace
+kind: Pod
 metadata:
-  name: nuvolaris
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config
-  namespace: nuvolaris
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: nuvolaris-operator
-  namespace: nuvolaris
-  labels:
-    app: nuvolaris-operator
---- 
+  name: nuvolaris-operator-launcher
+  namespace: kube-system       
+spec:
+  serviceAccount: nuvolaris-launcher       
+  containers:
+    - name: nuvolaris-operator-launcher
+      image: ghcr.io/francescotimperi/nuvolaris-operator-launcher:0.3.0-morpheus.23021614
+      args:
+        - /bin/sh
+        - -c
+        - ./autoexec.sh              
+      readinessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/started
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      livenessProbe:
+        exec:
+          command:
+            - cat /tmp/healthy | grep Running
+        initialDelaySeconds: 30
+        periodSeconds: 10

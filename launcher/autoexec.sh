@@ -35,9 +35,10 @@ touch /tmp/started
 
 sleep 30
 
+echo "starting operator liveness probe loop...."
+
 while true
 do PHASE=$(kubectl -n nuvolaris get pod/nuvolaris-operator -o jsonpath='{.status.phase}')
-     echo "current nuvolaris-operator status $PHASE"
      echo $PHASE > /tmp/healthy
      sleep 5
 done

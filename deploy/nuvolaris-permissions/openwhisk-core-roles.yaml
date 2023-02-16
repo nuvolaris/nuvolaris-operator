@@ -54,4 +54,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name:  nuvolaris-openwhisk-core
-    namespace: nuvolaris  
+    namespace: nuvolaris
+---     

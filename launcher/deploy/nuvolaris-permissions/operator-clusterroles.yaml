@@ -102,3 +102,4 @@ roleRef:
   kind: ClusterRole
   name: nuvolaris-operator-cr
   apiGroup: rbac.authorization.k8s.io
+---

@@ -33,4 +33,5 @@ metadata:
   name: nuvolaris-operator
   namespace: nuvolaris
   labels:
-    app: nuvolaris-operator  
+    app: nuvolaris-operator
+--- 

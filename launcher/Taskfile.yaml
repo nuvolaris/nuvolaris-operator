@@ -46,6 +46,18 @@ tasks:
     - rsync ../tests/kind/whisk.yaml config
     - rm deploy/nuvolaris-operator/kustomization.yaml
     - rm deploy/nuvolaris-operator/whisk.yaml
+    - cat deploy/nuvolaris-permissions/nuvolaris-common.yaml > kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/whisk-crd.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/operator-clusterroles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/operator-roles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/operator-roles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/openwhisk-core-roles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat deploy/nuvolaris-permissions/openwhisk-runtimes-cm.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat launcher-permissions/launcher-000-common.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat launcher-permissions/launcher-001-clusterroles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat launcher-permissions/launcher-002-roles.yaml >> kubelet/nuvolaris-launcher.yaml
+    - cat launcher-permissions/launcher-003-pod.yaml >> kubelet/nuvolaris-launcher.yaml
+
 
   docker-login: >
     echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
@@ -86,8 +98,7 @@ tasks:
 
   test-launcher:
     cmds:
-    - kubectl apply -f deploy/nuvolaris-permissions
-    - kubectl apply -f launcher-permissions
+    - kubectl apply -f kubelet
     - |-        
         cat << __EOF__ | kubectl apply -f -
         apiVersion: v1
@@ -118,3 +129,5 @@ tasks:
                 initialDelaySeconds: 30
                 periodSeconds: 10              
         __EOF__
+
+
