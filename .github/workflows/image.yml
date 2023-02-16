@@ -85,7 +85,7 @@ jobs:
         if: ${{ env.NGROK == 'on' }}
         run: bash .github/wait.sh
       - name: AddIngress
-        run: task kind-ingress         
+        run: task kind:ingress         
       - name: Test
         run: task test
       - name: DockerLogin
@@ -96,3 +96,5 @@ jobs:
           version: latest
       - name: Image
         run: task buildx-and-push
+      - name: LauncherImage
+        run: task:launcher buildx-and-push        

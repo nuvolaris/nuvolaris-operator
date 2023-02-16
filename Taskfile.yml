@@ -53,6 +53,9 @@ includes:
   mik:
     taskfile: clusters/microk8s.yml
     dir: clusters
+  launcher:
+    taskfile: launcher/Taskfile.yaml
+    dir: launcher    
 
 tasks:
 

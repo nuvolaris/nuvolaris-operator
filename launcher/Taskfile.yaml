@@ -1,0 +1,120 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+version: '3'
+
+env:
+  LAUNCHER_IMG_TAG: 
+    sh: git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD
+
+  OPERATOR_TAG: 
+    sh: git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD    
+
+  LAUNCHER_IMAGE:
+    sh: awk -F= '/ARG LAUNCHER_IMAGE_DEFAULT=/ { print $2 ; exit }' Dockerfile
+
+  OPERATOR_IMAGE:
+    sh: awk -F= '/ARG OPERATOR_IMAGE_DEFAULT=/ { print $2 ; exit }' Dockerfile    
+
+tasks:
+  image:
+    cmds: 
+      - echo "Operator=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}"      
+    silent: true
+
+  sync-resources:
+    - rm -Rf config
+    - rm -Rf deploy
+    - mkdir config
+    - mkdir deploy
+    - rsync -a ../deploy/nuvolaris-permissions deploy/
+    - rsync -a ../deploy/nuvolaris-operator deploy/
+    - rsync ../tests/kind/whisk.yaml config
+    - rm deploy/nuvolaris-operator/kustomization.yaml
+    - rm deploy/nuvolaris-operator/whisk.yaml
+
+  docker-login: >
+    echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+
+  # Docker image
+  docker-build:
+    cmds:
+      - task: sync-resources 
+      - >
+        docker build . 
+        -t ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+        --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
+        --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}}
+        --build-arg=LAUNCHER_IMAGE_DEFAULT=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}
+        --build-arg=LAUNCHER_TAG_DEFAULT={{.LAUNCHER_IMG_TAG}}
+
+  build-and-load:
+    - task: docker-build
+    - > 
+      kind load docker-image  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}} --name=nuvolaris
+
+  build-and-push:
+    - task: docker-login   
+    - task: docker-build 
+    - docker push  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}} 
+
+  buildx-and-push:
+    - task: docker-login   
+    - >
+      docker buildx build 
+      --platform linux/amd64,linux/arm64
+      -t ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+      --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
+      --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}}
+      --build-arg=LAUNCHER_IMAGE_DEFAULT=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}
+      --build-arg=LAUNCHER_TAG_DEFAULT={{.LAUNCHER_IMG_TAG}}
+      . --push        
+
+  test-launcher:
+    cmds:
+    - kubectl apply -f deploy/nuvolaris-permissions
+    - kubectl apply -f launcher-permissions
+    - |-        
+        cat << __EOF__ | kubectl apply -f -
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: nuvolaris-operator-launcher
+          namespace: kube-system       
+        spec:
+          serviceAccount: nuvolaris-launcher       
+          containers:
+            - name: nuvolaris-operator-launcher
+              image:  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+              args:
+              - /bin/sh
+              - -c
+              - ./autoexec.sh              
+              readinessProbe:
+                exec:
+                  command:
+                    - cat
+                    - /tmp/started
+                initialDelaySeconds: 10
+                periodSeconds: 5
+              livenessProbe:
+                exec:
+                  command:
+                    - cat /tmp/healthy | grep Running
+                initialDelaySeconds: 30
+                periodSeconds: 10              
+        __EOF__
