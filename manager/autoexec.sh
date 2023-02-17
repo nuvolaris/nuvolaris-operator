@@ -18,6 +18,8 @@
 #
 echo AUTO DEPLOYING OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
 
+kubectl apply -f deploy/nuvolaris-permissions
+
 cat << __EOF__> deploy/nuvolaris-operator/kustomization.yaml
       apiVersion: kustomize.config.k8s.io/v1beta1
       kind: Kustomization
