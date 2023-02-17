@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nuvolaris-operator-manager
+  namespace: kube-system       
+spec:    
+  containers:
+    - name: nuvolaris-operator-manager
+      image: ghcr.io/francescotimperi/nuvolaris-operator-manager:0.3.0-morpheus.23021712
+      args:
+      - /bin/bash
+      - -c
+      - ./autoexec.sh 
+      env:
+      - name: KUBECONFIG
+        value: /k-cfg/config
+      volumeMounts:
+        - name: k-config
+          mountPath: /k-cfg                   
+      readinessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/started
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      livenessProbe:
+        exec:
+          command:
+            - /bin/bash
+            - -c
+            - ./livenessprobe.sh
+        initialDelaySeconds: 30
+        periodSeconds: 10
+  volumes:
+  - name: k-config
+    configMap:
+        name: nuvolaris-manager-cm 

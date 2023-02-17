@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-echo AUTO DEPLOYING OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
+echo DEPLOYING OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
 
 kubectl apply -f deploy/nuvolaris-permissions
 
