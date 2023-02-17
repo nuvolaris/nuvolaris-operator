@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,20 +16,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: nuvolaris-launcher-rb
-  namespace: nuvolaris
-  labels:
-    app: nuvolaris-launcher-rb
-subjects:
-- kind: ServiceAccount
-  namespace: kube-system
-  name: nuvolaris-launcher
-roleRef:
-  kind: Role
-  name: nuvolaris-operator-role
-  apiGroup: rbac.authorization.k8s.io
----
+PHASE=$(cat /tmp/healthy)
+if [ "$PHASE" == "Running" ];
+then 
+  exit 0
+else 
+  exit 1
+fi 

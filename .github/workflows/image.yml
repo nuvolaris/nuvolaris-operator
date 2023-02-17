@@ -97,4 +97,4 @@ jobs:
       - name: Image
         run: task buildx-and-push
       - name: LauncherImage
-        run: task:launcher buildx-and-push        
+        run: task:manager buildx-and-push        

@@ -19,14 +19,14 @@ FROM ubuntu:22.04
 ARG OPERATOR_IMAGE_DEFAULT=ghcr.io/nuvolaris/nuvolaris-operator
 ARG OPERATOR_TAG_DEFAULT=0.2.1-trinity.22061708
 
-ARG LAUNCHER_IMAGE_DEFAULT=ghcr.io/nuvolaris/nuvolaris-operator-launcher
-ARG LAUNCHER_TAG_DEFAULT=0.2.1-trinity.22061708
+ARG MANAGER_IMAGE_DEFAULT=ghcr.io/nuvolaris/nuvolaris-operator-manager
+ARG MANAGER_TAG_DEFAULT=0.2.1-trinity.22061708
 
 ENV OPERATOR_IMAGE=${OPERATOR_IMAGE_DEFAULT}
 ENV OPERATOR_TAG=${OPERATOR_TAG_DEFAULT}
 
-ENV LAUNCHER_IMAGE=${LAUNCHER_IMAGE_DEFAULT}
-ENV LAUNCHER_TAG=${LAUNCHER_TAG_DEFAULT}
+ENV MANAGER_IMAGE=${MANAGER_IMAGE_DEFAULT}
+ENV MANAGER_TAG=${MANAGER_IMAGE_DEFAULT}
 
 
 # configure dpkg && timezone
@@ -52,18 +52,20 @@ RUN useradd -m -s /bin/bash nuvolaris && \
 WORKDIR /home/nuvolaris
 # setup the launcher required files
 
-ADD launcher-permissions /home/nuvolaris/deploy/launcher-permissions
+ADD manager-permissions /home/nuvolaris/deploy/manager-permissions
 ADD deploy/nuvolaris-permissions /home/nuvolaris/deploy/nuvolaris-permissions
 ADD deploy/nuvolaris-operator /home/nuvolaris/deploy/nuvolaris-operator
-ADD config /home/nuvolaris/config
+ADD instance /home/nuvolaris/deploy/instance
 
 ADD autoexec.sh /home/nuvolaris/
+ADD livenessprobe.sh /home/nuvolaris/
 RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
 
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin
 
 RUN cd /home/nuvolaris
-RUN chmod 766 ./autoexec.sh
+RUN chmod u+x ./autoexec.sh
+RUN chmod u+x ./livenessprobe.sh
 CMD ./autoexec.sh
 

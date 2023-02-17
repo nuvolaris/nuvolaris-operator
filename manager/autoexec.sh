@@ -30,16 +30,21 @@ cat << __EOF__> deploy/nuvolaris-operator/kustomization.yaml
 __EOF__
 
 kubectl -n nuvolaris apply -k deploy/nuvolaris-operator
-kubectl -n nuvolaris apply -f config/whisk.yaml
+kubectl -n nuvolaris apply -f deploy/instance
 touch /tmp/started
+touch /tmp/healthy
 
-sleep 30
-
-echo "starting operator liveness probe loop...."
+echo 'starting operator liveness probe loop....'
 
 while true
 do PHASE=$(kubectl -n nuvolaris get pod/nuvolaris-operator -o jsonpath='{.status.phase}')
-     echo $PHASE > /tmp/healthy
+     if [ "$PHASE" == "Running" ];
+     then 
+      echo $PHASE > /tmp/healthy
+     else 
+      echo 'None' > /tmp/healthy
+      echo 'operator not available'
+     fi     
      sleep 5
 done
 

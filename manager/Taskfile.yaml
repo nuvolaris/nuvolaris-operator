@@ -18,14 +18,14 @@
 version: '3'
 
 env:
-  LAUNCHER_IMG_TAG: 
+  MANAGER_IMG_TAG: 
     sh: git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD
 
   OPERATOR_TAG: 
     sh: git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD    
 
-  LAUNCHER_IMAGE:
-    sh: awk -F= '/ARG LAUNCHER_IMAGE_DEFAULT=/ { print $2 ; exit }' Dockerfile
+  MANAGER_IMAGE:
+    sh: awk -F= '/ARG MANAGER_IMAGE_DEFAULT=/ { print $2 ; exit }' Dockerfile
 
   OPERATOR_IMAGE:
     sh: awk -F= '/ARG OPERATOR_IMAGE_DEFAULT=/ { print $2 ; exit }' Dockerfile    
@@ -33,30 +33,19 @@ env:
 tasks:
   image:
     cmds: 
-      - echo "Operator=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}"      
+      - echo "Operator=${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}}"      
     silent: true
 
   sync-resources:
-    - rm -Rf config
+    - rm -Rf instance
     - rm -Rf deploy
-    - mkdir config
+    - mkdir instance
     - mkdir deploy
     - rsync -a ../deploy/nuvolaris-permissions deploy/
     - rsync -a ../deploy/nuvolaris-operator deploy/
-    - rsync ../tests/kind/whisk.yaml config
+    - rsync ../tests/kind/whisk.yaml instance
     - rm deploy/nuvolaris-operator/kustomization.yaml
     - rm deploy/nuvolaris-operator/whisk.yaml
-    - cat deploy/nuvolaris-permissions/nuvolaris-common.yaml > kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/whisk-crd.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/operator-clusterroles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/operator-roles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/operator-roles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/openwhisk-core-roles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat deploy/nuvolaris-permissions/openwhisk-runtimes-cm.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat launcher-permissions/launcher-000-common.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat launcher-permissions/launcher-001-clusterroles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat launcher-permissions/launcher-002-roles.yaml >> kubelet/nuvolaris-launcher.yaml
-    - cat launcher-permissions/launcher-003-pod.yaml >> kubelet/nuvolaris-launcher.yaml
 
 
   docker-login: >
@@ -68,51 +57,52 @@ tasks:
       - task: sync-resources 
       - >
         docker build . 
-        -t ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+        -t ${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}}
         --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
         --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}}
-        --build-arg=LAUNCHER_IMAGE_DEFAULT=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}
-        --build-arg=LAUNCHER_TAG_DEFAULT={{.LAUNCHER_IMG_TAG}}
+        --build-arg=MANAGER_IMAGE_DEFAULT=${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}
+        --build-arg=MANAGER_TAG_DEFAULT={{.MANAGER_IMG_TAG}}
 
   build-and-load:
     - task: docker-build
     - > 
-      kind load docker-image  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}} --name=nuvolaris
+      kind load docker-image  ${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}} --name=nuvolaris
 
   build-and-push:
     - task: docker-login   
     - task: docker-build 
-    - docker push  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}} 
+    - docker push  ${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}} 
 
   buildx-and-push:
     - task: docker-login   
     - >
       docker buildx build 
       --platform linux/amd64,linux/arm64
-      -t ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+      -t ${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}}
       --build-arg=OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
       --build-arg=OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}}
-      --build-arg=LAUNCHER_IMAGE_DEFAULT=${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}
-      --build-arg=LAUNCHER_TAG_DEFAULT={{.LAUNCHER_IMG_TAG}}
+      --build-arg=MANAGER_IMAGE_DEFAULT=${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}
+      --build-arg=MANAGER_TAG_DEFAULT={{.MANAGER_IMG_TAG}}
       . --push        
 
-  test-launcher:
+  test:
     cmds:
-    - kubectl apply -f kubelet
+    - kubectl apply -f deploy/nuvolaris-permissions
+    - kubectl apply -f manager-permissions
     - |-        
         cat << __EOF__ | kubectl apply -f -
         apiVersion: v1
         kind: Pod
         metadata:
-          name: nuvolaris-operator-launcher
+          name: nuvolaris-operator-manager
           namespace: kube-system       
         spec:
-          serviceAccount: nuvolaris-launcher       
+          serviceAccount: nuvolaris-manager       
           containers:
-            - name: nuvolaris-operator-launcher
-              image:  ${MY_LAUNCHER_IMAGE:-{{.LAUNCHER_IMAGE}}}:{{.LAUNCHER_IMG_TAG}}
+            - name: nuvolaris-operator-manager
+              image:  ${MY_MANAGER_IMAGE:-{{.MANAGER_IMAGE}}}:{{.MANAGER_IMG_TAG}}
               args:
-              - /bin/sh
+              - /bin/bash
               - -c
               - ./autoexec.sh              
               readinessProbe:
@@ -125,7 +115,9 @@ tasks:
               livenessProbe:
                 exec:
                   command:
-                    - cat /tmp/healthy | grep Running
+                    - /bin/bash
+                    - -c
+                    - ./livenessprobe.sh
                 initialDelaySeconds: 30
                 periodSeconds: 10              
         __EOF__

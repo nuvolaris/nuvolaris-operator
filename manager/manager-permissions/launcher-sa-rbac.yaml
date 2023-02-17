@@ -19,8 +19,38 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: nuvolaris-launcher
+  name: nuvolaris-manager
   namespace: kube-system
   labels:
-    app: nuvolaris-launcher
+    app: nuvolaris-manager
 ---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-manager-crb  
+  labels:
+    app: nuvolaris-manager-crb
+subjects:
+- kind: ServiceAccount
+  name:  nuvolaris-manager
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: nuvolaris-operator-cr
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nuvolaris-manager-rb
+  namespace: nuvolaris
+  labels:
+    app: nuvolaris-manager-rb
+subjects:
+- kind: ServiceAccount
+  namespace: kube-system
+  name: nuvolaris-manager
+roleRef:
+  kind: Role
+  name: nuvolaris-operator-role
+  apiGroup: rbac.authorization.k8s.io
