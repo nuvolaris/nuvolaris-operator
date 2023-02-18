@@ -18,9 +18,10 @@
  */
 
 const openwhisk = require('openwhisk');
+const options = {apihost: 'http://controller:3233'};
 
 function main(args) {
-    var ow = openwhisk();
+    var ow = openwhisk(options);
     //return { "body": "boh"}
     return ow.actions.list()
     .then(l => ({body: {result: l}}))
