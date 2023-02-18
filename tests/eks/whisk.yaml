@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: eks.sciabarra.net
+      apihost: eks.n9s.cc
   components:
     # start openwhisk controller
     openwhisk: true
