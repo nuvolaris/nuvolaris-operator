@@ -15,30 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-.git-hooks/
-__pycache__/
-__pypackages__
-.pdm.toml
-.*-version
-kubeconfig
-openwhisk-deploy-kube/
-kustomization.yaml
-playground
-examples/
-aliases
-deploy/extract/
-deploy/whisk-system/
-node_modules/
-.env
-__*
-clusters/id_rsa*
-*.kubeconfig
-run.pid
-*.off
-actions/*/nuvolaris/
-_*.yaml
-apihost.txt
-.git-hooks/
-installer
-whisk.properties
-.task/
+!kubectl -n nuvolaris apply -f deploy/couchdb
+!cat tests/kind/whisk.yaml | sed -e 's/host: couchdb/host: localhost/' | kubectl apply -f -
+
+import nuvolaris.couchdb as cdb
+import nuvolaris.couchdb_util as cu
+import nuvolaris.testutil as tu
+import nuvolaris.config as cfg
+
+scf = tu.load_sample_config()
+assert(cfg.configure(scf))
+assert(cfg.put("couchdb.host", "localhost"))
+assert(not cdb.init())
+
+!./wskadmin.sh user create -ns msciab msciab
+
+db = cu.CouchDB()
+assert(db.get_doc("subjects", "msciab")["subject"] == "msciab")
+
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

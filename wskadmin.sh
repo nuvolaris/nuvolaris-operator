@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,30 +16,28 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-.git-hooks/
-__pycache__/
-__pypackages__
-.pdm.toml
-.*-version
-kubeconfig
-openwhisk-deploy-kube/
-kustomization.yaml
-playground
-examples/
-aliases
-deploy/extract/
-deploy/whisk-system/
-node_modules/
-.env
-__*
-clusters/id_rsa*
-*.kubeconfig
-run.pid
-*.off
-actions/*/nuvolaris/
-_*.yaml
-apihost.txt
-.git-hooks/
-installer
-whisk.properties
-.task/
+cd "$(dirname $0)"
+configure() { 
+    if test -e whisk.properties
+    then return
+    fi
+    DB_USER="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.admin.user}')"
+    DB_PASS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.admin.password}')"
+    DB_HOST="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.host}')"
+    cat <<EOF >whisk.properties
+whisk.logs.dir=/var/tmp/wsklogs
+db.host=$DB_HOST
+db.username=$DB_USER
+db.password=$DB_PASS
+db.provider=CouchDB
+db.protocol=http
+db.port=5984
+db.prefix=nuvolaris_
+db.whisk.auths=nuvolaris_subjects
+db.whisk.actions=nuvolaris_whisks
+db.whisk.activations=nuvolaris_activations
+EOF
+}
+
+configure
+poetry run python tools/cli/wsk/wskadmin.py "$@"

@@ -78,7 +78,7 @@ tasks:
   logs: >
     rm -f nuvolaris-operator.log ;
     kubectl -n nuvolaris logs deploy/nuvolaris-operator -f | tee nuvolaris-operator.log
- 
+
   cli: 
     - task: d:cli
 
@@ -145,12 +145,16 @@ tasks:
   update-files-from-openwhisk: 
     cmds:
       - | 
-        if test -d ../nuvolaris-controller
-        then cp -v ../nuvolaris-controller/openwhisk/ansible/files/*.json nuvolaris/files
-        else echo "not found ../nuvolaris-controller/openwhisk"
-        fi
-    status:
-      - test -f nuvolaris/files/runtimes.json
+        cp -v ../nuvolaris-controller/openwhisk/ansible/files/*.json nuvolaris/files
+        cp -v ../nuvolaris-controller/openwhisk/bin/wskadmin tools/cli/wsk/wskadmin.py
+        cp -v ../nuvolaris-controller/openwhisk/tools/admin/*.py tools/cli/wsk
+    sources:
+      - ../nuvolaris-controller/openwhisk/ansible/files/*.json
+      - ../nuvolaris-controller/openwhisk/bin/wskadmin
+      - ../nuvolaris-controller/openwhisk/tools/admin/*.py
+    generates:
+      - nuvolaris/files/*.json
+      - nuvolaris/tools/cli/wsk/*.py
 
   # generate ssh keys
   ssh-key:
@@ -209,7 +213,6 @@ tasks:
     - task: t:ping
     - task: t:echo
     - task: t:api
-
 
   test:
     - task: clean
