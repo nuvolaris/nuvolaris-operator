@@ -53,6 +53,9 @@ includes:
   mik:
     taskfile: clusters/microk8s.yml
     dir: clusters
+  k3s:
+    taskfile: clusters/k3s.yml
+    dir: clusters
 
 tasks:
 
