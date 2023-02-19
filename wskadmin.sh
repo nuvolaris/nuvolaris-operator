@@ -21,6 +21,11 @@ configure() {
     if test -e whisk.properties
     then return
     fi
+    if ! kubectl get wsk/controller 2>/dev/null >/dev/null
+    then 
+        echo "Nuvolaris not yet configured"
+        exit 1
+    fi
     DB_USER="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.admin.user}')"
     DB_PASS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.admin.password}')"
     DB_HOST="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.couchdb.host}')"
