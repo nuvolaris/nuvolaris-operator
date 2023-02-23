@@ -26,14 +26,14 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-052efd3df9dad4825 # ImageID valid only in us-east-1 region
-      InstanceType: t2.large
+      InstanceType: t2.xlarge
       KeyName: !Ref Stack
       SecurityGroupIds:
         - !Ref MySecurityGroup
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
-            VolumeSize: 30
+            VolumeSize: 100
             DeleteOnTermination: true        
       Tags:
         - Key: Name
@@ -58,7 +58,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Ref Stack
-      GroupDescription: "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
+      GroupDescription: "Allow HTTP/HTTPS,SSH and UDP inbound and outbound traffic"
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -76,3 +76,11 @@ Resources:
           FromPort: 16443
           ToPort: 16443
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: udp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 0.0.0.0/0                    

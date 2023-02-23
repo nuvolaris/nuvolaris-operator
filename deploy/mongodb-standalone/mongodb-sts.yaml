@@ -34,7 +34,7 @@ spec:
         app: nuvolaris-mongodb
     spec:
       containers:
-      - image: mongo
+      - image: mongo:5.0.11
         name: mongodb
         args: ["--dbpath","/data/db", "--bind_ip", "0.0.0.0"]
         livenessProbe:
