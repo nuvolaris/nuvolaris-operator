@@ -35,16 +35,17 @@ spec:
         nuvolaris.mongodb.flavour: standalone
     spec:
       containers:
-      - image: mongo
+      - image: mongo:5.0.11
         name: mongodb
         args: ["--dbpath","/data/db", "--bind_ip", "0.0.0.0"]
         livenessProbe:
           exec:
             command:
-              - mongosh
+              - mongo
+              - --disableImplicitSessions
               - --eval
               - "db.adminCommand('ping')"
-          initialDelaySeconds: 60
+          initialDelaySeconds: 40
           periodSeconds: 10
           timeoutSeconds: 10
           successThreshold: 1
@@ -52,7 +53,8 @@ spec:
         readinessProbe:
           exec:
             command:
-              - mongosh
+              - mongo
+              - --disableImplicitSessions
               - --eval
               - "db.adminCommand('ping')"
           initialDelaySeconds: 20
