@@ -34,13 +34,14 @@ spec:
         app: nuvolaris-mongodb
     spec:
       containers:
-      - image: mongo
+      - image: mongo:5.0.11
         name: mongodb
         args: ["--dbpath","/data/db", "--bind_ip", "0.0.0.0"]
         livenessProbe:
           exec:
             command:
-              - mongosh
+              - mongo
+              - --disableImplicitSessions
               - --eval
               - "db.adminCommand('ping')"
           initialDelaySeconds: 30
@@ -51,7 +52,8 @@ spec:
         readinessProbe:
           exec:
             command:
-              - mongosh
+              - mongo
+              - --disableImplicitSessions
               - --eval
               - "db.adminCommand('ping')"
           initialDelaySeconds: 30
