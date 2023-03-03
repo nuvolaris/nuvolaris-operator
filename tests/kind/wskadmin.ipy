@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
 !kubectl -n nuvolaris apply -f deploy/couchdb
 !cat tests/kind/whisk.yaml | sed -e 's/host: couchdb/host: localhost/' | kubectl apply -f -
 
@@ -22,6 +25,7 @@ import nuvolaris.couchdb as cdb
 import nuvolaris.couchdb_util as cu
 import nuvolaris.testutil as tu
 import nuvolaris.config as cfg
+import nuvolaris.kube as kube
 
 scf = tu.load_sample_config()
 assert(cfg.configure(scf))
