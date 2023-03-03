@@ -83,7 +83,7 @@ spec:
 
         # Java options
         - name: "JAVA_OPTS"
-          value: "-Xmx1024M "
+          value: "-Xmx2048M "
 
         # specific controller arguments
         - name: "CONTROLLER_OPTS"

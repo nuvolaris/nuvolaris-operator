@@ -53,7 +53,7 @@ data:
                 },
                 "stemCells": [
                     {
-                        "initialCount": 2,
+                        "initialCount": 1,
                         "memory": "256 MB",
                         "reactive": {
                             "minCount": 1,
@@ -82,7 +82,7 @@ data:
                 },
                 "stemCells": [
                     {
-                        "initialCount": 2,
+                        "initialCount": 1,
                         "memory": "256 MB",
                         "reactive": {
                             "minCount": 1,
@@ -93,7 +93,21 @@ data:
                         }
                     }
                 ]
-            }
+            },
+            {
+                "kind": "python:310ai",
+                "default": false,
+                "image": {
+                    "prefix": "ghcr.io/nuvolaris",
+                    "name": "action-python-v310-ai",
+                    "tag": "0.3.0-morpheus.23030312"
+                },
+                "deprecated": false,
+                "attached": {
+                    "attachmentName": "codefile",
+                    "attachmentType": "text/plain"
+                }
+            }            
         ],
         "java": [
             {
