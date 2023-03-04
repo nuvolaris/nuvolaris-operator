@@ -29,6 +29,7 @@ import nuvolaris.mongodb as mongodb
 import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
+import nuvolaris.openwhisk_patcher as patcher
 
 # tested by an integration test
 @kopf.on.login()
@@ -48,7 +49,7 @@ def whisk_create(spec, name, **kwargs):
     cfg.clean()
     cfg.configure(spec)
     cfg.detect()
-    for k in cfg.getall(): logging.info(f"{k} = {cfg.get(k)}")
+    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
     owner = kube.get(f"wsk/{name}")
 
     state = {
@@ -205,7 +206,7 @@ def whisk_delete(spec, **kwargs):
 
     if cfg.get("components.minio"):
         msg = minio.delete()
-        logging.info(msg)        
+        logging.info(msg)       
     
                          
 # tested by integration test
@@ -241,3 +242,28 @@ def deploy_update(old, new, name, **kwargs):
         }
         logging.debug(data)
         logging.info(kube.applyTemplate("couchdb-init.yaml", data))
+
+@kopf.on.update('nuvolaris.org', 'v1', 'whisks')
+def whisk_update(spec, status, namespace, diff, name, **kwargs):
+    logging.info(f"*** detected an update of wsk/{name} under namespace {namespace}")
+
+    cfg.clean()
+    cfg.configure(spec)
+    cfg.detect()
+
+    logging.debug("*** dumping new configuration parameters")
+    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
+    owner = kube.get(f"wsk/{name}")
+
+    if cfg.get('components.openwhisk'):
+        patcher.redeploy_whisk(owner)    
+
+def runtimes_filter(name, type, **kwargs):
+    return name == 'openwhisk-runtimes' and type == 'MODIFIED'  
+
+@kopf.on.event("configmap", when=runtimes_filter)
+def runtimes_cm_event_watcher(event, **kwargs):    
+    logging.info("*** deteched a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
+    
+    if cfg.get('components.openwhisk'):
+        patcher.restart_whisk()

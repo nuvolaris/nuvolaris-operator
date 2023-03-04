@@ -132,5 +132,4 @@ def get_standalone_config_data():
         "whisk_memory_max": cfg.get("openwhisk.limits.time.max") or "512m"
     }
     return data
-
     

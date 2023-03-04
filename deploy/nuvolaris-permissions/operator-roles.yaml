@@ -41,7 +41,7 @@ rules:
 
 # edit deployments daemonset statefulset
 - apiGroups: ["extensions", "apps"]
-  resources: ["deployments", "daemonsets", "statefulsets" ]
+  resources: ["deployments", "daemonsets", "statefulsets", "statefulsets/scale"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 # edit jobs
