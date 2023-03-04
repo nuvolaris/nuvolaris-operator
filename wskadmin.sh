@@ -21,7 +21,7 @@ configure() {
     if test -e whisk.properties
     then return
     fi
-    if ! kubectl get wsk/controller 2>/dev/null >/dev/null
+    if ! kubectl -n nuvolaris get wsk/controller 2>/dev/null >/dev/null
     then 
         echo "Nuvolaris not yet configured"
         exit 1
