@@ -53,23 +53,6 @@ spec:
     namespaces:
       whisk-system: xxxx:yyyyyy
       nuvolaris: ccccc:zzzzz
-    limits:
-      actions:
-        sequence-maxLength: 50
-        invokes-perMinute: 999
-        invokes-concurrent: 250
-      triggers: 
-        fires-perMinute: 999
-      time:
-        limit-min: "100ms"  
-        limit-std: "1min"
-        limit-max: "5min"
-      memory:
-        limit-min: "128m"
-        limit-std: "256m"
-        limit-max: "512m" 
-    controller:
-      javaOpts: "-Xmx2048M"
   couchdb:
     host: couchdb
     port: 5984
@@ -99,8 +82,41 @@ spec:
     volume-size: 2
     nuvolaris:
       root-user: <minio_admin_user>
-      root-password: <minio_admin_pwd>   
+      root-password: <minio_admin_pwd>
+  configs:    
+    limits:
+      actions:
+        sequence-maxLength: 50
+        invokes-perMinute: 999
+        invokes-concurrent: 250
+      triggers: 
+        fires-perMinute: 999
+      time:
+        limit-min: "100ms"  
+        limit-std: "1min"
+        limit-max: "5min"
+      memory:
+        limit-min: "128m"
+        limit-std: "256m"
+        limit-max: "512m" 
+    controller:
+      javaOpts: "-Xmx2048M"        
 ```
+
+## Default configs values
+If the provided `whisk.yaml` does not specify any dynamic configuration parameteres under `configs` item, the Community operators defaults to these values:
+
+- `configs.limit.actions.sequence-maxLength=50`
+- `configs.limit.actions.invokes-perMinute=60`
+- `configs.limit.actions.invokes-concurrent=30`
+- `configs.limit.actions.triggers.fires-perMinute=60`
+- `configs.limits.time.limit-min=100ms`
+- `configs.limits.time.limit-std=1min`
+- `configs.limits.time.limit-max=5min`
+- `configs.limits.memory.limit-min=128m`
+- `configs.limits.memory.limit-std=256m`
+- `configs.limits.memory.limit-max=512m`
+- `configs.controller.javaOpts=-Xmx2048M`
 
 ## Openwhisk Controller hot deployment
 
@@ -108,13 +124,12 @@ The community operator supports hot deployment for the Openwhisk Controller, i.e
 will automatically stop and redeploy the controller to take into account the new settings.
 
 ```
-  openwhisk:
-    ....
+  configs:    
     limits:
       actions:
         sequence-maxLength: 50
-        invokes-perMinute: 60
-        invokes-concurrent: 60
+        invokes-perMinute: 999
+        invokes-concurrent: 250
       triggers: 
         fires-perMinute: 999
       time:

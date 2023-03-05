@@ -148,4 +148,4 @@ tasks:
     - wsk action invoke minio/minio -r
     
   mongo2:
-    - wsk project deploy --manifest tests/mongo.yaml
+    - wsk project deploy --manifest tests/mongo.yaml 

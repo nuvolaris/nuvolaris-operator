@@ -46,13 +46,6 @@ spec:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
       nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
-    limits:
-      actions:
-        sequence-maxLength: 100
-        invokes-perMinute: 999
-        invokes-concurrent: 250
-      triggers: 
-        fires-perMinute: 999
   couchdb:
     host: couchdb
     port: 5984
@@ -94,4 +87,14 @@ spec:
     volume-size: 2
     nuvolaris:
       root-user: minioadmin
-      root-password: minioadmin   
+      root-password: minioadmin
+  configs:
+    limits:
+      actions:
+        sequence-maxLength: 50
+        invokes-perMinute: 999
+        invokes-concurrent: 250
+      triggers: 
+        fires-perMinute: 999
+    controller:
+      javaOpts: "-Xmx4096M"        
