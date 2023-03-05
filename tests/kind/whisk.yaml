@@ -53,6 +53,8 @@ spec:
         invokes-concurrent: 250
       triggers: 
         fires-perMinute: 999
+    controller:
+      javaOpts: "-Xmx2048M"
   couchdb:
     host: couchdb
     port: 5984

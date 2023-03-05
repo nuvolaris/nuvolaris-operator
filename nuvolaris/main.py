@@ -44,7 +44,7 @@ def login(**kwargs):
 # tested by an integration test
 @kopf.on.create('nuvolaris.org', 'v1', 'whisks')
 def whisk_create(spec, name, **kwargs):
-    print("***", name)
+    logging.info("*** whisk_create ", name)
 
     cfg.clean()
     cfg.configure(spec)

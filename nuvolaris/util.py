@@ -118,18 +118,28 @@ def get_mongodb_config_data():
 # return configuration parameters for the standalone controller
 def get_standalone_config_data():
     data = {
+        "controller_image": cfg.get("controller.image") or  "missing-controller-image",
+        "controller_tag": cfg.get("controller.tag") or "missing-controller-tag",
         "couchdb_host": cfg.get("couchdb.host", "COUCHDB_SERVICE_HOST", "couchdb"),
         "couchdb_port": cfg.get("couchdb.port", "COUCHDB_SERVICE_PORT", "5984"),
-        "admin_user": cfg.get("couchdb.admin.user"),
-        "admin_password": cfg.get("couchdb.admin.password"),
-        "controller_user": cfg.get("couchdb.controller.user"),
-        "controller_password": cfg.get("couchdb.controller.password"),
-        "triggers_fires_perMinute": cfg.get("openwhisk.limits.triggers.fires-perMinute") or "60",
-        "actions_sequence_maxLength": cfg.get("openwhisk.limits.actions.sequence-maxLength") or "50",
-        "actions_invokes_perMinute": cfg.get("openwhisk.limits.actions.invokes-perMinute") or "60",
-        "actions_invokes_concurrent": cfg.get("openwhisk.limits.actions.invokes-concurrent") or "30",
-        "whisk_time_limit_max": cfg.get("openwhisk.limits.time.max") or "5m",
-        "whisk_memory_max": cfg.get("openwhisk.limits.time.max") or "512m"
+        "couchdb_admin_user": cfg.get("couchdb.admin.user"),
+        "couchdb_admin_password": cfg.get("couchdb.admin.password"),
+        "couchdb_controller_user": cfg.get("couchdb.controller.user"),
+        "couchdb_controller_password": cfg.get("couchdb.controller.password"),
+        "triggers_fires_perMinute": cfg.get("openwhisk.limits.triggers.fires-perMinute") or 60,
+        "actions_sequence_maxLength": cfg.get("openwhisk.limits.actions.sequence-maxLength") or 50,
+        "actions_invokes_perMinute": cfg.get("openwhisk.limits.actions.invokes-perMinute") or 60,
+        "actions_invokes_concurrent": cfg.get("openwhisk.limits.actions.invokes-concurrent") or 30,
+        "time_limit_min": cfg.get("openwhisk.limits.time.limit-min") or "100ms", 
+        "time_limit_std": cfg.get("openwhisk.limits.time.limit-std") or "1min", 
+        "time_limit_max": cfg.get("openwhisk.limits.time.limit-max") or "5min", 
+        "memory_limit_min": cfg.get("openwhisk.limits.memory.limit-min") or "128m", 
+        "memory_limit_std": cfg.get("openwhisk.limits.memory.limit-std") or "256m", 
+        "memory_limit_max": cfg.get("openwhisk.limits.memory.limit-max") or "512m", 
+        "concurrency_limit_min": cfg.get("openwhisk.limits.concurrency.limit-min") or 1, 
+        "concurrency_limit_std": cfg.get("openwhisk.limits.concurrency.limit-std") or 1, 
+        "concurrency_limit_max": cfg.get("openwhisk.limits.concurrency.limit-max") or 1,
+        "controller_java_opts": cfg.get('openwhisk.controller.javaOpts') or "-Xmx2048M",
     }
     return data
     

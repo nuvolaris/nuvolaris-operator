@@ -83,7 +83,7 @@ spec:
 
         # Java options
         - name: "JAVA_OPTS"
-          value: "-Xmx2048M "
+          value: "{{controller_java_opts}} "
 
         # specific controller arguments
         - name: "CONTROLLER_OPTS"
@@ -116,26 +116,26 @@ spec:
           value: "1"
 
         - name: "CONFIG_whisk_timeLimit_min"
-          value: "100ms"
+          value: "{{time_limit_min}}"
         - name: "CONFIG_whisk_timeLimit_std"
-          value: "1m"
+          value: "{{time_limit_std}}"
         - name: "CONFIG_whisk_timeLimit_max"
-          value: "{{whisk_time_limit_max}}"
+          value: "{{time_limit_max}}"
 
 
         - name: "CONFIG_whisk_memory_min"
-          value: "128m"
+          value: "{{memory_limit_min}}"
         - name: "CONFIG_whisk_memory_std"
-          value: "256m"
+          value: "{{memory_limit_std}}"
         - name: "CONFIG_whisk_memory_max"
-          value: "{{whisk_memory_max}}"          
+          value: "{{memory_limit_max}}"          
 
         - name: "CONFIG_whisk_concurrencyLimit_min"
-          value: "1"
+          value: "{{concurrency_limit_min}}"
         - name: "CONFIG_whisk_concurrencyLimit_max"
-          value: "1"
+          value: "{{concurrency_limit_max}}"
         - name: "CONFIG_whisk_concurrencyLimit_std"
-          value: "1"
+          value: "{{concurrency_limit_std}}"
 
         - name: "CONFIG_whisk_logLimit_min"
           value: "0m"
@@ -155,9 +155,9 @@ spec:
 
         # properties for DB connection
         - name: "CONFIG_whisk_couchdb_username"
-          value: "{{admin_user}}"
+          value: "{{couchdb_admin_user}}"
         - name: "CONFIG_whisk_couchdb_password"
-          value: "{{admin_password}}"
+          value: "{{couchdb_admin_password}}"
         - name: "CONFIG_whisk_couchdb_port"
           value: "{{couchdb_port}}"
         - name: "CONFIG_whisk_couchdb_protocol"
@@ -175,9 +175,9 @@ spec:
           value: "nuvolaris_subjects"
 
         - name: "CONFIG_whisk_couchdb_controller_username"
-          value: "{{controller_user}}"
+          value: "{{couchdb_controller_user}}"
         - name: "CONFIG_whisk_couchdb_controller_password"
-          value: "{{controller_password}}"          
+          value: "{{couchdb_controller_password}}"          
 
         - name: "CONFIG_axa_cluster_seedNodes_0"
           value: "axa://controller-actor-system@$(POD_IP):25520"
