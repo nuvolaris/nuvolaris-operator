@@ -41,7 +41,7 @@ ow.create(wsk)
 assert(kube.get("statefulset.apps/controller"))
 
 cfg_value = kube.kubectl("get", "statefulset.apps/controller", jsonpath="{.spec.template.spec.containers[0].env[?(@.name=='LIMITS_ACTIONS_INVOKES_PERMINUTE')].value}")
-exp_value = cfg.get("openwhisk.limits.actions.invokes-perMinute")
+exp_value = cfg.get("configs.limits.actions.invokes-perMinute")
 assert(f"{exp_value}" in cfg_value)
 
 ow.delete()
