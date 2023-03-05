@@ -29,8 +29,8 @@ def create(owner=None):
     logging.info("*** setup openwhisk in standalone mode activated")
     data = util.get_standalone_config_data()
 
-    whisk_image = cfg.get("controller.image") or  "missing-controller-image"
-    whisk_tag = cfg.get("controller.tag") or "missing-controller-tag"
+    whisk_image = data["controller_image"]
+    whisk_tag = data["controller_tag"]
     
     config = kus.image(whisk_image, newTag=whisk_tag)
     config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
