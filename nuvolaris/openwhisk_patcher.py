@@ -49,7 +49,7 @@ def redeploy_controller(owner=None):
     except Exception as e:
         logging.error('*** failed to redeploy whisk controller: %s' % e) 
 
-def restart_whisk():
+def restart_whisk(owner=None):
     restart_sts("sts/controller")
 
 def redeploy_whisk(owner=None):
