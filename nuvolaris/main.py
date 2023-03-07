@@ -44,7 +44,7 @@ def login(**kwargs):
 # tested by an integration test
 @kopf.on.create('nuvolaris.org', 'v1', 'whisks')
 def whisk_create(spec, name, **kwargs):
-    logging.info("*** whisk_create ", name)
+    logging.info(f"*** whisk_create {name}")
 
     cfg.clean()
     cfg.configure(spec)
@@ -264,6 +264,6 @@ def runtimes_filter(name, type, **kwargs):
 @kopf.on.event("configmap", when=runtimes_filter)
 def runtimes_cm_event_watcher(event, **kwargs):    
     logging.info("*** deteched a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
-    
+    owner = kube.get(f"wsk/controller")
     if cfg.get('components.openwhisk'):
-        patcher.restart_whisk()
+        patcher.restart_whisk(owner)

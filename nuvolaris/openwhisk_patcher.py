@@ -23,6 +23,7 @@ import nuvolaris.util as util
 
 def restart_sts(sts_name):
     try:
+        logging.info(f"*** handling request to redeploy {sts_name} using scaledown/scaleup")
         replicas =  1
         current_rep = kube.kubectl("get",sts_name,jsonpath="{.spec.replicas}")
         if current_rep:
@@ -32,25 +33,24 @@ def restart_sts(sts_name):
         time.sleep(5)
         logging.info(f"scaling {sts_name} to {replicas}")
         kube.scale_sts(sts_name,replicas)
+        logging.info(f"*** handling request to redeploy {sts_name} using scaledown/scaleup")
     except Exception as e:
-        logging.error('failed to scale up/down %s: %s' % sts_name,e)
+        logging.error('*** failed to scale up/down %s: %s' % sts_name,e)
 
 def redeploy_controller(owner=None):
     try:
+        logging.info("*** handling request to redeploy whisk controller")      
         msg = openwhisk.delete()
         logging.info(msg)
 
         msg = openwhisk.create(owner)
         logging.info(msg)
+        logging.info("*** handled request to redeploy whisk controller") 
     except Exception as e:
-        logging.error('failed to redeploy openwhisk controller: %s' % e)  
+        logging.error('*** failed to redeploy whisk controller: %s' % e) 
 
-def restart_whisk():
-    logging.info("*** handling request to redeploy whisk controller using scaledown/scaleup")
+def restart_whisk(owner=None):
     restart_sts("sts/controller")
-    logging.info("*** handling request to redeploy whisk controller using scaledown/scaleup")
 
 def redeploy_whisk(owner=None):
-    logging.info("*** handling request to redeploy whisk controller")
     redeploy_controller(owner)
-    logging.info("*** handled request to redeploy whisk controller")

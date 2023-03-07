@@ -118,8 +118,8 @@ def get_mongodb_config_data():
 # return configuration parameters for the standalone controller
 def get_standalone_config_data():
     data = {
-        "controller_image": cfg.get("controller.image") or  "missing-controller-image",
-        "controller_tag": cfg.get("controller.tag") or "missing-controller-tag",
+        "controller_image": cfg.get("controller.image") or  "ghcr.io/nuvolaris/openwhisk-controller",
+        "controller_tag": cfg.get("controller.tag") or "0.3.0-morpheus.22122609",
         "couchdb_host": cfg.get("couchdb.host", "COUCHDB_SERVICE_HOST", "couchdb"),
         "couchdb_port": cfg.get("couchdb.port", "COUCHDB_SERVICE_PORT", "5984"),
         "couchdb_admin_user": cfg.get("couchdb.admin.user"),
