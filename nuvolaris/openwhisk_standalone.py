@@ -36,11 +36,9 @@ def create(owner=None):
     config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
     spec = kus.kustom_list("openwhisk-standalone", config, templates=[], data=data)
 
+    cfg.put(CONTROLLER_SPEC, spec)
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
-        cfg.put(CONTROLLER_SPEC, spec)
-    else:
-        cfg.put(CONTROLLER_SPEC, spec)
     
     res = kube.apply(spec)
 
@@ -55,4 +53,4 @@ def delete():
     if cfg.exists(CONTROLLER_SPEC):
         res = kube.delete(cfg.get(CONTROLLER_SPEC))
         cfg.delete(CONTROLLER_SPEC)
-    res += kube.kubectl("delete", "pod", "-l", "user-action-pod=true")        
+    res += kube.kubectl("delete", "pod", "-l", "user-action-pod=true")       
