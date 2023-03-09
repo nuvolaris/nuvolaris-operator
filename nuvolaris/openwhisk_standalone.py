@@ -38,6 +38,7 @@ def create(owner=None):
 
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
+        cfg.put(CONTROLLER_SPEC, spec)
     else:
         cfg.put(CONTROLLER_SPEC, spec)
     
