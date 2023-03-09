@@ -36,9 +36,11 @@ def create(owner=None):
     config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
     spec = kus.kustom_list("openwhisk-standalone", config, templates=[], data=data)
 
-    cfg.put(CONTROLLER_SPEC, spec)
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
+    else:
+        cfg.put(CONTROLLER_SPEC, spec)
+
     
     res = kube.apply(spec)
 

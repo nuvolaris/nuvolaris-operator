@@ -97,4 +97,4 @@ spec:
       triggers: 
         fires-perMinute: 999
     controller:
-      javaOpts: "-Xmx4096M"        
+      javaOpts: "-Xmx2048M"        

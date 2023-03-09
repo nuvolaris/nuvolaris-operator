@@ -21,6 +21,14 @@ import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.util as util
 
+def rollout(kube_name):
+    try:
+        logging.info(f"*** handling request to rollout {kube_name}")
+        kube.rollout(kube_name)
+        logging.info(f"*** handled request to rollout {kube_name}")
+    except Exception as e:
+        logging.error('*** failed to rollout %s: %s' % kube_name,e)
+
 def restart_sts(sts_name):
     try:
         logging.info(f"*** handling request to redeploy {sts_name} using scaledown/scaleup")
@@ -40,17 +48,15 @@ def restart_sts(sts_name):
 def redeploy_controller(owner=None):
     try:
         logging.info("*** handling request to redeploy whisk controller")      
-        msg = openwhisk.delete()
-        logging.info(msg)
-
         msg = openwhisk.create(owner)
         logging.info(msg)
+        rollout("sts/controller")
         logging.info("*** handled request to redeploy whisk controller") 
     except Exception as e:
         logging.error('*** failed to redeploy whisk controller: %s' % e) 
 
 def restart_whisk(owner=None):
-    restart_sts("sts/controller")
+    rollout("sts/controller")
 
 def redeploy_whisk(owner=None):
     redeploy_controller(owner)
