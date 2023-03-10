@@ -16,6 +16,7 @@
 # under the License.
 #
 import flatdict, json, os
+import logging
 
 _config = {}
 
@@ -134,3 +135,8 @@ def detect():
     detect_storage()
     detect_labels()
     detect_env()
+
+def dump_config():
+    import nuvolaris.config as cfg
+    for k in cfg.getall():
+        logging.debug(f"{k} = {cfg.get(k)}") 

@@ -49,7 +49,7 @@ def whisk_create(spec, name, **kwargs):
     cfg.clean()
     cfg.configure(spec)
     cfg.detect()
-    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
+    cfg.dump_config()
     owner = kube.get(f"wsk/{name}")
 
     state = {
@@ -252,7 +252,7 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
     cfg.detect()
 
     logging.debug("*** dumping new configuration parameters")
-    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
+    cfg.dump_config()
     owner = kube.get(f"wsk/{name}")
 
     if cfg.get('components.openwhisk'):
@@ -267,7 +267,7 @@ def whisk_resume(spec, name, **kwargs):
     cfg.detect()
 
     logging.debug("*** dumping resumed configuration parameters")
-    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")          
+    cfg.dump_config()          
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  
