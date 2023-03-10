@@ -259,7 +259,7 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
         patcher.redeploy_whisk(owner)
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
-def whisk_create(spec, name, **kwargs):
+def whisk_resume(spec, name, **kwargs):
     logging.info(f"*** whisk_resume {name}")
 
     cfg.clean()
