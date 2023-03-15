@@ -49,7 +49,7 @@ def whisk_create(spec, name, **kwargs):
     cfg.clean()
     cfg.configure(spec)
     cfg.detect()
-    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
+    cfg.dump_config()
     owner = kube.get(f"wsk/{name}")
 
     state = {
@@ -252,11 +252,22 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
     cfg.detect()
 
     logging.debug("*** dumping new configuration parameters")
-    for k in cfg.getall(): logging.debug(f"{k} = {cfg.get(k)}")
+    cfg.dump_config()
     owner = kube.get(f"wsk/{name}")
 
     if cfg.get('components.openwhisk'):
-        patcher.redeploy_whisk(owner)    
+        patcher.redeploy_whisk(owner)
+
+@kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
+def whisk_resume(spec, name, **kwargs):
+    logging.info(f"*** whisk_resume {name}")
+
+    cfg.clean()
+    cfg.configure(spec)
+    cfg.detect()
+
+    logging.debug("*** dumping resumed configuration parameters")
+    cfg.dump_config()          
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  
@@ -265,5 +276,6 @@ def runtimes_filter(name, type, **kwargs):
 def runtimes_cm_event_watcher(event, **kwargs):    
     logging.info("*** deteched a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
     owner = kube.get(f"wsk/controller")
+
     if cfg.get('components.openwhisk'):
         patcher.restart_whisk(owner)

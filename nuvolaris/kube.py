@@ -163,4 +163,11 @@ def scale_sts(name, replicas, namespace="nuvolaris"):
     try:
         return kubectl("scale", name, f"--replicas={replicas}" ,namespace=namespace)
     except:
-        return None      
+        return None
+
+# rollout the specified element. Normally used for DeamonSet or StatefulSet
+def rollout(name, namespace="nuvolaris"):
+    try:
+        return kubectl("rollout", "restart", name, namespace=namespace)
+    except:
+        return None            
