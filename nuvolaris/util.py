@@ -20,6 +20,7 @@ import nuvolaris.kube as kube
 import logging
 import time, random, math
 import nuvolaris.config as cfg
+import uuid
 
 # Implements truncated exponential backoff from
 # https://cloud.google.com/storage/docs/retry-strategy#exponential-backoff
@@ -142,4 +143,31 @@ def get_standalone_config_data():
         "controller_java_opts": cfg.get('configs.controller.javaOpts') or "-Xmx2048M",
     }
     return data
-    
+
+def validate_ow_auth(auth):
+    """
+        >>> import nuvolaris.testutil as tutil
+        >>> import nuvolaris.util as util
+        >>> auth = tutil.generate_ow_auth()
+        >>> util.validate_ow_auth(auth)
+        True
+        >>> util.validate_ow_auth('21321:3213216')
+        False
+    """ 
+    try:
+        parts = auth.split(':')
+        try:
+            uid = str(uuid.UUID(parts[0], version = 4))
+        except ValueError:
+            logging.error('authorization id is not a valid UUID')
+            return False
+
+        key = parts[1]
+        if len(key) < 64:
+            logging.error('authorization key must be at least 64 characters long')
+            return False
+        
+        return True
+    except Exception as e:
+        logging.error('failed to determine authorization id and key: %s' % e)
+        return False
