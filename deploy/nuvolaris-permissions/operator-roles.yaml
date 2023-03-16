@@ -54,9 +54,9 @@ rules:
   resources: ["jobs", "cronjobs", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
-# edit nuvolaris crd
+# edit nuvolaris crds
 - apiGroups: ["nuvolaris.org"]
-  resources: ["whisks","whisks/status", "*/finalizers"]
+  resources: ["whisks","whisks/status","whisksusers","whisksusers/status", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 # networking.k8s.io

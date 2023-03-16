@@ -169,6 +169,54 @@ def init():
     # job process status code should be negated if the job is successfull
     return not res
 
+def add_subject(db, namespace, auth):
+    """
+    Add a new Openwhisk Couchdb subject that will be authorized to interact with the specified Openwhisk namespace.
+    the auth parameters represents the subject authentication in the form of a uuid.uuid4():randomstr(64)
+    """
+    res = check(db.wait_db_ready(60), "wait_db_ready", True)
+    dbn = "subjects"
+    [uuid, key] = auth.split(":")
+    data = { "name": namespace, "key": key, "uuid": uuid}
+    return check(update_templated_doc(db, dbn, "subject.json", data), f"add {namespace}", res)
+
+def create_ow_user(subject, auth):
+    logging.info(f"authorizing OpenWhisk namespace {subject}")
+
+    try:
+        db = nuvolaris.couchdb_util.CouchDB()
+
+        if(util.validate_ow_auth(auth)):
+            logging.info(f"{subject} authorization is valid, adding subject")
+            return add_subject(db, subject, auth)
+        else:
+            return None
+    except Exception as e:
+        logging.error('failed to authorize Openwhisk namespace %s authorization id and key: %s' % subject, e)
+        return None
+
+def delete_ow_user(subject):
+    logging.info(f"removing auhorization for OpenWhisk namespace {subject}")
+
+    try:
+        db = nuvolaris.couchdb_util.CouchDB()
+        selector = {"selector":{"subject": {"$eq": subject }}}
+        response = db.find_doc("subjects", json.dumps(selector))
+
+        if(response['docs']):
+                docs = list(response['docs'])
+                if(len(docs) > 0):
+                    doc = docs[0]
+                    logging.info(f"removing subjects documents {doc['_id']}")
+                    return db.delete_doc("subjects",doc['_id'])
+        
+        logging.warn(f"auhorization for OpenWhisk namespace {subject} not found!")
+        return None
+    except Exception as e:
+        logging.error('failed to remove Openwhisk namespace %s authorization id and key: %s' % subject, e)
+        return None
+
+
     
     
 

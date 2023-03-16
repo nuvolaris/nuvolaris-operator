@@ -179,6 +179,8 @@ tasks:
 
   clean:
     cmds:
+      - cmd: kubectl -n nuvolaris delete wsku --all
+        ignore_error: true    
       - cmd: kubectl -n nuvolaris delete wsk/controller
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete all --all

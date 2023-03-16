@@ -24,6 +24,9 @@ import os
 import requests as req
 from subprocess import run
 from urllib.parse import urlparse
+import uuid
+import string
+import random
 
 # takes a string, split in lines and search for the word (a re)
 # if field is a number, splits the line in fields separated by spaces and print the selected field
@@ -263,3 +266,29 @@ def retry(fn, value, max=10, delay=1):
         time.sleep(delay)
         print(i, "retrying...")
     return False
+
+def generate_ow_uid():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_uid())
+        36
+    """ 
+    return str(uuid.uuid4())
+
+def generate_ow_key():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_key())
+        64
+    """ 
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(64))
+
+def generate_ow_auth():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_auth())
+        101
+    """     
+    uid = generate_ow_uid()
+    key = generate_ow_key()
+    return f"{uid}:{key}"    
