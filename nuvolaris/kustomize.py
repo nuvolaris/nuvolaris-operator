@@ -164,7 +164,7 @@ def configMapTemplate(name, where, template, data):
   - {template}=__{template}
 """
 
-# genearate a patch from a template
+# generate a patch from a template
 def patchTemplate(where, template, data):
     """   
     >>> import nuvolaris.testutil as tu
