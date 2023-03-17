@@ -192,7 +192,7 @@ def create_ow_user(subject, auth):
         else:
             return None
     except Exception as e:
-        logging.error('failed to authorize Openwhisk namespace %s authorization id and key: %s' % subject, e)
+        logging.error(f"failed to authorize Openwhisk namespace {subject} authorization id and key: {e}")
         return None
 
 def delete_ow_user(subject):
@@ -213,7 +213,7 @@ def delete_ow_user(subject):
         logging.warn(f"auhorization for OpenWhisk namespace {subject} not found!")
         return None
     except Exception as e:
-        logging.error('failed to remove Openwhisk namespace %s authorization id and key: %s' % subject, e)
+        logging.error(f"failed to remove Openwhisk namespace {subject} authorization id and key: {e}")
         return None
 
 

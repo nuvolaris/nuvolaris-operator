@@ -21,6 +21,12 @@ import logging
 import json, flatdict, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.couchdb as cdb
+import nuvolaris.user_config as user_config
+
+def get_ucfg(spec):
+    ucfg = user_config.UserConfig(spec)
+    ucfg.dump_config()
+    return ucfg
 
 @kopf.on.create('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_create(spec, name, **kwargs):
@@ -28,9 +34,11 @@ def whisk_user_create(spec, name, **kwargs):
     state = {
     }
 
-    if(spec['namespace'] and spec['password']):
-        res = cdb.create_ow_user(spec['namespace'],spec['password'])
-        logging.info(f"OpenWhisk subject {spec['namespace']} added = {res}")
+    ucfg = get_ucfg(spec)
+
+    if(ucfg.get("namespace") and ucfg.get("password")):
+        res = cdb.create_ow_user(ucfg.get("namespace"),ucfg.get("password"))
+        logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res
 
     return state
@@ -39,9 +47,11 @@ def whisk_user_create(spec, name, **kwargs):
 def whisk_user_delete(spec, name, **kwargs):
     logging.info(f"*** whisk_user_delete {name}")
 
-    if(spec['namespace']):
-        res = cdb.delete_ow_user(spec['namespace'])
-        logging.info(f"OpenWhisk subject {spec['namespace']} removed = {res}")
+    ucfg = get_ucfg(spec)
+
+    if(ucfg.get("namespace")):
+        res = cdb.delete_ow_user(ucfg.get("namespace"))
+        logging.info(f"OpenWhisk subject {ucfg.get('namespace')} removed = {res}")
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):
