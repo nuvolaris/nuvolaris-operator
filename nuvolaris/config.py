@@ -38,10 +38,14 @@ def exists(key):
     return key in _config
 
 def get(key, envvar=None, defval=None):
-    if key in _config:
-       return _config.get(key)
+    val = _config.get(key)
+
     if envvar and envvar in os.environ:
-        return os.environ[envvar]
+        val = os.environ[envvar]
+    
+    if val: 
+        return val
+    
     return defval
 
 def put(key, value):

@@ -60,6 +60,7 @@ tasks:
       CONTROLLER_IMAGE: "{{.CONTROLLER_IMAGE}}"
       CONTROLLER_TAG: "{{.CONTROLLER_TAG}}"
       OPERATOR_TAG: "{{.OPERATOR_TAG}}"
+      COUCHDB_SERVICE_HOST: "localhost"
 
   instance:
     -  envsubst <{{.CONFIG}} | kubectl -n nuvolaris apply -f -

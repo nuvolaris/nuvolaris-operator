@@ -291,4 +291,9 @@ def generate_ow_auth():
     """     
     uid = generate_ow_uid()
     key = generate_ow_key()
-    return f"{uid}:{key}"    
+    return f"{uid}:{key}"
+
+def load_sample_user_config(name="whisk-user"):
+    with open(f"tests/{name}.yaml") as f: 
+        c = yaml.safe_load(f)
+        return c['spec']    
