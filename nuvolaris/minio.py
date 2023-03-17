@@ -25,13 +25,14 @@ def create(owner=None):
     logging.info(f"*** configuring minio standalone")
 
     data = {
+        "minio_host": cfg.get('minio.host') or "minio",
         "minio_volume_size": cfg.get('minio.volume-size') or "5",
         "minio_root_user": cfg.get('minio.nuvolaris.root-user') or "minio",
         "minio_root_password": cfg.get('minio.nuvolaris.root-password') or "minio123",
         "storage_class": cfg.get("nuvolaris.storageClass")
     }
     
-    kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml"], data)    
+    kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"], data)    
     spec = kus.kustom_list("minio", kust, templates=[], data=data)
 
     if owner:

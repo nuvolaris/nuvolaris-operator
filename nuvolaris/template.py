@@ -18,7 +18,7 @@
 import os, re
 
 from jinja2 import Environment, FileSystemLoader
-loader = FileSystemLoader(["./nuvolaris/templates", "./nuvolaris/files"])
+loader = FileSystemLoader(["./nuvolaris/templates", "./nuvolaris/files", "./nuvolaris/policies"])
 env = Environment(loader=loader)
 
 # expand template
