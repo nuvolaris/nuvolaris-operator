@@ -40,7 +40,8 @@ assert(pod_name)
 
 minioClient = mutil.MinioClient()
 assert(minioClient.make_bucket("ftt-data"))
+assert(minioClient.make_public_bucket("ftt-web"))
 assert(minioClient.add_user("ftt","jgfkjsgcasgfjgdsafgsdkfgkaj"))
-assert(minioClient.assign_rw_bucket_policy_to_user("ftt","ftt-data"))
+assert(minioClient.assign_rw_bucket_policy_to_user("ftt",["ftt-web/*","ftt-data/*"]))
 
-#assert(minio.delete())
+assert(minio.delete())

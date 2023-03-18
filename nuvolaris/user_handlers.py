@@ -22,6 +22,8 @@ import json, flatdict, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.couchdb as cdb
 import nuvolaris.user_config as user_config
+import nuvolaris.minio as minio
+import nuvolaris.kube as kube
 
 def get_ucfg(spec):
     ucfg = user_config.UserConfig(spec)
@@ -35,11 +37,15 @@ def whisk_user_create(spec, name, **kwargs):
     }
 
     ucfg = get_ucfg(spec)
+    owner = kube.get(f"wsku/{name}")
 
     if(ucfg.get("namespace") and ucfg.get("password")):
         res = cdb.create_ow_user(ucfg.get("namespace"),ucfg.get("password"))
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res
+
+    if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
+        minio.create_ow_storage(state, ucfg, owner)
 
     return state
 
@@ -52,6 +58,10 @@ def whisk_user_delete(spec, name, **kwargs):
     if(ucfg.get("namespace")):
         res = cdb.delete_ow_user(ucfg.get("namespace"))
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} removed = {res}")
+
+    if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
+        res = minio.delete_ow_storage(ucfg)
+        logging.info(f"OpenWhisk namespace {ucfg.get('namespace')} storage removed = {res}")   
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):

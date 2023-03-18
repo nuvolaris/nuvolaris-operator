@@ -20,6 +20,7 @@ import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.util as util
+import nuvolaris.minio_util as mutil
 
 def create(owner=None):
     logging.info(f"*** configuring minio standalone")
@@ -55,4 +56,52 @@ def delete():
         res = kube.delete(spec)
         logging.info(f"delete minio: {res}")
     return res
+
+def create_ow_storage(state, ucfg, owner=None):
+    minioClient = mutil.MinioClient()
+    
+    namespace = ucfg.get("namespace")
+    secretkey = ucfg.get("object-storage.password")
+
+    logging.info(f"*** configuring storage for namespace {namespace}")
+
+    res = minioClient.add_user(namespace, secretkey)
+    state['storage_user']=res
+    bucket_policy_names = []
+
+    if(ucfg.get('object-storage.data.enabled')):
+        bucket_name = ucfg.get('object-storage.data.bucket')
+        logging.info(f"*** adding private bucket {bucket_name} for {namespace}")
+        res = minioClient.make_bucket(bucket_name)                
+        bucket_policy_names.append(f"{bucket_name}/*")
+        state['storage_data']=res
+    
+    if(ucfg.get('object-storage.route.enabled')):
+        bucket_name = ucfg.get("object-storage.route.bucket")
+        logging.info(f"*** adding public bucket {bucket_name} for {namespace}")
+        res = minioClient.make_public_bucket(bucket_name)        
+        bucket_policy_names.append(f"{bucket_name}/*")
+        state['storage_route']=res
+
+    if(len(bucket_policy_names)>0):
+        logging.info(f"granting rw access to created policies under namespace {namespace}")
+        minioClient.assign_rw_bucket_policy_to_user(namespace,bucket_policy_names)        
+
+    return state
+
+def delete_ow_storage(ucfg):
+    minioClient = mutil.MinioClient()
+    namespace = ucfg.get("namespace")
+
+    if(ucfg.get('object-storage.data.enabled')):
+        bucket_name = ucfg.get('object-storage.data.bucket')
+        logging.info(f"*** removing private bucket {bucket_name} for {namespace}")
+        res = minioClient.force_bucket_remove(bucket_name)
+
+    if(ucfg.get('object-storage.route.enabled')):
+        bucket_name = ucfg.get("object-storage.route.bucket")
+        logging.info(f"*** removing public bucket {bucket_name} for {namespace}")
+        res = minioClient.force_bucket_remove(bucket_name)
+
+    return minioClient.delete_user(namespace)
 
