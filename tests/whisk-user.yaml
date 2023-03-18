@@ -18,26 +18,26 @@
 apiVersion: nuvolaris.org/v1
 kind: WhiskUser
 metadata:
-  name: ftt
+  name: franztt
   namespace: nuvolaris
 spec: 
   email: francesco@nuvolaris.io
   password: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-  namespace: ftt
+  namespace: franztt
   redis:
     enabled: false
     prefix: ftt
     password: fttredispwd
-  object-storage:
-    enabled: false
-    bucket: ftt-data
+  object-storage:        
     password: dsadgasdfsagdfasfda
+    data:
+      enabled: false
+      bucket: ftt-data
+    route:
+      enabled: false
+      host: localhost
+      bucket: ftt-web
   mongodb:
     enabled: false
     database: ftt
     password: ahfdajsfdafdasffdasdja
-  route:
-    enabled: false
-    host: localhost
-    bucket: ftt-web
-    password: sadgsagdsagdsagdsagdakajg

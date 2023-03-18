@@ -15,35 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# this module wraps mc minio client
+# this module wraps mc minio client using admin credentials 
+# to perform various operations
 
 import logging
 import json
 import subprocess
 import nuvolaris.config as cfg
 import nuvolaris.template as ntp
+import nuvolaris.util as util
 import os
 
 class MinioClient:
     
     def __init__(self):
-        self.minio_api_host   = cfg.get("minio.host", "MINIO_API_HOST", "localhost")
+        self.minio_api_host   = cfg.get("minio.host", "MINIO_API_HOST", "minio")
         self.minio_api_port   = cfg.get("9000", "MINIO_API_PORT", "9000")        
-        self.admin_username   = cfg.get("minio.nuvolaris.root-user", "MINIO_ADMIN_USER", "minioadmin")
-        self.admin_password   = cfg.get("minio.nuvolaris.root-password", "MINIO_ADMIN_PASSWORD", "minioadmin")
+        self.admin_username   = cfg.get("minio.nuvolaris.root-user", "MINIO_ADMIN_USER", "minio")
+        self.admin_password   = cfg.get("minio.nuvolaris.root-password", "MINIO_ADMIN_PASSWORD", "minio123")
         self.minio_api_url   = f"http://{self.minio_api_host}:{self.minio_api_port}"
         self.alias = "local"        
 
-        # automatically adds the nuv_minio alias to map the deployed minio instance
+        # automatically adds the local alias to mc configuration to operate on nuvolaris main MINIO server
         self.mc("alias","set", self.alias, self.minio_api_url, self.admin_username, self.admin_password)
-
-    def check(self,f, what, res):
-        if f:
-            logging.info(f"OK: {what}")
-            return res and True
-        else:
-            logging.warn(f"ERR: {what}")
-            return False        
 
     # execute minio commands using the mc cli tools installed by default inside the operator
     def mc(self, *kwargs):        
@@ -69,61 +63,81 @@ class MinioClient:
                         logging.error(e)
                         return e
 
-    def add_user(self, username, access_secret):
+    def add_user(self, username, secret_key):
         """
         adds a new minio user to the configured minio instance
         """
-        return self.check(self.mc("admin","user","add", self.alias, username, access_secret),"add_user",True)
+        return util.check(self.mc("admin","user","add", self.alias, username, secret_key),"add_user",True)
+
+    def remove_user(self, username):
+        """
+        removes a minio user to the configured minio instance
+        """
+        return util.check(self.mc("admin","user","remove", self.alias, username),"remove_user",True)       
 
     def make_bucket(self, bucket_name):
         """
         adds a new bucket inside the configured minio instance 
         """
-        return self.check(self.mc("mb",f"{self.alias}/{bucket_name}"),"make_bucket",True)
+        return util.check(self.mc("mb",f"{self.alias}/{bucket_name}"),"make_bucket",True)
+
+    def force_bucket_remove(self, bucket_name):
+        """
+        removes unconditionally a bucket
+        """
+        return util.check(self.mc("rb","--force",f"{self.alias}/{bucket_name}"),"force_bucket_remove",True)        
 
     def make_public_bucket(self, bucket_name):
         """
         adds a new public bucket to the configured minio instance 
         """
-        res = self.check(self.make_bucket(bucket_name),"make_bucket",True)
-        return self.check(self.mc("anonymous","-r","set","download",f"{self.alias}/{bucket_name}"),"make_public_bucket",res)
+        res = util.check(self.make_bucket(bucket_name),"make_bucket",True)
+        return util.check(self.mc("anonymous","-r","set","download",f"{self.alias}/{bucket_name}"),"make_public_bucket",res)
 
     def assign_policy_to_user(self, username, policy):
         """
         assign the specified policy to the given username
         """        
-        return self.check(self.mc("admin","policy","set",self.alias,policy,f"user={username}"),"assign_policy_to_user",True)
+        return util.check(self.mc("admin","policy","set",self.alias,policy,f"user={username}"),"assign_policy_to_user",True)
 
     def add_policy(self, policy, path_to_policy_json):
         """
         add a new policy into minio
         """        
-        return self.check(self.mc("admin","policy","add",self.alias,policy,path_to_policy_json),"add_policy",True)        
+        return util.check(self.mc("admin","policy","add",self.alias,policy,path_to_policy_json),"add_policy",True)        
 
     def remove_policy(self, policy):
         """
         add a new policy into minio
         """        
-        return self.check(self.mc("admin","policy","remove",self.alias,policy),"remove_policy",True)
+        return util.check(self.mc("admin","policy","remove",self.alias,policy),"remove_policy",True)
 
-    def render_policy(self,bucket,template,data):
+    def render_policy(self,username,template,data):
         """
         uses the given template policy to render a final policy and returns the absolute path to rendered policy file.
         """  
-        out = f"/tmp/__{bucket}_{template}"
+        out = f"/tmp/__{username}_{template}"
         file = ntp.spool_template(template, out, data)
         return os.path.abspath(file)
     
-    def assign_rw_bucket_policy_to_user(self,username,bucket_name):
+    def assign_rw_bucket_policy_to_user(self,username,bucket_names):
         """
         defines a rw policy template for the specified bucket and assigns it to the given username.
         """          
-        policy_name = f"{username}_{bucket_name}_rw_policy"
-        path_to_policy_json = self.render_policy(bucket_name,"minio_rw_policy_tpl.json",{"bucket_arn":f"{bucket_name}/*"})        
-        res=self.check(self.add_policy(policy_name,path_to_policy_json),"add_policy",True)
-        res=self.check(self.assign_policy_to_user(username,policy_name),"assign_rw_bucket_policy_to_user",res)
+        policy_name = f"{username}_rw_policy"
+        path_to_policy_json = self.render_policy(username,"minio_rw_policy_tpl.json",{"bucket_arns":bucket_names})
+        res=util.check(self.add_policy(policy_name,path_to_policy_json),"add_policy",True)
+        res=util.check(self.assign_policy_to_user(username,policy_name),"assign_rw_bucket_policy_to_user",res)
         os.remove(path_to_policy_json)
         return res
+
+    def delete_user(self,username):
+        """
+        removes the user and the corresponding policy
+        """          
+        policy_name = f"{username}_rw_policy"        
+        res=util.check(self.remove_user(username),"removed_user",True)
+        return util.check(self.remove_policy(policy_name),"deleted_user_policy",res)        
 
 
 

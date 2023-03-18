@@ -171,3 +171,11 @@ def validate_ow_auth(auth):
     except Exception as e:
         logging.error('failed to determine authorization id and key: %s' % e)
         return False
+
+def check(f, what, res):
+    if f:
+        logging.info(f"OK: {what}")
+        return res and True
+    else:
+        logging.warn(f"ERR: {what}")
+        return False         

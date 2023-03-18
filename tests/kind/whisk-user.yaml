@@ -28,16 +28,16 @@ spec:
     enabled: true
     prefix: ftt
     password: fttredispwd
-  object-storage:
-    enabled: true
-    bucket: ftt-data
-    password: dsadgasdfsagdfasfda
+  object-storage:        
+    password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+    data:
+      enabled: true
+      bucket: franztt-data
+    route:
+      enabled: true
+      host: localhost
+      bucket: franztt-web
   mongodb:
     enabled: true
     database: ftt
     password: ahfdajsfdafdasffdasdja
-  route:
-    enabled: true
-    host: localhost
-    bucket: ftt-web
-    password: sadgsagdsagdsagdsagdakajg
