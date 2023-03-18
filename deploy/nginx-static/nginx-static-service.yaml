@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nuvolaris-static-svc
+  labels:
+    app: nuvolaris-static
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nuvolaris-static
+  sessionAffinity: None

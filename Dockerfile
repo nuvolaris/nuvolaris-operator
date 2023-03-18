@@ -78,6 +78,8 @@ ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
 ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
+ADD deploy/nginx-static /home/nuvolaris/deploy/nginx-static
+ADD deploy/content /home/nuvolaris/deploy/content
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
 RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
 USER nuvolaris

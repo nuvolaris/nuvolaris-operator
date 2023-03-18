@@ -67,13 +67,15 @@ class MinioClient:
         """
         adds a new minio user to the configured minio instance
         """
-        return util.check(self.mc("admin","user","add", self.alias, username, secret_key),"add_user",True)
+        res = util.check(self.mc("admin","user","add", self.alias, username, secret_key),"add_user",True)
+        return util.check(self.init_namespace_alias(username, secret_key),"init_namespace_alias",res)
 
     def remove_user(self, username):
         """
         removes a minio user to the configured minio instance
         """
-        return util.check(self.mc("admin","user","remove", self.alias, username),"remove_user",True)       
+        res = util.check(self.mc("admin","user","remove", self.alias, username),"remove_user",True)
+        return util.check(self.remove_namespace_alias(username),"remove_namespace_alias",res)
 
     def make_bucket(self, bucket_name):
         """
@@ -137,7 +139,25 @@ class MinioClient:
         """          
         policy_name = f"{username}_rw_policy"        
         res=util.check(self.remove_user(username),"removed_user",True)
-        return util.check(self.remove_policy(policy_name),"deleted_user_policy",res)        
+        return util.check(self.remove_policy(policy_name),"deleted_user_policy",res)
+
+    def init_namespace_alias(self, namespace, secret_key):
+        """
+        called to initialize a local minio alias for a namespace user (used to impersonate the user uploading content)
+        """                 
+        self.mc("alias","set", f"local_{namespace}", self.minio_api_url, namespace, secret_key) 
+
+    def remove_namespace_alias(self, namespace):
+        """
+        called to initialize to remove a local minio alias for a namespace user
+        """                 
+        self.mc("alias","remove",f"local_{namespace}")
+
+    def upload_folder_content(self,origin,bucket):
+        """
+        uploads the given content using a local alias for the corresponding namespace
+        """
+        return util.check(self.mc("cp","-r",origin,f"{self.alias}/{bucket}"),"upload_folder_content",True)
 
 
 

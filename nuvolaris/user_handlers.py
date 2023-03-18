@@ -24,6 +24,7 @@ import nuvolaris.couchdb as cdb
 import nuvolaris.user_config as user_config
 import nuvolaris.minio as minio
 import nuvolaris.kube as kube
+import nuvolaris.nginx_static as static
 
 def get_ucfg(spec):
     ucfg = user_config.UserConfig(spec)
@@ -47,6 +48,11 @@ def whisk_user_create(spec, name, **kwargs):
     if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
         minio.create_ow_storage(state, ucfg, owner)
 
+    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+        res = static.create_ow_static_endpoint(ucfg,owner)
+        logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} added = {res}")
+        state['static']= res
+
     return state
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisksusers')
@@ -61,7 +67,11 @@ def whisk_user_delete(spec, name, **kwargs):
 
     if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
         res = minio.delete_ow_storage(ucfg)
-        logging.info(f"OpenWhisk namespace {ucfg.get('namespace')} storage removed = {res}")   
+        logging.info(f"OpenWhisk namespace {ucfg.get('namespace')} storage removed = {res}")
+
+    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+        res = static.delete_ow_static_endpoint(ucfg)
+        logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} removed = {res}")    
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):

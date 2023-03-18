@@ -47,18 +47,8 @@ def create(owner=None):
     openwhisk.annotate(f"apihost={apihost}")
     url = urllib.parse.urlparse(apihost)
 
-    hostname = url.hostname
-
-    # ingress class default to nginx
-    ingress_class = "nginx"
-
-    # On microk8s ingress class must be public
-    if runtime == "microk8s":
-        ingress_class = "public"
-
-    # On k3s ingress class must be traefik
-    if runtime == "k3s":
-        ingress_class = "traefik" 
+    hostname = url.hostname    
+    ingress_class = cfg.detect_ingress_class()
 
     data = {
         "hostname":hostname,

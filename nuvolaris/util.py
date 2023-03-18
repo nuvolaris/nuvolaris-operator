@@ -18,7 +18,7 @@
 # this module wraps utilities functions
 import nuvolaris.kube as kube
 import logging
-import time, random, math
+import time, random, math, os
 import nuvolaris.config as cfg
 import uuid
 
@@ -178,4 +178,4 @@ def check(f, what, res):
         return res and True
     else:
         logging.warn(f"ERR: {what}")
-        return False         
+        return False                    
