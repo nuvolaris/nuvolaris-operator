@@ -78,6 +78,8 @@ ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
 ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
+ADD deploy/nginx-static /home/nuvolaris/deploy/nginx-static
+ADD deploy/content /home/nuvolaris/deploy/content
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin

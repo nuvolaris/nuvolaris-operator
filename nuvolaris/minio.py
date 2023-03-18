@@ -15,12 +15,17 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import kopf, logging, json
+import kopf, logging, json, os
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.minio_util as mutil
+
+def find_content_path(filename):
+    absolute_path = os.path.dirname(__file__)
+    relative_path = "../deploy/content"
+    return os.path.join(absolute_path, relative_path, filename)
 
 def create(owner=None):
     logging.info(f"*** configuring minio standalone")
@@ -79,8 +84,17 @@ def create_ow_storage(state, ucfg, owner=None):
     if(ucfg.get('object-storage.route.enabled')):
         bucket_name = ucfg.get("object-storage.route.bucket")
         logging.info(f"*** adding public bucket {bucket_name} for {namespace}")
-        res = minioClient.make_public_bucket(bucket_name)        
+        res = minioClient.make_public_bucket(bucket_name)   
         bucket_policy_names.append(f"{bucket_name}/*")
+
+        content_path = find_content_path("index.html")
+
+        if(content_path):
+            logging.info(f"uploading example content to {bucket_name} from {content_path}")
+            res = minioClient.upload_folder_content(content_path,bucket_name)
+        else:
+            logging.warn("could not find example static content to upload")
+
         state['storage_route']=res
 
     if(len(bucket_policy_names)>0):
