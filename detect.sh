@@ -15,7 +15,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
 if ! test -e .env
 then echo "kind" ; exit 0
 else export $(xargs <.env)
@@ -28,6 +28,8 @@ elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
 then echo "microk8s"
 elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
 then echo "lks"
+elif echo "$LABELS" | jq . | grep openshift.io >/dev/null
+then echo "openshift"
 elif echo "$LABELS" | jq . | grep 'instance-type.*k3s' >/dev/null
 then echo "k3s"
 elif echo "$LABELS" | jq . | awk '/nuvolaris.io\/kube/ {print $2}' | grep kind >/dev/null
