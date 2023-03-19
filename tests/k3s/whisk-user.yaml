@@ -15,20 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: v1
-kind: Pod
+apiVersion: nuvolaris.org/v1
+kind: WhiskUser
 metadata:
-  name: nuvolaris-operator
+  name: franztt
   namespace: nuvolaris
-spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ghcr.io/nuvolaris/nuvolaris-operator:latest
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
-      securityContext:
-          capabilities:
-            drop:
-            - ALL  
+spec: 
+  email: francesco@nuvolaris.io
+  password: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+  namespace: franztt
+  redis:
+    enabled: true
+    prefix: franztt
+    password: fttredispwd
+  object-storage:        
+    password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+    data:
+      enabled: true
+      bucket: franztt-data
+    route:
+      enabled: true
+      host: franztt.nuvolaris.org
+      bucket: franztt-web
+  mongodb:
+    enabled: true
+    database: franztt
+    password: ahfdajsfdafdasffdasdja

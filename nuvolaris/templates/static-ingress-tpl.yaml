@@ -15,22 +15,28 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ingress_name}}
   namespace: nuvolaris
   annotations:
+      kubernetes.io/ingress.class: "{{ingress_class}}"
+      {% if tls %}
+      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
+      {% endif %}
+      {% if tls and not ingress_class=='traefik'%}
       nginx.ingress.kubernetes.io/proxy-body-size: "48m"
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-      kubernetes.io/ingress.class: "{{ingress_class}}"
-      {% if tls %}
-      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
       nginx.ingress.kubernetes.io/use-regex: "true"
-      nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}
+      nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}/$1
       {% endif %}
+      {% if tls and ingress_class=='traefik' %}
+      traefik.ingress.kubernetes.io/router.middlewares: nuvolaris-{{middleware_ingress_name}}@kubernetescrd
+      {% endif %}      
 spec:
   {% if tls %}
   tls:
@@ -48,4 +54,4 @@ spec:
               service:
                 name: {{nginx_static_service}}
                 port: 
-                  number: {{nginx_static_service_port}}
+                  number: {{nginx_static_service_port}} 

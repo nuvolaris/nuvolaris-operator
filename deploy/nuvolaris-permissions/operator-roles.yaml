@@ -77,6 +77,11 @@ rules:
   resources: ["mongodbcommunity","mongodbcommunity/finalizers","mongodbcommunity/spec","mongodbcommunity/status"]
   verbs: ["get","patch","list","update","watch","create","delete"]
 
+# required for traefik middlewares
+- apiGroups: ["traefik.containo.us"]
+  resources: ["middlewares"]
+  verbs: ["get","patch","list","update","watch","create","delete"]
+
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
