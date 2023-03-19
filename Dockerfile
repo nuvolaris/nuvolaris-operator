@@ -68,7 +68,9 @@ ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
-RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
+RUN chown -R nuvolaris:nuvolaris /home/nuvolaris ;\
+    chmod 0775 /home/nuvolaris ;\
+    chmod ug+x /home/nuvolaris/*.sh
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin
 RUN curl -sSL https://install.python-poetry.org | python3.10 -
