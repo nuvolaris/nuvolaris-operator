@@ -57,13 +57,24 @@ def static_ingress_name(namespace):
 def static_secret_name(namespace):
     return f"{namespace}-static-secret"
 
+def static_middleware_ingress_name(namespace):
+    return f"{namespace}-static-ingress-add-prefix"    
+
 def render_ingress_template(namespace,template,data):
     """
     uses the given template policy to render a final ingress template.
     """  
     out = f"/tmp/__{namespace}_{template}"
     file = ntp.spool_template(template, out, data)
-    return os.path.abspath(file)      
+    return os.path.abspath(file)
+
+def render_traefik_middleware_template(namespace,template,data):
+    """
+    uses the given template policy to render a final ingress template.
+    """  
+    out = f"/tmp/__{namespace}_{template}"
+    file = ntp.spool_template(template, out, data)
+    return os.path.abspath(file)          
 
 def create_ow_static_endpoint(ucfg, owner=None):
     namespace = ucfg.get("namespace")
@@ -79,17 +90,24 @@ def create_ow_static_endpoint(ucfg, owner=None):
     data = {
         "namespace":namespace,
         "ingress_name": static_ingress_name(namespace),
+        "middleware_ingress_name":static_middleware_ingress_name(namespace),
         "secret_name": static_secret_name(namespace),
         "ingress_class": ingress_class,
         "tls": tls,
         "hostname": host,        
-        "rewrite_target":f"/{bucket}/$1",
+        "rewrite_target":f"/{bucket}",
         "nginx_static_service": "nuvolaris-static-svc",
         "nginx_static_service_port": 80,
         "context_path":context_path
     }
 
     try:
+        if(ingress_class == 'traefik'):
+            logging.info(f"*** configuring traefik middleware {data['middleware_ingress_name']}")
+            path_to_template_yaml = render_traefik_middleware_template(namespace,"traefik-prefix-middleware-tpl.yaml",data)
+            res = kube.kubectl("apply", "-f",path_to_template_yaml)
+            os.remove(path_to_template_yaml)
+
         path_to_template_yaml = render_ingress_template(namespace,"static-ingress-tpl.yaml",data)
         res = kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)
@@ -101,8 +119,13 @@ def create_ow_static_endpoint(ucfg, owner=None):
 def delete_ow_static_endpoint(ucfg):
     namespace = ucfg.get("namespace")
     logging.info(f"*** removing static endpoint for {namespace}")
+    ingress_class = cfg.detect_ingress_class()
     
     try:
+        if(ingress_class == 'traefik'):
+            middleware_name = static_middleware_ingress_name(namespace)
+            kube.kubectl("delete", "middleware.traefik.containo.us",middleware_name)
+
         ingress_name = static_ingress_name(namespace)
         return kube.kubectl("delete", "ingress",ingress_name)
     except Exception as e:

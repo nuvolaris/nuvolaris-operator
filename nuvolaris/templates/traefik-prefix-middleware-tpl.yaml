@@ -15,16 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: v1
-kind: Pod
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
 metadata:
-  name: nuvolaris-operator
   namespace: nuvolaris
+  name: {{middleware_ingress_name}}
 spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ghcr.io/nuvolaris/nuvolaris-operator:latest
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
+  addPrefix:
+    prefix: {{rewrite_target}}
