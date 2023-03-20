@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: couchdb
+  name: couchdb-np
   namespace: nuvolaris
 spec:
   type: NodePort
@@ -29,3 +29,15 @@ spec:
     - port: 5984
       targetPort: 5984
       nodePort: 30984
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb
+  namespace: nuvolaris
+spec:
+  selector:
+    name: couchdb
+  ports:   
+    - port: 5984
+      targetPort: 5984

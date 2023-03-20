@@ -46,7 +46,7 @@ RUN WSK_VERSION=1.2.0 ;\
     WSK_URL="$WSK_BASE/$WSK_VERSION/OpenWhisk_CLI-$WSK_VERSION-linux-$ARCH.tgz" ;\
     curl -sL "$WSK_URL" | tar xzvf - -C /usr/bin/
 # add user
-RUN useradd -m -s /bin/bash nuvolaris && \
+RUN useradd -m -s /bin/bash -g root -N nuvolaris && \
     echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
 WORKDIR /home/nuvolaris
 # install the operator
@@ -68,11 +68,14 @@ ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
-RUN chown -R nuvolaris:nuvolaris /home/nuvolaris ;\
-    chmod 0775 /home/nuvolaris ;\
-    chmod ug+x /home/nuvolaris/*.sh
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin
 RUN curl -sSL https://install.python-poetry.org | python3.10 -
-RUN cd /home/nuvolaris ; poetry install
+RUN poetry install
+USER root
+RUN chown -R nuvolaris /home/nuvolaris ;\
+    chgrp -R root /home/nuvolaris ;\
+    chmod -R 0775 /home/nuvolaris
+USER nuvolaris
+ENV HOME=/home/nuvolaris
 CMD ./run.sh

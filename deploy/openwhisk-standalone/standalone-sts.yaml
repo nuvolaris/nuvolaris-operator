@@ -47,9 +47,9 @@ spec:
         ports:
         - name: controller
           containerPort: 8080
-        - name: axa-remoting
+        - name: akka-remoting
           containerPort: 25520
-        - name: axa-mgmt-http
+        - name: akka-mgmt-http
           containerPort: 19999
         livenessProbe:
           httpGet:
@@ -67,6 +67,22 @@ spec:
           initialDelaySeconds: 20        
           periodSeconds: 10
           timeoutSeconds: 10
+
+        resources:
+          requests:
+            memory: "1G"
+          limits:
+            memory: "4G"
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          #seccompProfile:
+          #  type: RuntimeDefault
+          #allowPrivilegeEscalation: false
+          #readOnlyRootFilesystem: false 
+          #runAsNonRoot: true
+
         env:
 
         - name: "PORT"
@@ -177,8 +193,8 @@ spec:
         - name: "CONFIG_whisk_couchdb_controller_password"
           value: "s0meP@ass2"          
 
-        - name: "CONFIG_axa_cluster_seedNodes_0"
-          value: "axa://controller-actor-system@$(POD_IP):25520"
+        - name: "CONFIG_akka_cluster_seedNodes_0"
+          value: "akka://controller-actor-system@$(POD_IP):25520"
         - name: "CONFIG_logback_log_level"
           value: "INFO"
 
