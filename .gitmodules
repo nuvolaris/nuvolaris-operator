@@ -15,3 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+[submodule "olaris"]
+	path = olaris
+	url = https://github.com/nuvolaris/olaris
