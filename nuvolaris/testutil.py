@@ -20,7 +20,9 @@ import re
 import flatdict
 import json
 import time
+import os
 import requests as req
+from subprocess import run
 
 # takes a string, split in lines and search for the word (a re)
 # if field is a number, splits the line in fields separated by spaces and print the selected field
@@ -167,6 +169,20 @@ def load_sample_config(name="whisk"):
     with open(f"tests/{name}.yaml") as f: 
         c = yaml.safe_load(f)
         return c['spec']
+
+def load_image_env():
+    # read operator image from Dockerfile or env
+    r = run('grep "ARG OPERATOR_IMAGE_DEFAULT=" Dockerfile', shell=True, capture_output=True)
+    opimg = r.stdout.strip().decode("ascii").split("=")[-1]
+    r = run('grep MY_OPERATOR_IMAGE .env', shell=True, capture_output=True)
+    if r.returncode == 0:
+        opimg = r.stdout.strip().decode("ascii").split("=")[-1]
+    os.environ["OPERATOR_IMAGE"] = opimg
+    # read operato tag from git
+    r = run('git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD', shell=True, capture_output=True)
+    tag = r.stdout.strip().decode("ascii")
+    os.environ["OPERATOR_TAG"] = tag
+
 
 def json2flatdict(data):
     return dict(flatdict.FlatterDict(json.loads(data), delimiter="."))

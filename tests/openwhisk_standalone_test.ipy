@@ -19,13 +19,21 @@
 import nuvolaris.config as cfg
 import nuvolaris.testutil as tu
 import nuvolaris.openwhisk_standalone as ow
+import nuvolaris.couchdb as cdb
 import nuvolaris.kube as kube
 import os
 
 !kubectl -n nuvolaris delete all --all
 !kubectl -n nuvolaris delete pvc --all
 
+tu.load_image_env()
 assert(cfg.configure(tu.load_sample_config()))
+cfg.detect()
+cfg.put("couchdb.host", "couchdb")
+cdb.create(None)
+!kubectl -n nuvolaris wait --for=condition=complete job/couchdb-init --timeout=600s
+
+
 assert(cfg.put("controller.image","ghcr.io/nuvolaris/openwhisk-controller"))
 assert(cfg.put("controller.tag","0.3.0-morpheus.22122609"))
 assert(cfg.put("components.invoker",False))
@@ -37,6 +45,7 @@ assert(cfg.put("components.invoker",False))
 !kubectl apply -f tests/whisk.yaml
 
 wsk = kube.get("wsk/controller")
+
 ow.create(wsk)
 assert(kube.get("statefulset.apps/controller"))
 

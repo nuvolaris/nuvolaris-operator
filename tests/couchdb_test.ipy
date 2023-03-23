@@ -23,26 +23,12 @@ import nuvolaris.testutil as tu
 import nuvolaris.kube as kube
 import nuvolaris.couchdb as cdb
 
+tu.load_image_env()
 assert(cfg.configure(tu.load_sample_config()))
 cfg.detect()
 cfg.put("couchdb.host", "couchdb")
-
-# read operator image and tag
-r = !grep "ARG OPERATOR_IMAGE_DEFAULT=" Dockerfile
-opimg = r[0].split("=")[-1]
-r = !grep MY_OPERATOR_IMAGE .env
-if len(r) > 0:
-    opimg = r[0].split("=")[-1]
-r = !git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD
-tag = r[0]
-
-cfg.put("operator.image", opimg)
-cfg.put("operator.tag", tag)
-
-
-
-cdb.create()
-
+cdb.create(None)
 r = !kubectl -n nuvolaris wait --for=condition=complete job/couchdb-init --timeout=600s
+assert(r[0].find("condition met") != -1)
 r = !kubectl logs -l job=couchdb-init | grep "OK: add_subjects"
 assert(r[0].find("OK:") != -1)
