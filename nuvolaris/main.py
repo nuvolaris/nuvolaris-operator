@@ -141,7 +141,7 @@ def whisk_create(spec, name, **kwargs):
         logging.info(msg)
         state['static'] = "on"
     else:
-        state['static'] = "off"        
+        state['static'] = "off"         
     
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -207,13 +207,15 @@ def whisk_delete(spec, **kwargs):
         msg = cron.delete()
         logging.info(msg)
 
+    if cfg.get('components.static'):
+        msg = static.delete()
+        logging.info(msg) 
+
     if cfg.get("components.minio"):
         msg = minio.delete()
         logging.info(msg)
 
-    if cfg.get('components.static'):
-        msg = static.delete
-        logging.info(msg)              
+             
     
                          
 # tested by integration test

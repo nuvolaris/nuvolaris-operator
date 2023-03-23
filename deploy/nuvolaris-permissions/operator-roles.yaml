@@ -27,7 +27,7 @@ rules:
 
 # edit secrets cm po svc pvc ingresses serviceaccounts events
 - apiGroups: [""]
-  resources: ["routes", "configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events", "*/finalizers"]
+  resources: ["routes", "configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events","pods/exec", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 - apiGroups: [""]
