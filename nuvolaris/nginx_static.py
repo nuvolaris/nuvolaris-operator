@@ -30,7 +30,7 @@ def create(owner=None):
         "minio_post": cfg.get('minio.port') or "9000",
     }
     
-    kust = kus.patchTemplates("nginx-static", ["nginx-static-cm.yaml","nginx-static-dep.yaml"], data)    
+    kust = kus.patchTemplates("nginx-static", ["nginx-static-cm.yaml","nginx-static-sts.yaml"], data)    
     spec = kus.kustom_list("nginx-static", kust, templates=[], data=data)
 
     if owner:
@@ -39,6 +39,9 @@ def create(owner=None):
         cfg.put("state.ngix-static.spec", spec)
 
     res = kube.apply(spec)
+
+    # dynamically detect nginx pod and wait for readiness
+    util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-static')].metadata.name}")
 
     logging.info("*** configured nuvolaris nginx static provider")
     return res

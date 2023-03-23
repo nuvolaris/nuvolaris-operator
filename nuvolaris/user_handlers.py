@@ -24,6 +24,7 @@ import nuvolaris.couchdb as cdb
 import nuvolaris.user_config as user_config
 import nuvolaris.minio as minio
 import nuvolaris.kube as kube
+import nuvolaris.mongodb as mdb
 import nuvolaris.nginx_static as static
 
 def get_ucfg(spec):
@@ -53,6 +54,11 @@ def whisk_user_create(spec, name, **kwargs):
         logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} added = {res}")
         state['static']= res
 
+    if(ucfg.get('mongodb.enabled')):
+        res = mdb.create_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'),ucfg.get('mongodb.password'))
+        logging.info(f"Mongodb setup for {ucfg.get('namespace')} added = {res}")
+        state['mongodb']= res        
+
     return state
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisksusers')
@@ -71,7 +77,11 @@ def whisk_user_delete(spec, name, **kwargs):
 
     if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
         res = static.delete_ow_static_endpoint(ucfg)
-        logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} removed = {res}")    
+        logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} removed = {res}")
+
+    if(ucfg.get('mongodb.enabled')):
+        res = mdb.delete_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'))
+        logging.info(f"Mongodb setup for {ucfg.get('namespace')} removed = {res}")          
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):
