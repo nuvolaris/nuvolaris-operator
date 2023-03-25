@@ -22,3 +22,7 @@ metadata:
 data:
     redis-conf: |-
                 #requirepass <secure_password>
+                # The format of the external ACL user file is exactly the same as the
+                # format that is used inside redis.conf to describe users.
+                #
+                aclfile /etc/users.acl

@@ -31,13 +31,11 @@ spec:
       labels:
         name: redis
     spec:
-      restartPolicy: Always
+      restartPolicy: Always  
       containers:
       - name: redis
-        image: redis:5.0.4
-        command:
-          - redis-server
-          - "/redis-master/redis.conf"
+        image: redis:7.0.10
+        command: ["/bin/sh","-c","redis-server /redis-master/redis.conf"]
         env:
         - name: MASTER
           value: "true"
