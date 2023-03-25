@@ -21,7 +21,7 @@ metadata:
   namespace: nuvolaris
 data:
     redis-conf: |
-                #requirepass <secure_password>
+                requirepass {{redis_password}}           
 
 
 

@@ -100,3 +100,6 @@ spec:
         fires-perMinute: 999
     controller:
       javaOpts: "-Xmx2048M"
+  redis:
+    default:
+      password: s0meP@ass3

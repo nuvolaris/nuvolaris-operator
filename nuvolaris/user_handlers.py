@@ -26,6 +26,7 @@ import nuvolaris.minio as minio
 import nuvolaris.kube as kube
 import nuvolaris.mongodb as mdb
 import nuvolaris.nginx_static as static
+import nuvolaris.redis as redis
 
 def get_ucfg(spec):
     ucfg = user_config.UserConfig(spec)
@@ -57,7 +58,12 @@ def whisk_user_create(spec, name, **kwargs):
     if(ucfg.get('mongodb.enabled')):
         res = mdb.create_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'),ucfg.get('mongodb.password'))
         logging.info(f"Mongodb setup for {ucfg.get('namespace')} added = {res}")
-        state['mongodb']= res        
+        state['mongodb']= res  
+
+    if(ucfg.get('redis.enabled')):
+        res = redis.create_db_user(ucfg.get('namespace'),ucfg.get('redis.prefix'),ucfg.get('redis.password'))
+        logging.info(f"Redis setup for {ucfg.get('namespace')} added = {res}")
+        state['redis']= res                
 
     return state
 
@@ -81,8 +87,31 @@ def whisk_user_delete(spec, name, **kwargs):
 
     if(ucfg.get('mongodb.enabled')):
         res = mdb.delete_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'))
-        logging.info(f"Mongodb setup for {ucfg.get('namespace')} removed = {res}")          
+        logging.info(f"Mongodb setup for {ucfg.get('namespace')} removed = {res}")
+
+    if(ucfg.get('redis.enabled')):
+        res = redis.delete_db_user(ucfg.get('namespace'))
+        logging.info(f"Redis setup for {ucfg.get('namespace')} removed = {res}")
+
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):
     logging.info(f"*** detected an update of wsku/{name} under namespace {namespace}")
+
+@kopf.on.resume('nuvolaris.org', 'v1', 'whisksusers')
+def whisk_user_resume(spec, name, namespace, **kwargs):
+    logging.info(f"*** detected an update of wsku/{name} under namespace {namespace}")
+    ucfg = get_ucfg(spec)
+
+    state = {}
+    
+    if(ucfg.get('redis.enabled')):
+        res = redis.create_db_user(ucfg.get('namespace'),ucfg.get('redis.prefix'),ucfg.get('redis.password'))
+        logging.info(f"Redis setup for {ucfg.get('namespace')} resumed = {res}")
+        state['redis']= res
+
+    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+        state['static']= True
+
+    if(ucfg.get('mongodb.enabled')):
+        state['mongodb']= True          

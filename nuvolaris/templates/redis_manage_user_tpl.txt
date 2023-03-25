@@ -1,0 +1,13 @@
+AUTH {{redis_password}}
+{% if mode == 'create'%}
+ACL SETUSER {{namespace}}
+ACL SETUSER {{namespace}} ON >{{password}}
+ACL SETUSER {{namespace}} +SET
+ACL SETUSER {{namespace}} +GET
+ACL SETUSER {{namespace}} +DEL
+ACL SETUSER {{namespace}} ~{{prefix}}:*
+{% endif %}
+
+{% if mode == 'delete'%}
+ACL DELUSER {{namespace}}
+{% endif %}
