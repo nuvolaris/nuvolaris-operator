@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: openwhisk-route
+  namespace: nuvolaris
+  labels:
+    app: openwhisk-route
+spec:
+  host: {{apihost}}
+  to:
+    kind: Service
+    name: controller-ip
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge

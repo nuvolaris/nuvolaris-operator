@@ -18,7 +18,7 @@
 #
 if ! test -e .env
 then echo "kind" ; exit 0
-else export $(xargs <.env)
+else export $(grep -v '^#' .env | xargs)
 fi
 LABELS="$(kubectl get nodes -ojsonpath='{.items[].metadata.labels}' 2>/dev/null)"
 #echo $LABELS | jq .

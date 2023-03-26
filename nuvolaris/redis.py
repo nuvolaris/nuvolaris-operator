@@ -24,7 +24,6 @@ import os, os.path
 import logging
 import kopf
 
-
 def create(owner=None):
     logging.info("create redis")
     data = {

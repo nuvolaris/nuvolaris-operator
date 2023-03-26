@@ -30,7 +30,8 @@ import nuvolaris.couchdb_util as cu
 
 # init
 assert(cfg.configure(tu.load_sample_config()))
-assert(cfg.put("couchdb.host", "localhost"))
+cfg.put("couchdb.host", "localhost")
+assert(cfg.get("couchdb.host") == "localhost")
 import nuvolaris.couchdb_util 
 db = cu.CouchDB()
 

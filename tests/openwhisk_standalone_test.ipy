@@ -25,26 +25,22 @@ import os
 
 !kubectl -n nuvolaris delete all --all
 !kubectl -n nuvolaris delete pvc --all
+!kubectl apply -f deploy/nuvolaris-permissions
 
 tu.load_image_env()
-assert(cfg.configure(tu.load_sample_config()))
+wsk = tu.load_sample_config()
+cfg.configure(wsk)
 cfg.detect()
-cfg.put("couchdb.host", "couchdb")
+tu.set_apihost_from_kubeconfig(cfg)
+
+# init database
+#cfg.put("couchdb.host", "couchdb")
 cdb.create(None)
 !kubectl -n nuvolaris wait --for=condition=complete job/couchdb-init --timeout=600s
 
-
-assert(cfg.put("controller.image","ghcr.io/nuvolaris/openwhisk-controller"))
-assert(cfg.put("controller.tag","0.3.0-morpheus.22122609"))
-assert(cfg.put("components.invoker",False))
-
-!kubectl apply -f deploy/nuvolaris-permissions/nuvolaris-common.yaml
-!kubectl apply -f deploy/nuvolaris-permissions/openwhisk-core-roles.yaml
-!kubectl apply -f deploy/nuvolaris-permissions/openwhisk-runtimes-cm.yaml
-!kubectl apply -f deploy/nuvolaris-permissions/whisk-crd.yaml
-!kubectl apply -f tests/whisk.yaml
-
-wsk = kube.get("wsk/controller")
+assert(cfg.get("controller.image") == "ghcr.io/nuvolaris/openwhisk-controller")
+assert(cfg.get("controller.tag") == "0.3.0-morpheus.22122609")
+assert(not cfg.get("components.invoker"))
 
 ow.create(wsk)
 assert(kube.get("statefulset.apps/controller"))

@@ -31,10 +31,14 @@ vars:
     sh: awk -F= '/ENV CONTROLLER_TAG=/ { print $2 ; exit }' Dockerfile
   CONTROLLER_IMAGE:
     sh: awk -F= '/ENV CONTROLLER_IMAGE=/ { print $2 ; exit }' Dockerfile
-
+  APIKUBE:
+      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' 
+      
 env:
     APIHOST:
-      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|'
+    APIHOST_OSH:
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|' | sed -e 's/^api./nuvolaris.apps./'
       
 tasks:
 
@@ -87,24 +91,3 @@ tasks:
 
   enter: kubectl exec -ti nuvolaris-operator -- bash
 
-  mount: 
-  - |-
-    kubectl apply -f - <<EOF
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: busybox
-      namespace: nuvolaris
-    spec:
-      containers:
-      - name: busybox
-        image: busybox
-        command: ["sleep", "inf"]
-        volumeMounts:  
-          - name: mount
-            mountPath: "/mnt"
-      volumes:
-      - name: mount
-        persistentVolumeClaim:
-          claimName: nuvolaris/couchdb-pvc-couchdb-0
-    EOF

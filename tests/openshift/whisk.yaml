@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: $APIHOST
+      apihost: $APIHOST_OSH
       #apiport: 80
       #protocol: http 
   components:
@@ -35,9 +35,9 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: true
+    mongodb: false
     # start redis
-    redis: true
+    redis: false
     # start s3ninja
     s3bucket: false
     # start cron based action parser
