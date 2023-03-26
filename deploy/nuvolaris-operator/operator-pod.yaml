@@ -27,3 +27,7 @@ spec:
       image: ghcr.io/nuvolaris/nuvolaris-operator:latest
       command: ["./run.sh"]
       args: ["--verbose"]
+      securityContext:
+          capabilities:
+            drop:
+            - ALL  

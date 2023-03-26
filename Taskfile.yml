@@ -80,7 +80,7 @@ tasks:
   
   watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress
   watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
-  watch-osh: watch kubectl -n nuvolaris get svc,route
+  watch-osh: watch kubectl -n nuvolaris get sts,po,svc,route
 
   logs: >
     rm -f nuvolaris-operator.log ;

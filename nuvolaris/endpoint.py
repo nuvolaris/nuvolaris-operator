@@ -36,7 +36,7 @@ def create(owner=None):
     
     apihost = ""
 
-    if runtime in ["k3s","microk8s"]:
+    if runtime in ["k3s","microk8s", "openshift"]:
         apihost = openwhisk.apihost(None)
     else:
         namespace = util.get_ingress_namespace(runtime)

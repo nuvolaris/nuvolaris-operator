@@ -43,7 +43,7 @@ spec:
     # start cron based action parser
     cron: false
     # enable TLS
-    tls: false
+    tls: true
     # minio enabled or not
     minio: false            
   openwhisk:
