@@ -27,7 +27,7 @@ rules:
 
 # edit secrets cm po svc pvc ingresses serviceaccounts events
 - apiGroups: [""]
-  resources: ["configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events", "*/finalizers"]
+  resources: ["routes", "configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 - apiGroups: [""]
@@ -64,10 +64,13 @@ rules:
   resources: ["ingresses"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
-
 # required for mongodb
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["roles","rolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 - apiGroups: ["mongodbcommunity.mongodb.com"]

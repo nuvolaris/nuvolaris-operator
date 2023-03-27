@@ -101,6 +101,10 @@ tasks:
   instance:
     - task: d:instance
 
+  instance-and-log:
+    - task: d:instance
+    - kubectl -n nuvolaris logs pod/nuvolaris-operator -f
+
   destroy: 
     - task: d:destroy
 
