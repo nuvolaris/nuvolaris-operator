@@ -87,6 +87,9 @@ tasks:
 
   run:
     - task: d:run
+  
+  run-wfx:
+    - task: d:run-wfx
 
   permission:
     - task: t:permission
@@ -96,6 +99,9 @@ tasks:
 
   instance:
     - task: d:instance
+
+  instance-wfx:
+    - task: d:instance-wfx
 
   destroy: 
     - task: d:destroy
