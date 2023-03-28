@@ -38,6 +38,7 @@ spec:
     s3bucket: false
     # start cron based action parser
     cron: true
+    # tls
     tls: false
     # minio enabled or not
     minio: true          

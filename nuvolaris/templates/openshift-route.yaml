@@ -12,5 +12,7 @@ spec:
     name: controller-ip
   port:
     targetPort: 8080
+{% if tls %}
   tls:
     termination: edge
+{% endif %}
