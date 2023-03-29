@@ -21,6 +21,7 @@ import json, flatdict, os, os.path
 import yaml
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
+import nuvolaris.template as tpl
 
 # tested by an integration test
 @kopf.on.login()
@@ -36,55 +37,28 @@ def login(**kwargs):
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
 def workflows_create(spec, name, **kwargs):
     logging.info(f"*** workflows_create {name}")
-    jobTemplateRaw = """
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: ""
-    spec:
-      ttlSecondsAfterFinished: 100
-      template:
-        spec:
-          containers:
-            - name: ""
-              image: default-route-openshift-image-registry.apps.wfx.sciabarra.net/paas-images/wfm:0.2
-              env:
-                - name: APIHOST
-                  value: ""
-                - name: AUTH
-                  value: ""
-              args: []
-          restartPolicy: OnFailure
-    """
 
     whisk = dict(kube.kubectl('get', 'whisk', 'controller', namespace='nuvolaris', jsonpath='{.spec}')[0])
     cfg.clean()
     cfg.configure(whisk)
     cfg.detect()
     cfg.dump_config()
-    auth = cfg.get('openwhisk.namespaces.nuvolaris')
-    apihost= cfg.get('nuvolaris.apihost')
-    jobFile = ''
+    data = {
+        'name': '',
+        'apihost': cfg.get('nuvolaris.apihost'),
+        'auth': cfg.get('openwhisk.namespaces.nuvolaris'),
+        'args': [],
+        'image': 'ghcr.io/fsilletti/wfm:0.2'
+    }
 
-    for w in spec['workflows']:
-        jobTeplate = yaml.safe_load(jobTemplateRaw)
-        jobTeplate['metadata']['name'] = name
-        jobContainerTeplate = jobTeplate['spec']['template']['spec']['containers'][0]
-        jobContainerTeplate['name'] = name
-
-        if jobContainerTeplate['env'][0]['name'] == 'APIHOST':
-            jobContainerTeplate['env'][0]['value'] = apihost
-            jobContainerTeplate['env'][1]['value'] = auth
-        else:
-            jobContainerTeplate['env'][0]['value'] = auth
-            jobContainerTeplate['env'][1]['value'] = apihost
-
+    for w in spec.get('workflows'):
         argsK8s = []
-        for a in list(w['parameters'].keys()):
-            arg = a + '=' + str(w['parameters'][a])
+        for a in list(w.get('parameters').keys()):
+            arg = a + '=' + str(w.get('parameters').get(a))
             argsK8s.append(arg)
-        jobTeplate['spec']['template']['spec']['containers'][0]['args'] = argsK8s
-        jobFile =  jobFile + '---\n' + yaml.dump(jobTeplate, default_flow_style=False)
-    print(jobFile)
 
-
+        data['name'] = w.get('name')
+        data['args'] = argsK8s
+        obj = tpl.expand_template('workflow-job.yaml', data)
+        print(obj)
+        kube.apply(obj)
