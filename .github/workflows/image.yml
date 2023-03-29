@@ -85,11 +85,12 @@ jobs:
         if: ${{ env.NGROK == 'on' }}
         run: bash .github/wait.sh
       - name: AddIngress
-        run: task kind-ingress         
+        run: task kind:ingress         
       - name: Test
         run: task test
       - name: DockerLogin
-        run: task docker-login        
+        if:  ${{ env.GITHUB_USER != 'nuvolaris'}}
+        run: task docker-login
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:

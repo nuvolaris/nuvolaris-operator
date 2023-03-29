@@ -65,7 +65,7 @@ jobs:
       - name: BuildAndLoad
         run: task build-and-load
       - name: AddIngress
-        run: task kind-ingress        
+        run: task kind:ingress        
       - name: Test
         run: task test
         continue-on-error: true
