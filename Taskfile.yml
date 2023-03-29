@@ -73,6 +73,12 @@ tasks:
     status:
       - test -e $GOBIN/kopf
 
+
+  kind-ingress:
+    cmds:
+      - kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+
   env: env
   
   watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress
