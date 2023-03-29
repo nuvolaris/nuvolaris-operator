@@ -88,11 +88,6 @@ jobs:
         run: task kind:ingress         
       - name: Test
         run: task test
-      - name: DockerLogin     
-        run: |
-          if ${{ env.GITHUB_USER != 'nuvolaris'}} ; then
-            task docker-login
-          fi
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:
