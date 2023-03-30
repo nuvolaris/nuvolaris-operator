@@ -31,7 +31,7 @@ curl -sL $URL | tar tzvf - -C ~/.local/bin
 YQ_VER=v4.27.2
 YQ_BIN=yq_linux_amd64
 sudo wget https://github.com/mikefarah/yq/releases/download/${YQ_VER}/${YQ_BIN} -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
-sudo curl -sL "https://dl.min.io/client/mc/release/linux-${ARCH}/mc" -o /usr/bin/mc && sudo chmod +x /usr/bin/mc
+sudo wget https://dl.min.io/client/mc/release/linux-${ARCH}/mc -O /usr/bin/mc && sudo chmod +x /usr/bin/mc
 #URL="https://dl.k8s.io/release/$VER/bin/linux/$ARCH/kubectl"
 #curl -sSL "$URL" | sudo tee /usr/local/bin/kubectl && sudo chmod +x /usr/bin/kubectl
 #kubectl version
