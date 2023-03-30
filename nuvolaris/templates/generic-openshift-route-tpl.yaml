@@ -18,17 +18,21 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: openwhisk-route
+  name: {{route_name}}
   namespace: nuvolaris
   labels:
-    app: openwhisk-route
+    app: {{route_name}}
+  {% if is_static_ingress and apply_route_rewrite_rule %}
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/      
+  {% endif %}  
 spec:
   host: {{hostname}}
   to:
-    kind: Service
-    name: controller-ip
+    kind: {{service_kind}}
+    name: {{service_name}}
   port:
-    targetPort: 8080
+    targetPort: {{service_port}}
 {% if tls %}
   tls:
     termination: edge

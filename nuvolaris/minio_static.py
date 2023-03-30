@@ -57,13 +57,16 @@ def delete():
 def static_ingress_name(namespace):
     return f"{namespace}-static-ingress"
 
+def static_route_name(namespace):
+    return f"{namespace}-static-route"    
+
 def static_secret_name(namespace):
     return f"{namespace}-static-secret"
 
 def static_middleware_ingress_name(namespace):
     return f"{namespace}-static-ingress-add-prefix"    
 
-def render_ingress_template(namespace,template,data):
+def render_static_template(namespace,template,data):
     """
     uses the given template policy to render a final ingress template.
     """  
@@ -108,23 +111,62 @@ def prepare_static_ingress_data(ucfg):
     }
 
     return data
-                  
-def create_ow_static_endpoint(ucfg, owner=None):
-    namespace = ucfg.get("namespace")    
-    data = prepare_static_ingress_data(ucfg)
 
-    try:
-        if(data['apply_traefik_prefix_middleware']):
-            logging.info(f"*** configuring traefik middleware {data['middleware_ingress_name']}")
-            path_to_template_yaml = render_traefik_middleware_template(namespace,"traefik-prefix-middleware-tpl.yaml",data)
-            res = kube.kubectl("apply", "-f",path_to_template_yaml)
-            os.remove(path_to_template_yaml)
+def prepare_static_osh_data(ucfg):
+    namespace = ucfg.get("namespace")
+    runtime = cfg.get('nuvolaris.kube')
+    hostname = ucfg.get('object-storage.route.host')
+    bucket = ucfg.get('object-storage.route.bucket')    
+    tls = cfg.get('components.tls') and not runtime=='kind'
+    context_path = tls and "/" or f"/{bucket}"
 
-        logging.info(f"*** configuring static endpoint for {namespace}")
-        path_to_template_yaml = render_ingress_template(namespace,"generic-ingress-tpl.yaml",data)
+    data = {
+        "namespace":namespace,
+        "route_name": static_route_name(namespace),        
+        "tls": tls,
+        "hostname": hostname,        
+        "rewrite_target":f"/{bucket}",
+        "service_name": "nuvolaris-static-svc",
+        "service_port": 80,
+        "service_kind": "Service",
+        "context_path":context_path,
+        "is_static_ingress":True,
+        "apply_route_rewrite_rule":True
+    }
+
+    return data
+
+def create_static_ingress(namespace,data):
+    if(data['apply_traefik_prefix_middleware']):
+        logging.info(f"*** configuring traefik middleware {data['middleware_ingress_name']}")
+        path_to_template_yaml = render_traefik_middleware_template(namespace,"traefik-prefix-middleware-tpl.yaml",data)
         res = kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)
-        return res
+
+    logging.info(f"*** configuring static ingress endpoint for {namespace}")
+    path_to_template_yaml = render_static_template(namespace,"generic-ingress-tpl.yaml",data)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+    return res 
+
+def create_static_route(namespace,data):
+    logging.info(f"*** configuring static ingress route for {namespace}")
+    path_to_template_yaml = render_static_template(namespace,"generic-openshift-route-tpl.yaml",data)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+    return res      
+
+                  
+def create_ow_static_endpoint(ucfg, owner=None):
+    namespace = ucfg.get("namespace")
+    runtime = cfg.get('nuvolaris.kube')
+
+    try:
+        data = runtime=='openshift' and prepare_static_osh_data(ucfg) or prepare_static_ingress_data(ucfg)
+        if(runtime=='openshift'):
+            return create_static_route(namespace, data)
+        
+        return create_static_ingress(namespace, data)
     except Exception as e:
         logging.warn(e)       
         return False
@@ -133,14 +175,19 @@ def delete_ow_static_endpoint(ucfg):
     namespace = ucfg.get("namespace")
     logging.info(f"*** removing static endpoint for {namespace}")
     ingress_class = cfg.detect_ingress_class()
+    runtime = cfg.get('nuvolaris.kube')
     
     try:
         if(ingress_class == 'traefik'):            
             middleware_name = static_middleware_ingress_name(namespace)
             kube.kubectl("delete", "middleware.traefik.containo.us",middleware_name)
 
+        if(runtime=='openshift'):
+            route_name = static_route_name(namespace)
+            return kube.kubectl("delete", "route",route_name)
+
         ingress_name = static_ingress_name(namespace)
         return kube.kubectl("delete", "ingress",ingress_name)
     except Exception as e:
         logging.warn(e)       
-        return False           
+        return False

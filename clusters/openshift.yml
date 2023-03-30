@@ -64,3 +64,4 @@ tasks:
     cmds: 
     - >
       openshift-install destroy cluster --dir openshift --log-level=debug
+

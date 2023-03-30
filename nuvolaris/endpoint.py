@@ -59,8 +59,27 @@ def get_ingress_data(apihost, tls):
 
     return data
 
+def get_osh_data(apihost, tls):
+    url = urllib.parse.urlparse(apihost)
+    hostname = url.hostname    
+    ingress_class = cfg.detect_ingress_class()
+
+    data = {
+        "hostname":hostname,
+        "route_name":"openwhisk-route",
+        "tls":tls,
+        "ingress_name":"openwhisk-route",
+        "service_name":"controller-ip",
+        "service_kind":"Service",
+        "service_port":"8080",
+        "context_path":"/",
+        "static_ingress": False
+    }
+
+    return data    
+
 def create_osh_route_spec(data):
-    tpl = "openshift-route.yaml"
+    tpl = "generic-openshift-route-tpl.yaml"
     logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
     return kus.processTemplate("openwhisk-endpoint", tpl, data)
 
@@ -77,8 +96,8 @@ def create(owner=None):
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
 
-    data = get_ingress_data(apihost, tls)
-    spec = runtime=='openshift' and  create_osh_route_spec(data) or create_ingress_route_spec(data)
+    data = runtime=='openshift' and get_osh_data(apihost, tls) or get_ingress_data(apihost, tls)
+    spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)
 
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
