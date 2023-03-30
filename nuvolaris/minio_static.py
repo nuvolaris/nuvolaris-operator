@@ -79,15 +79,16 @@ def render_traefik_middleware_template(namespace,template,data):
     file = ntp.spool_template(template, out, data)
     return os.path.abspath(file)
 
-def prepare_static_ingress_data():
+def prepare_static_ingress_data(ucfg):
+    namespace = ucfg.get("namespace")
     runtime = cfg.get('nuvolaris.kube')
     host = ucfg.get('object-storage.route.host')
     bucket = ucfg.get('object-storage.route.bucket')
     tls = cfg.get('components.tls') and not runtime=='kind'
     ingress_class = cfg.detect_ingress_class()
     context_path = tls and "/" or f"/{bucket}"
-    apply_traefik_prefix_middleware = ingress_class in ['traefik']
-    apply_nginx_rewrite_rule = ingress_class not in ['traefik'] 
+    apply_traefik_prefix_middleware = ingress_class == 'traefik'
+    apply_nginx_rewrite_rule = not apply_traefik_prefix_middleware
 
     data = {
         "namespace":namespace,
@@ -101,23 +102,25 @@ def prepare_static_ingress_data():
         "service_name": "nuvolaris-static-svc",
         "service_port": 80,
         "context_path":context_path,
-        "apply_traefik_prefix_middleware":apply_traefik_prefix_middleware,
+        "apply_traefik_prefix_middleware": apply_traefik_prefix_middleware,
         "apply_nginx_rewrite_rule": apply_nginx_rewrite_rule,
         "is_static_ingress":True
     }
+
+    return data
                   
 def create_ow_static_endpoint(ucfg, owner=None):
-    namespace = ucfg.get("namespace")
-    logging.info(f"*** configuring static endpoint for {namespace}")
-    data = prepare_static_ingress_data()
+    namespace = ucfg.get("namespace")    
+    data = prepare_static_ingress_data(ucfg)
 
     try:
-        if(apply_traefik_prefix_middleware):
+        if(data['apply_traefik_prefix_middleware']):
             logging.info(f"*** configuring traefik middleware {data['middleware_ingress_name']}")
             path_to_template_yaml = render_traefik_middleware_template(namespace,"traefik-prefix-middleware-tpl.yaml",data)
             res = kube.kubectl("apply", "-f",path_to_template_yaml)
             os.remove(path_to_template_yaml)
 
+        logging.info(f"*** configuring static endpoint for {namespace}")
         path_to_template_yaml = render_ingress_template(namespace,"generic-ingress-tpl.yaml",data)
         res = kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)

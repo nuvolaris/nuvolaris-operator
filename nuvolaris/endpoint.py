@@ -30,36 +30,55 @@ def get_ingress(namespace="ingress-nginx"):
     
     return None
 
-def create(owner=None):
-    runtime = cfg.get('nuvolaris.kube')
-    tls = cfg.get('components.tls')
-    
+def get_api_host(runtime):
     apihost = ""
 
     if runtime in ["k3s","microk8s", "openshift"]:
         apihost = openwhisk.apihost(None)
     else:
         namespace = util.get_ingress_namespace(runtime)
-        apihost = openwhisk.apihost(get_ingress(namespace))    
+        apihost = openwhisk.apihost(get_ingress(namespace))
 
-    logging.info(f"*** Configuring ingress for apihost={apihost}")
-    
-    openwhisk.annotate(f"apihost={apihost}")
+    return apihost
+
+def get_ingress_data(apihost, tls):
     url = urllib.parse.urlparse(apihost)
-
     hostname = url.hostname    
     ingress_class = cfg.detect_ingress_class()
 
     data = {
         "hostname":hostname,
-        "ingress_class":ingress_class
+        "ingress_class":ingress_class,
+        "tls":tls,
+        "secret_name":"nuvolaris-letsencrypt-secret",
+        "ingress_name":"apihost",
+        "service_name":"controller",
+        "service_port":"3233",
+        "context_path":"/"
     }
 
-    tpl = (runtime == "kind" or not tls) and "apihost-in-http.yaml" or "apihost-in-https.yaml";
-    logging.info(f"*** Configuring host {hostname} endpoint for openwhisk controller using {tpl}")
+    return data
 
-    kust = kus.patchTemplates("openwhisk-endpoint", [tpl], data)
-    spec = kus.restricted_kustom_list("openwhisk-endpoint", kust, templates=[],templates_filter=[tpl],data=data)
+def create_osh_route_spec(data):
+    tpl = "openshift-route.yaml"
+    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
+    return kus.processTemplate("openwhisk-endpoint", tpl, data)
+
+def create_ingress_route_spec(data):
+    tpl = "generic-ingress-tpl.yaml"
+    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
+    return kus.processTemplate("openwhisk-endpoint", tpl, data)    
+
+def create(owner=None):
+    runtime = cfg.get('nuvolaris.kube')
+    tls = cfg.get('components.tls')
+    
+    apihost = get_api_host(runtime)    
+    logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
+    openwhisk.annotate(f"apihost={apihost}")
+
+    data = get_ingress_data(apihost, tls)
+    spec = runtime=='openshift' and  create_osh_route_spec(data) or create_ingress_route_spec(data)
 
     if owner:
         kopf.append_owner_reference(spec['items'], owner)

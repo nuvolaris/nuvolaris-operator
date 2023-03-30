@@ -23,7 +23,7 @@ metadata:
   labels:
     app: openwhisk-route
 spec:
-  host: {{apihost}}
+  host: {{hostname}}
   to:
     kind: Service
     name: controller-ip
