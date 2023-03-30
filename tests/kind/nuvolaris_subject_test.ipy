@@ -56,7 +56,7 @@ with KopfRunner(['run', '-A', '--verbose', 'nuvolaris/user_handlers.py']) as run
     # do something while the operator is running.
     !kubectl apply -f tests/whisk-user.yaml      
     time.sleep(1)  # give it some time to react and to sleep and to retry
-    wsku = kube.get("wsku/ftt")    
+    wsku = kube.get("wsku/franztt")    
     assert(wsku['spec'])
 
     !kubectl delete -f tests/whisk-user.yaml           

@@ -54,8 +54,6 @@ jobs:
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
-          envkey_GITHUB_TOKEN: ${{ secrets.GT_TOKEN }}
-          envkey_GITHUB_USER: ${{ secrets.GT_USER }}
           file_name: .env
           fail_on_empty: false        
       - name: Registry
@@ -87,10 +85,7 @@ jobs:
       - name: AddIngress
         run: task kind:ingress         
       - name: Test
-        run: task test
-      - name: DockerLogin
-        if:  ${{ github.actor != 'nuvolaris'}}
-        run: task docker-login        
+        run: task test       
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:

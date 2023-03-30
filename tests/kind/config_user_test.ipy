@@ -21,4 +21,4 @@ import nuvolaris.testutil as tu
 spec = tu.load_sample_user_config()
 cfg = user_cfg.UserConfig(spec)
 
-assert(cfg.get("namespace") == "ftt")
+assert(cfg.get("namespace") == "franztt")

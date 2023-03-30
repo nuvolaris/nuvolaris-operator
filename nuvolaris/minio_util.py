@@ -145,13 +145,13 @@ class MinioClient:
         """
         called to initialize a local minio alias for a namespace user (used to impersonate the user uploading content)
         """                 
-        self.mc("alias","set", f"local_{namespace}", self.minio_api_url, namespace, secret_key) 
+        return util.check(self.mc("alias","set", f"local_{namespace}", self.minio_api_url, namespace, secret_key),"init_namespace_alias_call",True)
 
     def remove_namespace_alias(self, namespace):
         """
         called to initialize to remove a local minio alias for a namespace user
         """                 
-        self.mc("alias","remove",f"local_{namespace}")
+        return util.check(self.mc("alias","remove",f"local_{namespace}"),"remove_namespace_alias_call",True)
 
     def upload_folder_content(self,origin,bucket):
         """
