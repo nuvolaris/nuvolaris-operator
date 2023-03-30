@@ -25,7 +25,7 @@ import nuvolaris.user_config as user_config
 import nuvolaris.minio as minio
 import nuvolaris.kube as kube
 import nuvolaris.mongodb as mdb
-import nuvolaris.nginx_static as static
+import nuvolaris.minio_static as static
 import nuvolaris.redis as redis
 
 def get_ucfg(spec):

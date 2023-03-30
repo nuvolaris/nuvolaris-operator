@@ -22,7 +22,7 @@ import nuvolaris.config as cfg
 import nuvolaris.testutil as tu
 import nuvolaris.minio as minio
 import nuvolaris.util as util
-import nuvolaris.nginx_static as nginx
+import nuvolaris.minio_static as nginx
 import logging
 
 # test

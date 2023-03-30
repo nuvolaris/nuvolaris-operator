@@ -26,7 +26,7 @@ metadata:
       {% if tls %}
       cert-manager.io/cluster-issuer: "letsencrypt-issuer"
       {% endif %}
-      {% if tls and not ingress_class=='traefik'%}
+      {% if is_static_ingress and apply_nginx_rewrite_rule %}
       nginx.ingress.kubernetes.io/proxy-body-size: "48m"
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
@@ -34,7 +34,7 @@ metadata:
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}/$1
       {% endif %}
-      {% if tls and ingress_class=='traefik' %}
+      {% if is_static_ingress and apply_traefik_prefix_middleware %}
       traefik.ingress.kubernetes.io/router.middlewares: nuvolaris-{{middleware_ingress_name}}@kubernetescrd
       {% endif %}      
 spec:
@@ -52,6 +52,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{nginx_static_service}}
+                name: {{service_name}}
                 port: 
-                  number: {{nginx_static_service_port}} 
+                  number: {{service_port}}

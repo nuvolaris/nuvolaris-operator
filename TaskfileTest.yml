@@ -112,6 +112,10 @@ tasks:
     echo $AUTH
     echo wsk property set --apihost $APIHOST --auth $AUTH
     wsk property set --apihost $APIHOST --auth $AUTH
+    which nuv && nuv auth --apihost $APIHOST --auth $AUTH
+    while ! wsk action list
+    do echo $(( N++)) "waiting for the load balancer to be ready..." ; sleep 10
+    done
   
   hello:
     - wsk -i action update hello tests/hello.js --web=true

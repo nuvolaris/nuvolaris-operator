@@ -30,7 +30,7 @@ import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
 import nuvolaris.openwhisk_patcher as patcher
-import nuvolaris.nginx_static as static
+import nuvolaris.minio_static as static
 
 # tested by an integration test
 @kopf.on.login()
