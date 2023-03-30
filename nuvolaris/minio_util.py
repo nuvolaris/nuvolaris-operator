@@ -100,13 +100,13 @@ class MinioClient:
         """
         assign the specified policy to the given username
         """        
-        return util.check(self.mc("admin","policy","set",self.alias,policy,f"user={username}"),"assign_policy_to_user",True)
+        return util.check(self.mc("admin","policy","attach",self.alias,policy,"--user", username),"assign_policy_to_user",True)
 
     def add_policy(self, policy, path_to_policy_json):
         """
         add a new policy into minio
         """        
-        return util.check(self.mc("admin","policy","add",self.alias,policy,path_to_policy_json),"add_policy",True)        
+        return util.check(self.mc("admin","policy","create",self.alias,policy,path_to_policy_json),"add_policy",True)        
 
     def remove_policy(self, policy):
         """

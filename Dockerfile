@@ -50,7 +50,8 @@ RUN rm -Rvf /tmp/minio-binaries ;\
     mkdir /tmp/minio-binaries ;\
     MINIO_BASE=https://dl.min.io/client/mc/release/linux ;\
     ARCH=$(dpkg --print-architecture) ;\
-    MINIO_URL="$MINIO_BASE-$ARCH/mc" ;\
+    MC_VER=RELEASE.2023-03-23T20-03-04Z ;\
+    MINIO_URL="$MINIO_BASE-$ARCH/mc.${MC_VER}" ;\
     curl -sL "$MINIO_URL" --create-dirs -o /tmp/minio-binaries/mc ;\
     chmod +x /tmp/minio-binaries/mc ;\
     mv /tmp/minio-binaries/mc /usr/bin/mc ;\
