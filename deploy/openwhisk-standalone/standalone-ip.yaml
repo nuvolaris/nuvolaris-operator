@@ -15,32 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
----
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Service
 metadata:
-  name: preload-runtimes
   namespace: nuvolaris
-  labels:
-    app: preload-runtimes
+  name: controller-ip
 spec:
-  template:
-    metadata:
-      name: preload-runtimes
-      labels:
-        app: preload-runtimes
-    spec:
-      containers:
-      - name: nodejs
-        image: "ghcr.io/nuvolaris/action-nodejs-v16:0.3.0-morpheus.22111407"
-        command: ["/bin/true"]
-      - name: python
-        image: "ghcr.io/nuvolaris/action-python-v310:0.3.0-morpheus.23012319"
-        command: ["/bin/true"]
-      - name: java
-        image: "ghcr.io/nuvolaris/action-java-v8:0.3.0-morpheus.22110809"
-        command: ["/bin/true"]
-      - name: go
-        image: "openwhisk/action-golang-v1.17:nightly"
-        command: ["/bin/true"]
-      restartPolicy: Never
+  type: ClusterIP
+  selector:
+    app: controller
+  ports:
+  - port: 8080
+    targetPort: 8080

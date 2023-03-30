@@ -49,6 +49,10 @@ rules:
   resources: ["clusterroles","clusterrolebindings","rolebindings","roles"]
   verbs: ["get", "list", "watch","create", "update", "patch", "delete"]
 
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes", "routes/custom-host"]
+  verbs: ["get","patch","list","update","watch","create","delete"]
+
 # tls specific
 - apiGroups: ["cert-manager.io"]
   resources: ["certificates"]

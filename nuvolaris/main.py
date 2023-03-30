@@ -59,7 +59,6 @@ def whisk_create(spec, name, **kwargs):
         "kafka": "?",  # Kafka
         "redis": "?",  # Redis
         "mongodb": "?",  # MongoDB
-        "s3bucket": "?",   # S3-compatbile buckets
         "cron": "?",   # Cron based actions executor
         "tls": "?",   # Cron based actions executor
         "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
@@ -93,7 +92,7 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['redis'] = "off"
 
-    if cfg.get('components.tls') and not runtime == "kind":        
+    if cfg.get('components.tls') and not runtime in [ "kind", "openshift"]:
         try:
             msg = issuer.create(owner)
             state['issuer'] = "on"
@@ -119,12 +118,6 @@ def whisk_create(spec, name, **kwargs):
             state['cron']= "error"
     else:
         state['cron'] = "off" 
-
-    if cfg.get('components.s3bucket'):
-        logging.warn("invoker not yet implemented")
-        state['s3bucket'] = "n/a"
-    else:
-        state['s3bucket'] = "off"       
 
     if cfg.get('components.mongodb'):
         msg = mongodb.create(owner)

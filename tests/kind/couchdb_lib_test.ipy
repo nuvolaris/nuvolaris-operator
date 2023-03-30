@@ -27,9 +27,10 @@ import nuvolaris.kube as kube
 import requests as req
 
 assert(cfg.configure(tu.load_sample_config()))
+cfg.put("couchdb.host", "localhost")
 assert(cfg.detect_labels()["nuvolaris.kube"] == "kind")
 assert(cfg.detect_storage()["nuvolaris.storageClass"] == "standard")
-assert(cfg.put("couchdb.host", "localhost"))
+assert(cfg.get("couchdb.host") == "localhost")
 
 !kubectl apply -f tests/kind/whisk.yaml
 wsk = kube.get("wsk/controller")

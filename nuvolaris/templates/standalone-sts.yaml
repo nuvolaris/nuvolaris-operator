@@ -48,9 +48,9 @@ spec:
         ports:
         - name: controller
           containerPort: 8080
-        - name: axa-remoting
+        - name: akka-remoting
           containerPort: 25520
-        - name: axa-mgmt-http
+        - name: akka-mgmt-http
           containerPort: 19999
         livenessProbe:
           httpGet:
@@ -68,6 +68,10 @@ spec:
           initialDelaySeconds: 20        
           periodSeconds: 10
           timeoutSeconds: 10
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
         env:
 
         - name: "PORT"

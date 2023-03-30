@@ -20,7 +20,11 @@ kind: Whisk
 metadata:
   name: controller
   namespace: nuvolaris
-spec: 
+spec:
+  nuvolaris:
+      apihost: $APIHOST
+      #apiport: 80
+      #protocol: http 
   components:
     # start openwhisk controller
     openwhisk: true
@@ -31,24 +35,22 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: true
+    mongodb: false
     # start redis
     redis: false
     # start s3ninja
     s3bucket: false
     # start cron based action parser
-    cron: true
-    # tls
-    tls: false
+    cron: false
+    # enable TLS
+    tls: true
     # minio enabled or not
-    minio: true          
+    minio: false            
   openwhisk:
     namespaces:
-      whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
-      nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+      whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+      nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
   couchdb:
-    host: couchdb
-    port: 5984
     volume-size: 10
     admin:
       user: whisk_admin
@@ -68,7 +70,6 @@ spec:
     nuvolaris:
       user: nuvolaris
       password: s0meP@ass3
-    exposed: true
   kafka:
     host: kafka
     volume-size: 10
@@ -77,17 +78,16 @@ spec:
     id: AKIAIOSFODNN7EXAMPLE
     key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     region: eu-central-1
-  controller:
-    protocol: "http"
-    host : "localhost"
-    port: "3233"
   scheduler:
     schedule: "* * * * *"
+  tls:
+    acme-registered-email: francesco@nuvolaris.io
+    acme-server-url: https://acme-v02.api.letsencrypt.org/directory
   minio:
     volume-size: 2
     nuvolaris:
       root-user: minioadmin
-      root-password: minioadmin
+      root-password: minioadmin 
   configs:
     limits:
       actions:
@@ -97,5 +97,5 @@ spec:
       triggers: 
         fires-perMinute: 999
     controller:
-      javaOpts: "-Xmx2048M"      
+      javaOpts: "-Xmx2048M"             
 

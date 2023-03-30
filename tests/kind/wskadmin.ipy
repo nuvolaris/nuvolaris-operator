@@ -29,7 +29,8 @@ import nuvolaris.kube as kube
 
 scf = tu.load_sample_config()
 assert(cfg.configure(scf))
-assert(cfg.put("couchdb.host", "localhost"))
+cfg.put("couchdb.host", "localhost")
+assert(cfg.get("couchdb.host") == "localhost")
 assert(not cdb.init())
 
 !./wskadmin.sh user create -ns msciab msciab

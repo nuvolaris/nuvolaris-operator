@@ -31,17 +31,24 @@ def create(owner=None):
 
     whisk_image = data["controller_image"]
     whisk_tag = data["controller_tag"]
-    
+
+    # adding a route for openshift
+    routes = []
+    if cfg.get("nuvolaris.kube") == "openshift":
+        data["apihost"] = cfg.get("nuvolaris.apihost")
+        routes = ["openshift-route.yaml"]
+
+    data["tls"] = cfg.get("components.tls")
+
     config = kus.image(whisk_image, newTag=whisk_tag)
     config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
-    spec = kus.kustom_list("openwhisk-standalone", config, templates=[], data=data)
+    spec = kus.kustom_list("openwhisk-standalone", config, templates=routes, data=data)
 
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
     else:
         cfg.put(CONTROLLER_SPEC, spec)
 
-    
     res = kube.apply(spec)
 
     # dynamically detect controller pod and wait for readiness

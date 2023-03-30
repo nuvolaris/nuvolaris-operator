@@ -56,6 +56,9 @@ includes:
   k3s:
     taskfile: clusters/k3s.yml
     dir: clusters
+  osh:
+    taskfile: clusters/openshift.yml
+    dir: clusters
 
 tasks:
 
@@ -83,6 +86,7 @@ tasks:
   
   watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress
   watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
+  watch-pod: watch kubectl -n nuvolaris get sts,po,svc,route
 
   logs: >
     rm -f nuvolaris-operator.log ;
@@ -94,6 +98,10 @@ tasks:
   run:
     - task: d:run
 
+  irun:
+   - task: instance
+   - task: d:run
+
   permission:
     - task: t:permission
 
@@ -102,6 +110,10 @@ tasks:
 
   instance:
     - task: d:instance
+
+  instance-and-log:
+    - task: d:instance
+    - kubectl -n nuvolaris logs pod/nuvolaris-operator -f
 
   destroy: 
     - task: d:destroy

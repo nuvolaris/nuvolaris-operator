@@ -26,15 +26,16 @@ spec:
     metadata:
       name: couchdb-init
       namespace: nuvolaris
+      labels:
+        job: couchdb-init
     spec:
       serviceAccount: nuvolaris-operator
       restartPolicy: Never      
       containers:
       - name: init-couchdb
         image: "{{image}}"
-        imagePullPolicy: "IfNotPresent"
+        imagePullPolicy: "Always"
         command: ["./dbinit.sh"]
-        #command: ["sleep", "inf"]
         env:
         - name: "NUVOLARIS_CONFIG"
           value: >
