@@ -1,0 +1,56 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nuvolaris-static
+  namespace: nuvolaris
+  labels:
+    app: nuvolaris-static
+spec:
+  serviceName: nuvolaris-static-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nuvolaris-static
+  template:
+    metadata:
+      labels:
+        app: nuvolaris-static
+    spec:
+      initContainers:
+      - name: check-minio
+        image: busybox:1.36.0
+        command: ['sh', '-c', "until nslookup {{minio_host}}.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for minio; sleep 2; done"]     
+      containers:
+      - name: nuvolaris-static
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: nginx-default-conf
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+            readOnly: true
+      volumes:
+        - name: nginx-default-conf
+          configMap:
+            name: nginx-static-conf-cm
+            items:
+              - key: default.conf
+                path: default.conf            

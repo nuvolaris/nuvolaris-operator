@@ -38,10 +38,14 @@ def exists(key):
     return key in _config
 
 def get(key, envvar=None, defval=None):
-    if key in _config:
-       return _config.get(key)
+    val = _config.get(key)
+
     if envvar and envvar in os.environ:
-        return os.environ[envvar]
+        val = os.environ[envvar]
+    
+    if val: 
+        return val
+    
     return defval
 
 def put(key, value):
@@ -134,6 +138,22 @@ def detect():
     detect_storage()
     detect_labels()
     detect_env()
+
+def detect_ingress_class():
+    runtime = _config['nuvolaris.kube']
+
+    # ingress class default to nginx
+    ingress_class = "nginx"
+
+    # On microk8s ingress class must be public
+    if runtime == "microk8s":
+        ingress_class = "public"
+
+    # On k3s ingress class must be traefik
+    if runtime == "k3s":
+        ingress_class = "traefik" 
+    
+    return ingress_class
 
 def dump_config():
     import nuvolaris.config as cfg

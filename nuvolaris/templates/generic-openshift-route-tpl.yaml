@@ -14,34 +14,26 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+
+apiVersion: route.openshift.io/v1
+kind: Route
 metadata:
-  name: apihost
+  name: {{route_name}}
   namespace: nuvolaris
+  labels:
+    app: {{route_name}}
+  {% if is_static_ingress and apply_route_rewrite_rule %}
   annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: "48m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      kubernetes.io/ingress.class: "{{ingress_class}}"
-      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
-    
+    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/      
+  {% endif %}  
 spec:
+  host: {{hostname}}
+  to:
+    kind: {{service_kind}}
+    name: {{service_name}}
+  port:
+    targetPort: {{service_port}}
+{% if tls %}
   tls:
-    - hosts:
-      - {{hostname}}
-      secretName: nuvolaris-letsencrypt-secret
-  rules:
-    - host: {{hostname}}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: controller
-                port: 
-                  number: 3233
+    termination: edge
+{% endif %}

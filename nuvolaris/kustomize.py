@@ -164,7 +164,7 @@ def configMapTemplate(name, where, template, data):
   - {template}=__{template}
 """
 
-# genearate a patch from a template
+# generate a patch from a template
 def patchTemplate(where, template, data):
     """   
     >>> import nuvolaris.testutil as tu
@@ -264,3 +264,13 @@ def restricted_kustom_list(where, *what, templates=[], templates_filter=[], data
 def raw(where, yamlfile):
   with open(f"deploy/{where}/{yamlfile}", 'r') as f:
     return list(yaml.load_all(f, yaml.Loader))
+
+def processTemplate(where,template,data):
+    """
+    merges the given template and write it under the deply/{where} folder returning the file path
+    """  
+    out = f"deploy/{where}/_{template}"
+    ntp.spool_template(template, out, data)
+    with open(out, 'r') as f:
+      res = list(yaml.load_all(f, yaml.Loader))
+      return {"apiVersion": "v1", "kind": "List", "items": res }

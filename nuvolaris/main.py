@@ -30,6 +30,7 @@ import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
 import nuvolaris.openwhisk_patcher as patcher
+import nuvolaris.minio_static as static
 
 # tested by an integration test
 @kopf.on.login()
@@ -64,7 +65,9 @@ def whisk_create(spec, name, **kwargs):
         "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
         "issuer": "?", # ClusterIssuer configuration
         "ingress": "?", # Ingress configuration
-        "minio": "?" # Minio configuration
+        "minio": "?", # Minio configuration
+        "static": "?", # Minio static endpoint provider
+        "zookeeper": "?" #Zookeeper configuration
     }
 
     runtime = cfg.get('nuvolaris.kube')
@@ -132,6 +135,13 @@ def whisk_create(spec, name, **kwargs):
         state['minio'] = "on"
     else:
         state['minio'] = "off"
+
+    if cfg.get('components.static'):
+        msg = static.create(owner)
+        logging.info(msg)
+        state['static'] = "on"
+    else:
+        state['static'] = "off"         
     
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -197,9 +207,15 @@ def whisk_delete(spec, **kwargs):
         msg = cron.delete()
         logging.info(msg)
 
+    if cfg.get('components.static'):
+        msg = static.delete()
+        logging.info(msg) 
+
     if cfg.get("components.minio"):
         msg = minio.delete()
-        logging.info(msg)       
+        logging.info(msg)
+
+             
     
                          
 # tested by integration test

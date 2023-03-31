@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "s3:*"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        {% for bucket_arn in bucket_arns -%}
+          "arn:aws:s3:::{{bucket_arn}}"
+          {% if not loop.last %}
+          ,
+          {% endif %}
+        {% endfor %}
+      ]
+    }
+  ]
+}

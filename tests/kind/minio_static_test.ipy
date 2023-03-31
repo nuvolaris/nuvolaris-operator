@@ -15,24 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: apihost
-  namespace: nuvolaris
-  annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: "48m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: controller
-                port: 
-                  number: 3233
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.minio as minio
+import nuvolaris.util as util
+import nuvolaris.minio_static as nginx
+import logging
+
+# test
+assert(cfg.configure(tu.load_sample_config()))
+assert(cfg.detect_storage()["nuvolaris.storageClass"])
+assert(minio.create())
+assert(nginx.create())
+
+assert(nginx.delete())
+assert(minio.delete())

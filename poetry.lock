@@ -571,6 +571,22 @@ files = [
 traitlets = "*"
 
 [[package]]
+name = "minio"
+version = "7.1.13"
+description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "minio-7.1.13-py3-none-any.whl", hash = "sha256:462aebd79000d5b923b2a728352014f76292bbd81a9d00e3ed25aa6ec4dc41f2"},
+    {file = "minio-7.1.13.tar.gz", hash = "sha256:8828615a20cde82df79c5a52005252ad29bb022cde25177a4a43952a04c3222c"},
+]
+
+[package.dependencies]
+certifi = "*"
+urllib3 = "*"
+
+[[package]]
 name = "multidict"
 version = "6.0.4"
 description = "multidict implementation"
@@ -1232,4 +1248,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e8a29ca9aed75c3ba6c5070ab36fda0e620328f1cfd8de65b5d6ac21f7eee7a5"
+content-hash = "2e2d7e2383fad371e0346116e29728f38b64688f47afe2aa289660583f6613dd"
