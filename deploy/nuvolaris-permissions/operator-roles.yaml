@@ -27,7 +27,7 @@ rules:
 
 # edit secrets cm po svc pvc ingresses serviceaccounts events
 - apiGroups: [""]
-  resources: ["configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events"]
+  resources: ["routes", "configmaps", "secrets", "pods", "services", "persistentvolumeclaims", "ingresses","serviceaccounts","events","pods/exec", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 - apiGroups: [""]
@@ -41,17 +41,22 @@ rules:
 
 # edit deployments daemonset statefulset
 - apiGroups: ["extensions", "apps"]
-  resources: ["deployments", "daemonsets", "statefulsets", "statefulsets/scale"]
+  resources: ["deployments", "daemonsets", "statefulsets", "statefulsets/scale", "*/finalizers" ]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# rbac
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings", "rolebindings/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 # edit jobs
 - apiGroups: ["batch"]
-  resources: ["jobs", "cronjobs"]
+  resources: ["jobs", "cronjobs", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
-# edit nuvolaris crd
+# edit nuvolaris crds
 - apiGroups: ["nuvolaris.org"]
-  resources: ["whisks","whisks/status"]
+  resources: ["whisks","whisks/status","whisksusers","whisksusers/status", "*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 # networking.k8s.io
@@ -64,8 +69,17 @@ rules:
   resources: ["roles","rolebindings"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
 - apiGroups: ["mongodbcommunity.mongodb.com"]
   resources: ["mongodbcommunity","mongodbcommunity/finalizers","mongodbcommunity/spec","mongodbcommunity/status"]
+  verbs: ["get","patch","list","update","watch","create","delete"]
+
+# required for traefik middlewares
+- apiGroups: ["traefik.containo.us"]
+  resources: ["middlewares"]
   verbs: ["get","patch","list","update","watch","create","delete"]
 
 ---

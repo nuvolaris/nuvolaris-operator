@@ -30,6 +30,7 @@ Jinja2 = "^3.0.3"
 requests = "^2.27.1"
 flatdict = "^4.0.1"
 croniter = "^1.3.5"
+minio = "^7.1.13"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.31.0"

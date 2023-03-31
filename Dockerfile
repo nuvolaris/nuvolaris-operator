@@ -45,14 +45,26 @@ RUN WSK_VERSION=1.2.0 ;\
     ARCH=$(dpkg --print-architecture) ;\
     WSK_URL="$WSK_BASE/$WSK_VERSION/OpenWhisk_CLI-$WSK_VERSION-linux-$ARCH.tgz" ;\
     curl -sL "$WSK_URL" | tar xzvf - -C /usr/bin/
+# Download MINIO client
+RUN rm -Rvf /tmp/minio-binaries ;\
+    mkdir /tmp/minio-binaries ;\
+    MINIO_BASE=https://dl.min.io/client/mc/release/linux ;\
+    ARCH=$(dpkg --print-architecture) ;\
+    MC_VER=RELEASE.2023-03-23T20-03-04Z ;\
+    MINIO_URL="$MINIO_BASE-$ARCH/mc.${MC_VER}" ;\
+    curl -sL "$MINIO_URL" --create-dirs -o /tmp/minio-binaries/mc ;\
+    chmod +x /tmp/minio-binaries/mc ;\
+    mv /tmp/minio-binaries/mc /usr/bin/mc ;\
+    rm -Rvf /tmp/minio-binaries
 # add user
-RUN useradd -m -s /bin/bash nuvolaris && \
+RUN useradd -m -s /bin/bash -g root -N nuvolaris && \
     echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
 WORKDIR /home/nuvolaris
 # install the operator
 ADD nuvolaris/*.py /home/nuvolaris/nuvolaris/
 ADD nuvolaris/files /home/nuvolaris/nuvolaris/files
 ADD nuvolaris/templates /home/nuvolaris/nuvolaris/templates
+ADD nuvolaris/policies /home/nuvolaris/nuvolaris/policies
 ADD deploy/nuvolaris-operator /home/nuvolaris/deploy/nuvolaris-operator
 ADD deploy/nuvolaris-permissions /home/nuvolaris/deploy/nuvolaris-permissions
 ADD deploy/openwhisk-standalone /home/nuvolaris/deploy/openwhisk-standalone
@@ -67,10 +79,17 @@ ADD deploy/cert-manager /home/nuvolaris/deploy/cert-manager
 ADD deploy/ingress-nginx /home/nuvolaris/deploy/ingress-nginx
 ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
+ADD deploy/nginx-static /home/nuvolaris/deploy/nginx-static
+ADD deploy/content /home/nuvolaris/deploy/content
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
-RUN chown -R nuvolaris:nuvolaris /home/nuvolaris
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin
 RUN curl -sSL https://install.python-poetry.org | python3.10 -
-RUN cd /home/nuvolaris ; poetry install
+RUN poetry install
+USER root
+RUN chown -R nuvolaris /home/nuvolaris ;\
+    chgrp -R root /home/nuvolaris ;\
+    chmod -R 0775 /home/nuvolaris
+USER nuvolaris
+ENV HOME=/home/nuvolaris
 CMD ./run.sh

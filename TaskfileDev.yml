@@ -31,16 +31,26 @@ vars:
     sh: awk -F= '/ENV CONTROLLER_TAG=/ { print $2 ; exit }' Dockerfile
   CONTROLLER_IMAGE:
     sh: awk -F= '/ENV CONTROLLER_IMAGE=/ { print $2 ; exit }' Dockerfile
-
+  APIKUBE:
+      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' 
+      
 env:
     APIHOST:
-      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' | sed -e 's|^.*//\(.*\):.*$|\1|'
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|'
+    APIHOST_OSH:
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|' | sed -e 's/^api./nuvolaris.apps./'
       
 tasks:
 
   env: env
 
-  cli: poetry run ipython -i profile.ipy
+  cli:
+    cmds:
+      - env OPERATOR_IMAGE="${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}" poetry run ipython -i profile.ipy
+    env:
+      CONTROLLER_IMAGE: "{{.CONTROLLER_IMAGE}}"
+      CONTROLLER_TAG: "{{.CONTROLLER_TAG}}"
+      OPERATOR_TAG: "{{.OPERATOR_TAG}}"
 
   run: 
     cmds:     
@@ -50,6 +60,8 @@ tasks:
       CONTROLLER_IMAGE: "{{.CONTROLLER_IMAGE}}"
       CONTROLLER_TAG: "{{.CONTROLLER_TAG}}"
       OPERATOR_TAG: "{{.OPERATOR_TAG}}"
+      COUCHDB_SERVICE_HOST: "localhost"
+      MINIO_API_HOST: "localhost"
   
   run-wfx: 
     cmds:     
@@ -93,24 +105,3 @@ tasks:
 
   enter: kubectl exec -ti nuvolaris-operator -- bash
 
-  mount: 
-  - |-
-    kubectl apply -f - <<EOF
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: busybox
-      namespace: nuvolaris
-    spec:
-      containers:
-      - name: busybox
-        image: busybox
-        command: ["sleep", "inf"]
-        volumeMounts:  
-          - name: mount
-            mountPath: "/mnt"
-      volumes:
-      - name: mount
-        persistentVolumeClaim:
-          claimName: nuvolaris/couchdb-pvc-couchdb-0
-    EOF

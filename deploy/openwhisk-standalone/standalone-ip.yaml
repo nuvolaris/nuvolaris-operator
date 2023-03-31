@@ -15,32 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
-  name: apihost
   namespace: nuvolaris
-  annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: "48m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-      kubernetes.io/ingress.class: "nginx"
-      cert-manager.io/cluster-issuer: "letsencrypt-issuer"
-    
+  name: controller-ip
 spec:
-  tls:
-    - hosts:
-      - localhost
-      secretName: nuvolaris-letsencrypt-secret
-  rules:
-    - host: localhost
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: controller
-                port: 
-                  number: 3233
+  type: ClusterIP
+  selector:
+    app: controller
+  ports:
+  - port: 8080
+    targetPort: 8080

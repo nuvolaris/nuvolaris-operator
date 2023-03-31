@@ -61,8 +61,6 @@ spec:
               #         type: string
               #       redis:
               #         type: string
-              #       s3bucket:
-              #         type: string
               #       cron:
               #         type: string
               #       tls:
@@ -100,11 +98,6 @@ spec:
           priority: 0
           jsonPath: .status.whisk_create.redis
           description: Redis
-        - name: S3Bucket
-          type: string
-          priority: 0
-          jsonPath: .status.whisk_create.s3bucket
-          description: S3Bucket
         - name: Cron
           type: string
           priority: 0

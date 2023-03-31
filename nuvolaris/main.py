@@ -30,6 +30,7 @@ import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
 import nuvolaris.openwhisk_patcher as patcher
+import nuvolaris.minio_static as static
 
 # tested by an integration test
 @kopf.on.login()
@@ -59,13 +60,14 @@ def whisk_create(spec, name, **kwargs):
         "kafka": "?",  # Kafka
         "redis": "?",  # Redis
         "mongodb": "?",  # MongoDB
-        "s3bucket": "?",   # S3-compatbile buckets
         "cron": "?",   # Cron based actions executor
         "tls": "?",   # Cron based actions executor
         "endpoint": "?", # Http/s controller endpoint # Http/s controller endpoint
         "issuer": "?", # ClusterIssuer configuration
         "ingress": "?", # Ingress configuration
-        "minio": "?" # Minio configuration
+        "minio": "?", # Minio configuration
+        "static": "?", # Minio static endpoint provider
+        "zookeeper": "?" #Zookeeper configuration
     }
 
     runtime = cfg.get('nuvolaris.kube')
@@ -93,7 +95,7 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['redis'] = "off"
 
-    if cfg.get('components.tls') and not runtime == "kind":        
+    if cfg.get('components.tls') and not runtime in [ "kind", "openshift"]:
         try:
             msg = issuer.create(owner)
             state['issuer'] = "on"
@@ -120,12 +122,6 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['cron'] = "off" 
 
-    if cfg.get('components.s3bucket'):
-        logging.warn("invoker not yet implemented")
-        state['s3bucket'] = "n/a"
-    else:
-        state['s3bucket'] = "off"       
-
     if cfg.get('components.mongodb'):
         msg = mongodb.create(owner)
         logging.info(msg)
@@ -139,6 +135,13 @@ def whisk_create(spec, name, **kwargs):
         state['minio'] = "on"
     else:
         state['minio'] = "off"
+
+    if cfg.get('components.static'):
+        msg = static.create(owner)
+        logging.info(msg)
+        state['static'] = "on"
+    else:
+        state['static'] = "off"         
     
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -204,9 +207,15 @@ def whisk_delete(spec, **kwargs):
         msg = cron.delete()
         logging.info(msg)
 
+    if cfg.get('components.static'):
+        msg = static.delete()
+        logging.info(msg) 
+
     if cfg.get("components.minio"):
         msg = minio.delete()
-        logging.info(msg)       
+        logging.info(msg)
+
+             
     
                          
 # tested by integration test

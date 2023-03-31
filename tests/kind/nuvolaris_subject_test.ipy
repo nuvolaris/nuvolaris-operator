@@ -25,6 +25,10 @@ import nuvolaris.testutil as tu
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import requests as req
+import time
+import subprocess
+import json
+from kopf.testing import KopfRunner
 
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.detect_labels()["nuvolaris.kube"] == "kind")
@@ -42,29 +46,25 @@ assert(db.wait_db_ready(60))
 assert(db.configure_single_node())
 assert(db.configure_no_reduce_limit())
 
-assert(db.create_db("test"))
-assert(db.update_doc("test", {"_id":"test"}))
-assert(db.get_doc("test", "test", no_auth=True)['_id'] == 'test')
-assert(db.add_user("hello", "world"))
-assert(db.add_role("test", ["hello"]))
-assert(db.get_doc("test", "test", no_auth=True) == None)
-assert(db.get_doc("test", "test", user="boh", password="mah") == None)
-assert(db.get_doc("test", "test", user="hello", password="world")['_id'] == 'test')
-
 assert(cdb.init_system(db))
 assert(cdb.init_subjects(db))
 assert(cdb.init_activations(db))
 assert(cdb.init_actions(db))
 assert(cdb.add_initial_subjects(db))
 
+with KopfRunner(['run', '-A', '--verbose', 'nuvolaris/user_handlers.py']) as runner:
+    # do something while the operator is running.
+    !kubectl apply -f tests/whisk-user.yaml      
+    time.sleep(1)  # give it some time to react and to sleep and to retry
+    wsku = kube.get("wsku/franztt")    
+    assert(wsku['spec'])
+
+    !kubectl delete -f tests/whisk-user.yaml           
+    time.sleep(1)  # give it some time to react
+
+assert runner.exit_code == 0
+assert runner.exception is None
+
 !kubectl -n nuvolaris delete all --all
 !kubectl -n nuvolaris delete pvc --all
 
-"""
-import nuvolaris.couchdb_util as cu
-import nuvolaris.couchdb as cdb
-import nuvolaris.testutil as tu
-import requests as req
-cdb.init()
-# TODO check the database after the init
-"""

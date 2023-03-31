@@ -56,6 +56,9 @@ includes:
   k3s:
     taskfile: clusters/k3s.yml
     dir: clusters
+  osh:
+    taskfile: clusters/openshift.yml
+    dir: clusters
 
 tasks:
 
@@ -72,11 +75,12 @@ tasks:
       - poetry install
     status:
       - test -e $GOBIN/kopf
-
+      
   env: env
   
-  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress
+  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress,route
   watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
+  watch-pod: watch kubectl -n nuvolaris get sts,po,svc,route
 
   logs: >
     rm -f nuvolaris-operator.log ;
@@ -91,6 +95,10 @@ tasks:
   run-wfx:
     - task: d:run-wfx
 
+  irun:
+   - task: instance
+   - task: d:run
+
   permission:
     - task: t:permission
 
@@ -102,6 +110,10 @@ tasks:
 
   instance-wfx:
     - task: d:instance-wfx
+
+  instance-and-log:
+    - task: d:instance
+    - kubectl -n nuvolaris logs pod/nuvolaris-operator -f
 
   destroy: 
     - task: d:destroy
@@ -173,6 +185,8 @@ tasks:
 
   clean:
     cmds:
+      - cmd: kubectl -n nuvolaris delete wsku --all
+        ignore_error: true    
       - cmd: kubectl -n nuvolaris delete wsk/controller
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete all --all

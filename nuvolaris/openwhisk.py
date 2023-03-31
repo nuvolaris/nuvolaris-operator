@@ -38,7 +38,7 @@ def ensure_host(ip_address_str):
 
 
 # this functions returns the apihost to be stored as annotation
-def apihost(apiHost):
+def apihost(apiHost=None):
     logging.info(f"*** openwhisk received ingress {apiHost}")
     runtime = cfg.get('nuvolaris.kube')
     url = urllib.parse.urlparse("https://pending")

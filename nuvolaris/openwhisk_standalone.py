@@ -31,7 +31,7 @@ def create(owner=None):
 
     whisk_image = data["controller_image"]
     whisk_tag = data["controller_tag"]
-    
+
     config = kus.image(whisk_image, newTag=whisk_tag)
     config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
     spec = kus.kustom_list("openwhisk-standalone", config, templates=[], data=data)
@@ -41,7 +41,6 @@ def create(owner=None):
     else:
         cfg.put(CONTROLLER_SPEC, spec)
 
-    
     res = kube.apply(spec)
 
     # dynamically detect controller pod and wait for readiness

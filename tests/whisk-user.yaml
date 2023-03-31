@@ -15,24 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: nuvolaris.org/v1
+kind: WhiskUser
 metadata:
-  name: apihost
+  name: franztt
   namespace: nuvolaris
-  annotations:
-      nginx.ingress.kubernetes.io/proxy-body-size: "48m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: controller
-                port: 
-                  number: 3233
+spec: 
+  email: francesco@nuvolaris.io
+  password: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+  namespace: franztt
+  redis:
+    enabled: false
+    prefix: ftt
+    password: fttredispwd
+  object-storage:        
+    password: dsadgasdfsagdfasfda
+    data:
+      enabled: false
+      bucket: ftt-data
+    route:
+      enabled: false
+      host: localhost
+      bucket: ftt-web
+  mongodb:
+    enabled: false
+    database: ftt
+    password: ahfdajsfdafdasffdasdja

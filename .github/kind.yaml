@@ -30,6 +30,12 @@ nodes:
   - hostPath: /tmp
     containerPath: /data
   extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP  
   - containerPort: 30232
     hostPort: 3232
     protocol: TCP
@@ -42,18 +48,27 @@ nodes:
   - containerPort: 30984
     hostPort: 5984
     protocol: TCP  
-  - containerPort: 30017
-    hostPort: 27017
+  - containerPort: 30992 
+    hostPort: 9092
     protocol: TCP
-  - containerPort: 30444
-    hostPort: 9444
+  - containerPort: 30644
+    hostPort: 9644
     protocol: TCP    
   - containerPort: 6379
     hostPort: 30379
     protocol: TCP
-  - containerPort: 80
-    hostPort: 80
+  - containerPort: 27017
+    hostPort: 32717
     protocol: TCP
-  - containerPort: 443
-    hostPort: 443
+  - containerPort: 28017
+    hostPort: 32817
+    protocol: TCP
+  - containerPort: 32717
+    hostPort: 27017
+    protocol: TCP
+  - containerPort: 32090
+    hostPort: 9000
+    protocol: TCP 
+  - containerPort: 32091
+    hostPort: 9090
     protocol: TCP

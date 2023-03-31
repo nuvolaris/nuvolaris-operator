@@ -22,7 +22,7 @@ metadata:
   name: preload-runtimes
   namespace: nuvolaris
   labels:
-    app: preloload-runtimes
+    app: preload-runtimes
 spec:
   template:
     metadata:

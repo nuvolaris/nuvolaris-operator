@@ -39,12 +39,13 @@ def exists(key):
 
 def get(key, envvar=None, defval=None):
     val = _config.get(key)
-    if val: 
-        return val
+
     if envvar and envvar in os.environ:
         val = os.environ[envvar]
+    
     if val: 
         return val
+    
     return defval
 
 def put(key, value):
@@ -88,6 +89,8 @@ def detect_labels(labels=None):
                 kube = "microk8s"
             elif j.find("lke.linode.com") >=0:
                 kube = "lks"
+            elif j.find("node.openshift.io") >=0:
+                kube = "openshift"
             elif j.endswith("kubernetes.io/instance-type"): 
                 kube = i[j]               
             # assign all the 'nuvolaris.io' labels
@@ -135,6 +138,22 @@ def detect():
     detect_storage()
     detect_labels()
     detect_env()
+
+def detect_ingress_class():
+    runtime = _config['nuvolaris.kube']
+
+    # ingress class default to nginx
+    ingress_class = "nginx"
+
+    # On microk8s ingress class must be public
+    if runtime == "microk8s":
+        ingress_class = "public"
+
+    # On k3s ingress class must be traefik
+    if runtime == "k3s":
+        ingress_class = "traefik" 
+    
+    return ingress_class
 
 def dump_config():
     import nuvolaris.config as cfg

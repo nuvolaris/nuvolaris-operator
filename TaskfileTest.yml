@@ -29,7 +29,7 @@ vars:
 
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "tests/{{.KUBE}}/{{.WHISK}}.yaml"
-  REDIS_URI: "redis://redis"
+  REDIS_URI: "redis://default:s0meP@ass3@redis"
   MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
   MONGO_RT: "ghcr.io/nuvolaris/action-nodejs-v14:0.3.0-morpheus.22081008"
   MINIO_RT: "ghcr.io/francescotimperi/action-nodejs-v14:0.3.0-morpheus.23012416"
@@ -118,34 +118,34 @@ tasks:
     done
   
   hello:
-    - wsk action update hello tests/hello.js --web=true
-    - wsk action invoke hello -r | grep "hello"
+    - wsk -i action update hello tests/hello.js --web=true
+    - wsk -i action invoke hello -r | grep "hello"
     - |
-      URL=$(wsk action get hello --url | tail +2)
-      curl -sL $URL | grep hello
+      URL=$(wsk -i action get hello --url | tail +2)
+      curl -skL $URL | grep hello
 
   ping:
-    - wsk package update redis -p redis "{{.REDIS_URI}}"
-    - wsk action update redis/ping tests/ping.js
-    - wsk action invoke redis/ping -r | grep "PONG"
+    - wsk -i package update redis -p redis "{{.REDIS_URI}}"
+    - wsk -i action update redis/ping tests/ping.js
+    - wsk -i action invoke redis/ping -r | grep "PONG"
 
   echo:
-    - wsk action update echo tests/echo.js -a provide-api-key true
-    - wsk action invoke echo -r | grep "__OW_API_KEY"
+    - wsk -i action update echo tests/echo.js -a provide-api-key true
+    - wsk -i action invoke echo -r | grep "__OW_API_KEY"
 
   api:
-    - wsk action update api tests/api.js -a provide-api-key true
-    - wsk action invoke api -r | grep '"api"'
+    - wsk -i action update api tests/api.js -a provide-api-key true
+    - wsk -i action invoke api -r | grep '"api"'
 
   mongo:
-    - wsk package update mongo -p dburi {{.MONGO_URI}}
-    - wsk action update mongo/mongo tests/mongo.js --docker {{.MONGO_RT}}
-    - wsk action invoke mongo/mongo -r | grep "hello"
+    - wsk -i package update mongo -p dburi {{.MONGO_URI}}
+    - wsk -i action update mongo/mongo tests/mongo.js --docker {{.MONGO_RT}}
+    - wsk -i action invoke mongo/mongo -r | grep "hello"
 
   minio:
-    - wsk package update minio -p minio_host {{.MINIO_HOST}} -p minio_port {{.MINIO_PORT}} -p minio_user {{.MINIO_USER}} -p minio_pwd {{.MINIO_PWD}}
-    - wsk action update minio/minio tests/minio.js --docker {{.MINIO_RT}}
-    - wsk action invoke minio/minio -r
+    - wsk -i package update minio -p minio_host {{.MINIO_HOST}} -p minio_port {{.MINIO_PORT}} -p minio_user {{.MINIO_USER}} -p minio_pwd {{.MINIO_PWD}}
+    - wsk -i action update minio/minio tests/minio.js --docker {{.MINIO_RT}}
+    - wsk -i action invoke minio/minio -r
     
   mongo2:
-    - wsk project deploy --manifest tests/mongo.yaml 
+    - wsk -i project deploy --manifest tests/mongo.yaml 

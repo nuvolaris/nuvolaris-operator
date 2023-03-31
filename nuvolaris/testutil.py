@@ -20,7 +20,13 @@ import re
 import flatdict
 import json
 import time
+import os
 import requests as req
+from subprocess import run
+from urllib.parse import urlparse
+import uuid
+import string
+import random
 
 # takes a string, split in lines and search for the word (a re)
 # if field is a number, splits the line in fields separated by spaces and print the selected field
@@ -168,6 +174,42 @@ def load_sample_config(name="whisk"):
         c = yaml.safe_load(f)
         return c['spec']
 
+# read environment variables from Dockerfile, .env and git config
+def load_image_env():
+    # operator images defaults in Dockerfile, can be overriden in .env
+    r = run('grep "ARG OPERATOR_IMAGE_DEFAULT=" Dockerfile', shell=True, capture_output=True)
+    opimg = r.stdout.strip().decode("ascii").split("=")[-1]
+    r = run('grep MY_OPERATOR_IMAGE .env', shell=True, capture_output=True)
+    if r.returncode == 0:
+        opimg = r.stdout.strip().decode("ascii").split("=")[-1]
+    os.environ["OPERATOR_IMAGE"] = opimg
+    # operator tag is the git tag of the operator
+    r = run('git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short HEAD', shell=True, capture_output=True)
+    tag = r.stdout.strip().decode("ascii")
+    os.environ["OPERATOR_TAG"] = tag
+    # controller images and tag are in the Dockerfile
+    r = run("grep -Po '(?<=CONTROLLER_IMAGE=).*' Dockerfile", shell=True, capture_output=True)
+    os.environ["CONTROLLER_IMAGE"] =  r.stdout.decode("ascii").strip()
+    r = run("grep -Po '(?<=CONTROLLER_TAG=).*' Dockerfile", shell=True, capture_output=True)
+    os.environ["CONTROLLER_TAG"] =  r.stdout.decode("ascii").strip()
+
+
+def set_apihost_from_kubeconfig(cfg):
+    # assume for k3s and microk8s, 
+    # the nuvolaris apihost is the same as the kube api server
+    r = run("kubectl config view -o json | jq -r '.clusters[0].cluster.server'", shell=True, capture_output=True)
+    server = r.stdout.decode("ascii").strip()
+    hostname = urlparse(server).hostname    
+    kube = cfg.get("nuvolaris.kube")
+    if kube is None:
+        return
+    if kube in ["k3s", "microk8s"]:
+        cfg.put("nuvolaris.apihost", hostname)
+    if kube == "openshift":
+        hostname1 =  ".".join(["nuvolaris", "apps"] + hostname.split(".")[1:])
+        cfg.put("nuvolaris.apihost", hostname1)
+
+
 def json2flatdict(data):
     return dict(flatdict.FlatterDict(json.loads(data), delimiter="."))
 
@@ -224,3 +266,34 @@ def retry(fn, value, max=10, delay=1):
         time.sleep(delay)
         print(i, "retrying...")
     return False
+
+def generate_ow_uid():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_uid())
+        36
+    """ 
+    return str(uuid.uuid4())
+
+def generate_ow_key():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_key())
+        64
+    """ 
+    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(64))
+
+def generate_ow_auth():
+    """
+        >>> import nuvolaris.testutil as util        
+        >>> len(util.generate_ow_auth())
+        101
+    """     
+    uid = generate_ow_uid()
+    key = generate_ow_key()
+    return f"{uid}:{key}"
+
+def load_sample_user_config(name="whisk-user"):
+    with open(f"tests/{name}.yaml") as f: 
+        c = yaml.safe_load(f)
+        return c['spec']    
