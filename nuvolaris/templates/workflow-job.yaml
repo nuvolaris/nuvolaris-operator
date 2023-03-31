@@ -1,0 +1,19 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{name}}
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+        - name: {{name}}
+          image: {{image}}
+          env:
+            - name: APIHOST
+              value: {{apihost}}
+            - name: AUTH
+              value: {{auth}}
+          args: {{args}}
+      restartPolicy: OnFailure

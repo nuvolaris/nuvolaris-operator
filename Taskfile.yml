@@ -91,6 +91,9 @@ tasks:
 
   run:
     - task: d:run
+  
+  run-wfx:
+    - task: d:run-wfx
 
   irun:
    - task: instance
@@ -104,6 +107,9 @@ tasks:
 
   instance:
     - task: d:instance
+
+  instance-wfx:
+    - task: d:instance-wfx
 
   instance-and-log:
     - task: d:instance
