@@ -226,7 +226,7 @@ tasks:
                   fi
             fi
         done
-        if -e _failed.txt
+        if test -e _failed.txt
         then echo "*** FAILED TESTS:"
              cat _failed.txt
         fi
