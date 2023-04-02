@@ -97,8 +97,8 @@ tasks:
     - task: d:run-wfx
 
   irun:
-   - task: instance
-   - task: d:run
+  - task: instance
+  - task: d:run
 
   permission:
     - task: t:permission
@@ -213,14 +213,23 @@ tasks:
       - task: iclean
       - |
         kubectl apply -f deploy/nuvolaris-permissions
+        rm -f _failed.txt
         for test in tests/{{.T}}*.ipy tests/{{.KUBE}}/{{.T}}*.ipy
         do  
             if test -e "$test"
             then  echo "*** [{{.KUBE}}] $test"
                   rm -f deploy/*/kustomization.yaml deploy/*/__*
-                  poetry run ipython $test {{.CLI_ARGS}}
+                  if poetry run ipython $test {{.CLI_ARGS}}
+                  then echo "OK: $test"
+                  else echo "FAIL: $test"
+                       echo $test >>_failed.txt
+                  fi
             fi
         done
+        if -e _failed.txt
+        then echo "*** FAILED TESTS:"
+             cat _failed.txt
+        fi
     silent: true
 
   dtest:

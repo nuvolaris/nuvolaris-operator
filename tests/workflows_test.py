@@ -38,4 +38,6 @@ check = {"_STEP_=start", "_WORKFLOW_=nginx","_ACTION_=create", "_APIHOST_=undefi
 assert(len(set(l) & check) == len(check))
 
 l = !kubectl -n nuvolaris logs job/workflow-test -c second
+check = {"_STEP_=start", "_WORKFLOW_=nginx","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL3=gamma"}
+assert(len(set(l) & check) == len(check))
 
