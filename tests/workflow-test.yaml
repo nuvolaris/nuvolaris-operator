@@ -18,7 +18,8 @@
 apiVersion: nuvolaris.org/v1
 kind: Workflows
 metadata:
-  name: test-workflow-nginx
+  name: workflow-test
+  namespace: nuvolaris
 spec:
   image: busybox
   command: 

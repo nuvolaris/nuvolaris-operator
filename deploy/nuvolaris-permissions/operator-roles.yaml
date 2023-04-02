@@ -56,7 +56,7 @@ rules:
 
 # edit nuvolaris crds
 - apiGroups: ["nuvolaris.org"]
-  resources: ["whisks","whisks/status","whisksusers","whisksusers/status", "*/finalizers"]
+  resources: ["whisks","whisks/status","whisksusers","whisksusers/status","workflows","workflows/status","*/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
 # networking.k8s.io

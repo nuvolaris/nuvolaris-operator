@@ -85,7 +85,7 @@ tasks:
 
   logs: >
     rm -f nuvolaris-operator.log ;
-    kubectl -n nuvolaris logs deploy/nuvolaris-operator -f | tee nuvolaris-operator.log
+    kubectl -n nuvolaris logs pod/nuvolaris-operator -f | tee nuvolaris-operator.log
 
   cli: 
     - task: d:cli
@@ -93,9 +93,6 @@ tasks:
   run:
     - task: d:run
   
-  run-wfx:
-    - task: d:run-wfx
-
   irun:
   - task: instance
   - task: d:run

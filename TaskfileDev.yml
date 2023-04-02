@@ -63,21 +63,9 @@ tasks:
       COUCHDB_SERVICE_HOST: "localhost"
       MINIO_API_HOST: "localhost"
   
-  run-wfx: 
-    cmds:     
-      # note that the .env is loaded after the env pameters
-      - env OPERATOR_IMAGE="${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}" ./run-wfx.sh
-    env:
-      CONTROLLER_IMAGE: "{{.CONTROLLER_IMAGE}}"
-      CONTROLLER_TAG: "{{.CONTROLLER_TAG}}"
-      OPERATOR_TAG: "{{.OPERATOR_TAG}}"
-
   instance:
     -  envsubst <{{.CONFIG}} | kubectl -n nuvolaris apply -f -
   
-  instance-wfx:
-    -  envsubst <{{.CONFIG}} | kubectl -n nuvolaris apply -f -
-
   show:
     - echo "*** {{.CONFIG}}" 
     - envsubst <{{.CONFIG}}

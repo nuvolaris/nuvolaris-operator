@@ -42,3 +42,4 @@ apihost.txt
 installer
 whisk.properties
 .task/
+*.log
