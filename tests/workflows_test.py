@@ -25,19 +25,18 @@ assert(cfg.configure(tu.load_sample_config()))
 
 name = "workflow-test"
 spec = tu.load_sample_config(name)
-job = wfx.generate_job(name, spec, "create")
+job = wfx.generate_job(name, spec, "create", "123")
 print(job)
 kube.apply(job)
 
-!kubectl -n nuvolaris wait --for=condition=complete job/workflow-test  --timeout=600s
+!kubectl -n nuvolaris wait --for=condition=complete job/123-workflow-test-create  --timeout=600s
 
-l = !kubectl -n nuvolaris logs job/workflow-test -c first
+l = !kubectl -n nuvolaris logs job/123-workflow-test-create -c first
 
 check = {"_STEP_=start", "_WORKFLOW_=nginx","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL1=alpha", "VAL2=beta"}
 
 assert(len(set(l) & check) == len(check))
 
-l = !kubectl -n nuvolaris logs job/workflow-test -c second
+l = !kubectl -n nuvolaris logs job/123-workflow-test-create -c second
 check = {"_STEP_=start", "_WORKFLOW_=nginx","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL3=gamma"}
 assert(len(set(l) & check) == len(check))
-

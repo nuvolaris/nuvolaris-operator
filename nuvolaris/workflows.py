@@ -16,15 +16,15 @@
 # under the License.
 #
 import kopf
-import logging, yaml, json, flatdict, os, os.path
+import logging, time, yaml, json, flatdict, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.template as tpl
 
-def generate_job(name, spec, action):
+def generate_job(name, spec, action, id):
     
     data = {
-        'name': name,
+        'name': f"{id}-{name}-{action}",
         'image': spec['image']
     }
 
@@ -62,9 +62,11 @@ def generate_job(name, spec, action):
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
 def workflows_create(spec, name, **kwargs):
     logging.info(f"*** workflows_create {name}")
-    kube.apply(generate_job(name, spec, "create"))
+    id = str(int(time.time()))
+    kube.apply(generate_job(name, spec, "create", id))
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'workflows')
 def workflows_delete(spec, name, **kwargs):
     logging.info(f"*** workflows_delete {name}")
-    kube.apply(generate_job(name, spec, "delete"))
+    id = str(int(time.time()))
+    kube.apply(generate_job(name, spec, "delete", id))
