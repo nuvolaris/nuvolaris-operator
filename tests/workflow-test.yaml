@@ -14,30 +14,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
----
-apiVersion: batch/v1
-kind: Job
+#
+apiVersion: nuvolaris.org/v1
+kind: Workflows
 metadata:
-  name: {{name}}
+  name: test-workflow-nginx
 spec:
-  ttlSecondsAfterFinished: 100
-  template:
-    spec:
-      containers:
-        {% for job in jobs %}
-        - name: {{job.name}}
-          {%if command %}
-          command: {{command}}
-          {% endif %}
-          image: {{image}}
-          {%if environ %}
-          env: {{environ}}
-          {% endif %}
-          args: {{job.args}}
-          securityContext:
-            capabilities:
-              drop:
-              - ALL
-        {% endfor %}
-      restartPolicy: Never
+  image: busybox
+  command: 
+  - env
+  env:
+    _WORKFLOW_: nginx
+    _STEP_: start
+  workflows:
+    - name: first
+      parameters:
+        VAL1: alpha
+        VAL2: beta
+    - name: second
+      parameters:
+        VAL3: gamma

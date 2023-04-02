@@ -15,17 +15,27 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: nuvolaris.org/v1
-kind: Workflows
-metadata:
-  name: demo-workflow
-spec:
-  workflows:
-    - name: livy
-      parameters:
-        NAMESPACE: demo
-        REPLICAS: 1
-    - name: spark
-      parameters:
-        NAMESPACE: demo
-        REPLICAS: 2
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.workflows as wfx
+
+cfg.clean()
+assert(cfg.configure(tu.load_sample_config()))
+
+name = "workflow-test"
+spec = tu.load_sample_config(name)
+job = wfx.generate_job(name, spec, "create")
+print(job)
+kube.apply(job)
+
+!kubectl -n nuvolaris wait --for=condition=complete job/workflow-test  --timeout=600s
+
+l = !kubectl -n nuvolaris logs job/workflow-test -c first
+
+check = {"_STEP_=start", "_WORKFLOW_=nginx","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL1=alpha", "VAL2=beta"}
+
+assert(len(set(l) & check) == len(check))
+
+l = !kubectl -n nuvolaris logs job/workflow-test -c second
+

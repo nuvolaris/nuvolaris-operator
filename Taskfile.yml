@@ -24,6 +24,7 @@ vars:
   BASETAG: 0.3.0-morpheus
   KUBE:
     sh: ./detect.sh
+  NS: "nuvolaris"
 
 dotenv:
   - .env
@@ -78,9 +79,9 @@ tasks:
       
   env: env
   
-  watch: watch kubectl -n nuvolaris get nodes,pod,svc,pvc,ingress,route
-  watch-cert: watch kubectl -n nuvolaris get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
-  watch-pod: watch kubectl -n nuvolaris get sts,po,svc,route
+  watch: watch kubectl -n {{.NS}} get nodes,pod,svc,pvc,ingress
+  watch-cert: watch kubectl -n {{.NS}} get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
+  watch-pod: watch kubectl -n {{.NS}} get sts,po,job
 
   logs: >
     rm -f nuvolaris-operator.log ;
@@ -185,8 +186,6 @@ tasks:
 
   clean:
     cmds:
-      - cmd: kubectl -n nuvolaris delete wsku --all
-        ignore_error: true    
       - cmd: kubectl -n nuvolaris delete wsk/controller
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete all --all

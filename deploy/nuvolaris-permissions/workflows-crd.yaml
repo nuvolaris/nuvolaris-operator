@@ -33,6 +33,17 @@ spec:
             spec:
               type: object
               properties:
+                image:
+                  type: "string"
+                command:
+                  type: "array"
+                  nullable: true
+                  items:
+                    type: string
+                env:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  nullable: true
                 workflows:
                   type: array
                   items:

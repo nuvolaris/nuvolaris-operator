@@ -16,49 +16,55 @@
 # under the License.
 #
 import kopf
-import logging
-import json, flatdict, os, os.path
-import yaml
+import logging, yaml, json, flatdict, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.template as tpl
 
-# tested by an integration test
-@kopf.on.login()
-def login(**kwargs):
-    token = '/var/run/secrets/kubernetes.io/serviceaccount/token'
-    if os.path.isfile(token):
-        logging.debug("found serviceaccount token: login via pykube in kubernetes")
-        return kopf.login_via_pykube(**kwargs)
-    logging.debug("login via client")
-    return kopf.login_via_client(**kwargs)
+def generate_job(name, spec, action):
+    
+    data = {
+        'name': name,
+        'image': spec['image']
+    }
 
+    if "command" in spec:
+        data['command'] = json.dumps(spec['command'])
+
+    environ = [
+        { "name": "_ACTION_", "value": action },
+        { "name":  "_APIHOST_", "value": cfg.get("nuvolaris.apihost", defval="undefined-apihost") },
+        { "name": "_AUTH_", "value": cfg.get("openwhisk.namespaces.nuvolaris",  defval="undefined-auth") }
+    ]
+    if "env" in spec:
+        environ += [ {"name": k, "value": spec['env'][k]} for k in spec['env']]
+    data['environ'] = json.dumps(environ)
+
+    data['jobs'] = []
+
+    for w in spec.get('workflows'):
+        job = {}
+        args = []
+        job['name'] = w['name']
+        params = w.get("parameters")
+        for k in params:
+            arg = f"{k}={params[k]}"
+            args.append(arg)
+        job['args'] = json.dumps(args)
+        data['jobs'].append(job)
+
+    data["jobs"] 
+
+    obj = tpl.expand_template('workflow-job.yaml', data)
+    return obj
+    
 # tested by an integration test
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
 def workflows_create(spec, name, **kwargs):
     logging.info(f"*** workflows_create {name}")
+    kube.apply(generate_job(name, spec, "create"))
 
-    whisk = dict(kube.kubectl('get', 'whisk', 'controller', namespace='nuvolaris', jsonpath='{.spec}')[0])
-    cfg.clean()
-    cfg.configure(whisk)
-    cfg.detect()
-    cfg.dump_config()
-    data = {
-        'name': '',
-        'apihost': cfg.get('nuvolaris.apihost'),
-        'auth': cfg.get('openwhisk.namespaces.nuvolaris'),
-        'args': [],
-        'image': 'ghcr.io/fsilletti/wfm:0.2'
-    }
-
-    for w in spec.get('workflows'):
-        argsK8s = []
-        for a in list(w.get('parameters').keys()):
-            arg = a + '=' + str(w.get('parameters').get(a))
-            argsK8s.append(arg)
-
-        data['name'] = w.get('name')
-        data['args'] = argsK8s
-        obj = tpl.expand_template('workflow-job.yaml', data)
-        print(obj)
-        kube.apply(obj)
+@kopf.on.delete('nuvolaris.org', 'v1', 'workflows')
+def workflows_delete(spec, name, **kwargs):
+    logging.info(f"*** workflows_delete {name}")
+    kube.apply(generate_job(name, spec, "delete"))
