@@ -31,9 +31,7 @@ spec:
           command: {{command}}
           {% endif %}
           image: {{image}}
-          {%if environ %}
-          env: {{environ}}
-          {% endif %}
+          env: {{job.environ}}
           args: {{job.args}}
           securityContext:
             capabilities:

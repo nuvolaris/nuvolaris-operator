@@ -32,13 +32,14 @@ def generate_job(name, spec, action, id):
         data['command'] = json.dumps(spec['command'])
 
     environ = [
+        { "name": "_WORKFLOW_", "value": ""}, # to be replaced with name
         { "name": "_ACTION_", "value": action },
         { "name":  "_APIHOST_", "value": cfg.get("nuvolaris.apihost", defval="undefined-apihost") },
         { "name": "_AUTH_", "value": cfg.get("openwhisk.namespaces.nuvolaris",  defval="undefined-auth") }
     ]
+
     if "env" in spec:
         environ += [ {"name": k, "value": spec['env'][k]} for k in spec['env']]
-    data['environ'] = json.dumps(environ)
 
     data['jobs'] = []
 
@@ -51,12 +52,11 @@ def generate_job(name, spec, action, id):
             arg = f"{k}={params[k]}"
             args.append(arg)
         job['args'] = json.dumps(args)
+        environ[0]['value'] = w['name']
+        job['environ'] = json.dumps(environ)
         data['jobs'].append(job)
 
-    data["jobs"] 
-
-    obj = tpl.expand_template('workflow-job.yaml', data)
-    return obj
+    return tpl.expand_template('workflow-job.yaml', data)
     
 # tested by an integration test
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
