@@ -21,7 +21,7 @@ header:
     copyright-owner: Apache Software Foundation
 
   paths-ignore:
-    - '.git-hooks/pre-commit'
+    - '**/.git-hooks/*'
     - 'playground'
     - '**/*.off'
     - '**/*.excalidraw'

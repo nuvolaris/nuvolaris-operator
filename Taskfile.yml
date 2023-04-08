@@ -217,15 +217,15 @@ tasks:
             then  echo "*** [{{.KUBE}}] $test"
                   rm -f deploy/*/kustomization.yaml deploy/*/__*
                   if poetry run ipython $test {{.CLI_ARGS}}
-                  then echo "OK: $test"
-                  else echo "FAIL: $test"
-                       echo $test >>_failed.txt
+                  then  echo "OK: $test"
+                  else  echo "FAIL: $test"
+                        echo $test >>_failed.txt
                   fi
             fi
         done
         if test -e _failed.txt
-        then echo "*** FAILED TESTS:"
-             cat _failed.txt
+        then  echo "*** FAILED TESTS:"
+              cat _failed.txt
         fi
     silent: true
 
