@@ -39,12 +39,12 @@ data:
     "runtimes": {
         "nodejs": [
             {
-                "kind": "nodejs:16",
+                "kind": "nodejs:18",
                 "default": true,
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
-                    "name": "action-nodejs-v16",
-                    "tag": "0.3.0-morpheus.22111407"
+                    "name": "action-nodejs-v18",
+                    "tag": "0.3.0-morpheus.23040714"
                 },
                 "deprecated": false,
                 "attached": {
@@ -64,7 +64,21 @@ data:
                         }
                     }
                 ]
-            }
+            },
+            {
+                "kind": "nodejs:16",
+                "default": false,
+                "image": {
+                    "prefix": "ghcr.io/nuvolaris",
+                    "name": "action-nodejs-v16",
+                    "tag": "0.3.0-morpheus.23040714"
+                },
+                "deprecated": false,
+                "attached": {
+                    "attachmentName": "codefile",
+                    "attachmentType": "text/plain"
+                }
+            }            
         ],
         "python": [
             {
