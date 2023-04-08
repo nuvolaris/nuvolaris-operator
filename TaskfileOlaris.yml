@@ -14,33 +14,16 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-.git-hooks/
-__pycache__/
-__pypackages__
-.pdm.toml
-.*-version
-kubeconfig
-openwhisk-deploy-kube/
-kustomization.yaml
-playground
-examples/
-aliases
-deploy/extract/
-deploy/whisk-system/
-node_modules/
-.env
-__*
-clusters/id_rsa*
-*.kubeconfig
-run.pid
-*.off
-actions/*/nuvolaris/
-_*.yaml
-apihost.txt
-.git-hooks/
-installer
-whisk.properties
-.task/
-*.log
-.latestcheck
+
+version: '3'
+
+env: 
+  DP: deploy/nuvolaris-permissions
+  OK: olaris/kubernetes
+
+tasks:
+  copy-yaml:
+  - cp -v $DP/nuvolaris-common.yaml $DP/openwhisk-runtimes-cm.yaml $OK/common
+  - cp -v $DP/openwhisk-core-roles.yaml $DP/operator-clusterroles.yaml $DP/operator-roles.yaml $OK/roles
+  - cp -v $DP/whisk-crd.yaml $DP/whisk-user-crd.yaml  $DP/workflows-crd.yaml $OK/crds
+  

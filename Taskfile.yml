@@ -36,6 +36,8 @@ includes:
     taskfile: TaskfileTest.yml
   b: 
     taskfile: TaskfileBuild.yml
+  o:
+    taskfile: TaskfileOlaris.yml
   kind:
     taskfile: clusters/kind.yml
     dir: clusters
@@ -123,9 +125,16 @@ tasks:
   minio: 
     - task: t:minio        
 
-  nuv:
-    - task: kind:config
-    - nuv setup --context=kind-nuvolaris --apihost=auto --image-tag={{.TAG}}
+  #nuv:
+  #  - task: kind:config
+  #  - nuv setup --context=kind-nuvolaris --apihost=auto --image-tag={{.TAG}}
+
+  re-nuv:
+    cmds:
+    - git pull origin main
+    - task rebuild
+    dir: ../nuv
+
 
   all:
     - task: permission

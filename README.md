@@ -21,9 +21,15 @@
 
 This is the Kubernetes Operator of the [bit.ly/nuvolaris](nuvolaris project).
 
-You can discuss it in the #[nuvolaris-operator](https://discord.gg/RzJ4FHR2aR) discord channel and in the forum under the category [operator](https://github.com/nuvolaris/nuvolaris/discussions/categories/operator).
-
 If you are interested in developing it, please read the [design document](DESIGN.md). Please also read the [development environment document](https://github.com/nuvolaris/nuvolaris/blob/main/docs/DEVEL.md) to learn how to setup it.
+
+If you wonder what are the strange subfolders, here is an explanation:
+
+- `nuvolaris` are python modules, and implements the operator logic, coded in Python. 
+- `nuv` is a git submodule, where is the code of Nuvolaris' CLI, `nuv`, coded in Go. Note that `nuv` is mostly a task intepreter, so the real logic is actually in the repo `olaris`.
+- `olaris` is another submodule, where is the code of the tasks `nuv` interprets
+
+So you generally build the `nuvolaris` operator as a docker image and publishi, build the `nuv` CLI and use the `olaris` tasks to install and manage it...
 
 ## Developer notes
 

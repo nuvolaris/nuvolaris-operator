@@ -51,6 +51,9 @@ header:
     - 'ngrok.log'
     - 'poetry.lock'
     - 'installer/**'
+    - 'nuv/**'
+    - 'olaris/**'
+
  
 dependency:
   files:
