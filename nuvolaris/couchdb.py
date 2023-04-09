@@ -180,6 +180,15 @@ def add_subject(db, namespace, auth):
     data = { "name": namespace, "key": key, "uuid": uuid}
     return check(update_templated_doc(db, dbn, "subject.json", data), f"add {namespace}", res)
 
+def init_user_metadata(db):
+    """
+    Add a new Openwhisk Couchdb database to host nuvolaris user relevant informations
+    """
+    dbn = "user_metadata"
+    res = check(db.wait_db_ready(60), "wait_db_ready", True)
+    res = check(db.create_db(dbn), "create_db: user_metadata", res)
+    return res    
+
 def create_ow_user(subject, auth):
     logging.info(f"authorizing OpenWhisk namespace {subject}")
 
