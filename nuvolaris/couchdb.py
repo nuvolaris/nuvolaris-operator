@@ -165,6 +165,7 @@ def init():
     res = check(init_activations(db), "init_activations", res)
     res = check(init_actions(db), "init_actions", res)
     res = check(add_initial_subjects(db), "add_subjects", res)
+    res = check(init_user_metadata(db), "init_user_metadata", res)
 
     # job process status code should be negated if the job is successfull
     return not res
