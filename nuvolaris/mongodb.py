@@ -27,8 +27,36 @@ import nuvolaris.mongodb_operator as operator
 import nuvolaris.mongodb_standalone as standalone
 import nuvolaris.kube as kube
 import nuvolaris.template as ntp
-import logging
+import logging, json
 import os
+
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
+
+def _add_mdb_user_metadata(ucfg, user_metadata):
+    """
+    adds an entry for the mongodb connectivity, i.e
+    something like "mongodb://{namespace}:{auth}@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"}
+    """ 
+
+    try:
+        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb')]}")
+
+        if(mdb_service):
+            mdb_service_name = mdb_service['metadata']['name']
+            mdb_pod_name = mdb_service['spec']['selector']['statefulset.kubernetes.io/pod-name']
+            mdb_ns = mdb_service['metadata']['namespace']
+
+            username = ucfg.get('namespace')
+            auth = ucfg.get('mongodb.password')
+            database = ucfg.get('mongodb.database')
+
+            mdb_url = f"mongodb://{username}:{auth}@{mdb_pod_name}.{mdb_service_name}.{mdb_ns}.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"
+            user_metadata.add_metadata("MONGODB_URL",mdb_url)
+        return None
+    except Exception as e:
+        logging.error(f"failed to build mongodb_url for {ucfg.get('mongodb.database')}: {e}")
+        return None  
 
 def create(owner=None):
     """
@@ -69,21 +97,25 @@ def exec_mongosh_command(pod_name,path_to_mdb_script):
     os.remove(path_to_mdb_script)
     return res
 
-def create_db_user(namespace, database, auth):
+def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
+    database = ucfg.get('mongodb.database')
     logging.info(f"authorizing new mongodb database {database}")
 
     try:
         data = util.get_mongodb_config_data()
-        data["subject"]=namespace
         data["database"]=database
-        data["auth"]=auth
+        data["subject"]=ucfg.get('namespace')
+        data["auth"]=ucfg.get('mongodb.password')
         data["mode"]="create"
 
-        path_to_mdb_script = render_mongodb_script(namespace,"mongodb_manage_user_tpl.js",data)
+        path_to_mdb_script = render_mongodb_script(ucfg.get('namespace'),"mongodb_manage_user_tpl.js",data)
         pod_name = util.get_pod_name("{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb')].metadata.name}")
 
         if(pod_name):
             res = exec_mongosh_command(pod_name,path_to_mdb_script)
+
+            if(res):
+                _add_mdb_user_metadata(ucfg, user_metadata)
             return res
 
         return None
@@ -110,4 +142,4 @@ def delete_db_user(namespace, database):
         return None
     except Exception as e:
         logging.error(f"failed to remove Mongodb database {namespace} authorization id and key: {e}")
-        return None    
+        return None         

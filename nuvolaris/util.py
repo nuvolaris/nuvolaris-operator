@@ -93,8 +93,8 @@ def get_pod_name(jsonpath,namespace="nuvolaris"):
     if(pod_name):
         return pod_name[0]
 
-    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")        
-
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")
+  
 # helper method waiting for a pod ready using the given jsonpath to retrieve the pod name
 def wait_for_pod_ready(pod_name_jsonpath, timeout="600s", namespace="nuvolaris"):
     try:        
@@ -189,4 +189,11 @@ def get_redis_config_data():
         "storageClass": cfg.get("nuvolaris.storageClass"),
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3"
     }
-    return data                           
+    return data
+
+def get_service(jsonpath,namespace="nuvolaris"):
+    services= kube.kubectl("get", "svc", namespace=namespace, jsonpath=jsonpath)
+    if(services):
+        return services[0]
+
+    raise Exception(f"could not find any svc matching jsonpath={jsonpath}")                                

@@ -21,15 +21,18 @@ import logging
 import json, flatdict, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.couchdb as cdb
-import nuvolaris.user_config as user_config
 import nuvolaris.minio as minio
 import nuvolaris.kube as kube
 import nuvolaris.mongodb as mdb
 import nuvolaris.minio_static as static
 import nuvolaris.redis as redis
+import nuvolaris.userdb_util as userdb
+
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
 
 def get_ucfg(spec):
-    ucfg = user_config.UserConfig(spec)
+    ucfg = UserConfig(spec)
     ucfg.dump_config()
     return ucfg
 
@@ -40,15 +43,16 @@ def whisk_user_create(spec, name, **kwargs):
     }
 
     ucfg = get_ucfg(spec)
+    user_metadata = UserMetadata(ucfg)
     owner = kube.get(f"wsku/{name}")
-
+    
     if(ucfg.get("namespace") and ucfg.get("password")):
-        res = cdb.create_ow_user(ucfg.get("namespace"),ucfg.get("password"))
+        res = cdb.create_ow_user(ucfg,user_metadata)
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res
 
     if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
-        minio.create_ow_storage(state, ucfg, owner)
+        minio.create_ow_storage(state, ucfg, user_metadata, owner)
 
     if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
         res = static.create_ow_static_endpoint(ucfg,owner)
@@ -56,14 +60,19 @@ def whisk_user_create(spec, name, **kwargs):
         state['static']= res
 
     if(ucfg.get('mongodb.enabled')):
-        res = mdb.create_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'),ucfg.get('mongodb.password'))
+        res = mdb.create_db_user(ucfg,user_metadata)
         logging.info(f"Mongodb setup for {ucfg.get('namespace')} added = {res}")
         state['mongodb']= res  
 
     if(ucfg.get('redis.enabled')):
-        res = redis.create_db_user(ucfg.get('namespace'),ucfg.get('redis.prefix'),ucfg.get('redis.password'))
+        res = redis.create_db_user(ucfg, user_metadata)
         logging.info(f"Redis setup for {ucfg.get('namespace')} added = {res}")
-        state['redis']= res                
+        state['redis']= res
+
+    # finally persists user metadata into the internal couchdb database
+    user_metadata.dump()
+    res = userdb.save_user_metadata(user_metadata)
+    state['user_metadata']= res          
 
     return state
 
@@ -93,6 +102,8 @@ def whisk_user_delete(spec, name, **kwargs):
         res = redis.delete_db_user(ucfg.get('namespace'))
         logging.info(f"Redis setup for {ucfg.get('namespace')} removed = {res}")
 
+    res = userdb.delete_user_metadata(ucfg.get('namespace'))
+
 
 @kopf.on.update('nuvolaris.org', 'v1', 'whisksusers')
 def whisk_user_update(spec, status, namespace, diff, name, **kwargs):
@@ -102,11 +113,12 @@ def whisk_user_update(spec, status, namespace, diff, name, **kwargs):
 def whisk_user_resume(spec, name, namespace, **kwargs):
     logging.info(f"*** detected an update of wsku/{name} under namespace {namespace}")
     ucfg = get_ucfg(spec)
+    user_metadata = UserMetadata(ucfg)
 
     state = {}
     
     if(ucfg.get('redis.enabled')):
-        res = redis.create_db_user(ucfg.get('namespace'),ucfg.get('redis.prefix'),ucfg.get('redis.password'))
+        res = redis.create_db_user(ucfg,user_metadata)
         logging.info(f"Redis setup for {ucfg.get('namespace')} resumed = {res}")
         state['redis']= res
 

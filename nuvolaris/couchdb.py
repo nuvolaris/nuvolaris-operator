@@ -23,6 +23,9 @@ import nuvolaris.config as cfg
 import nuvolaris.couchdb_util
 import nuvolaris.util as util
 
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
+
 from jinja2 import Environment, FileSystemLoader
 loader = FileSystemLoader(["./nuvolaris/templates", "./nuvolaris/files"])
 env = Environment(loader=loader)
@@ -165,7 +168,7 @@ def init():
     res = check(init_activations(db), "init_activations", res)
     res = check(init_actions(db), "init_actions", res)
     res = check(add_initial_subjects(db), "add_subjects", res)
-    res = check(init_user_metadata(db), "init_user_metadata", res)
+    res = check(init_users_metadata(db), "init_users_metadata", res)
 
     # job process status code should be negated if the job is successfull
     return not res
@@ -181,16 +184,19 @@ def add_subject(db, namespace, auth):
     data = { "name": namespace, "key": key, "uuid": uuid}
     return check(update_templated_doc(db, dbn, "subject.json", data), f"add {namespace}", res)
 
-def init_user_metadata(db):
+def init_users_metadata(db):
     """
     Add a new Openwhisk Couchdb database to host nuvolaris user relevant informations
     """
-    dbn = "user_metadata"
+    dbn = "users_metadata"
     res = check(db.wait_db_ready(60), "wait_db_ready", True)
     res = check(db.create_db(dbn), "create_db: user_metadata", res)
     return res    
 
-def create_ow_user(subject, auth):
+def create_ow_user(ucfg: UserConfig, user_metadata: UserMetadata):
+    subject = ucfg.get("namespace")
+    auth = ucfg.get("password")
+
     logging.info(f"authorizing OpenWhisk namespace {subject}")
 
     try:
@@ -198,7 +204,12 @@ def create_ow_user(subject, auth):
 
         if(util.validate_ow_auth(auth)):
             logging.info(f"{subject} authorization is valid, adding subject")
-            return add_subject(db, subject, auth)
+            res = add_subject(db, subject, auth)
+
+            if(res):
+                user_metadata.add_metadata("AUTH",ucfg.get('password'))
+
+            return res    
         else:
             return None
     except Exception as e:
