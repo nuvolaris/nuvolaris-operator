@@ -53,7 +53,7 @@ metadata = user_metadata.UserMetadata(ucfg)
 assert(userdb.save_user_metadata(metadata))
 
 selector = {"selector":{"login": {"$eq": ucfg.get('namespace') }}}
-response = db.find_doc("user_metadata", json.dumps(selector))
+response = db.find_doc("users_metadata", json.dumps(selector))
 
 assert(response)
 docs = list(response['docs'])
@@ -63,7 +63,7 @@ doc = docs[0]
 assert(ucfg.get('password') == doc['password'])
 
 assert(userdb.delete_user_metadata(ucfg.get('namespace')))
-response = db.find_doc("user_metadata", json.dumps(selector))
+response = db.find_doc("users_metadata", json.dumps(selector))
 assert(response)
 docs = list(response['docs'])
 assert(len(docs) == 0)

@@ -51,20 +51,20 @@ def whisk_user_create(spec, name, **kwargs):
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res
 
-    if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
+    if(cfg.get('components.minio') and (ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled'))):        
         minio.create_ow_storage(state, ucfg, user_metadata, owner)
 
-    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+    if(cfg.get('components.minio') and ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
         res = static.create_ow_static_endpoint(ucfg,owner)
         logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} added = {res}")
         state['static']= res
 
-    if(ucfg.get('mongodb.enabled')):
+    if(cfg.get('components.mongodb') and ucfg.get('mongodb.enabled')):
         res = mdb.create_db_user(ucfg,user_metadata)
         logging.info(f"Mongodb setup for {ucfg.get('namespace')} added = {res}")
         state['mongodb']= res  
 
-    if(ucfg.get('redis.enabled')):
+    if(cfg.get('components.redis') and ucfg.get('redis.enabled')):
         res = redis.create_db_user(ucfg, user_metadata)
         logging.info(f"Redis setup for {ucfg.get('namespace')} added = {res}")
         state['redis']= res
@@ -86,19 +86,19 @@ def whisk_user_delete(spec, name, **kwargs):
         res = cdb.delete_ow_user(ucfg.get("namespace"))
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} removed = {res}")
 
-    if(ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled')):        
+    if(cfg.get('components.minio') and (ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled'))):        
         res = minio.delete_ow_storage(ucfg)
         logging.info(f"OpenWhisk namespace {ucfg.get('namespace')} storage removed = {res}")
 
-    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+    if(cfg.get('components.minio') and ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
         res = static.delete_ow_static_endpoint(ucfg)
         logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} removed = {res}")
 
-    if(ucfg.get('mongodb.enabled')):
+    if(cfg.get('components.mongodb') and ucfg.get('mongodb.enabled')):
         res = mdb.delete_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database'))
         logging.info(f"Mongodb setup for {ucfg.get('namespace')} removed = {res}")
 
-    if(ucfg.get('redis.enabled')):
+    if(cfg.get('components.redis') and ucfg.get('redis.enabled')):
         res = redis.delete_db_user(ucfg.get('namespace'))
         logging.info(f"Redis setup for {ucfg.get('namespace')} removed = {res}")
 
@@ -117,13 +117,13 @@ def whisk_user_resume(spec, name, namespace, **kwargs):
 
     state = {}
     
-    if(ucfg.get('redis.enabled')):
+    if(cfg.get('components.redis') and ucfg.get('redis.enabled')):
         res = redis.create_db_user(ucfg,user_metadata)
         logging.info(f"Redis setup for {ucfg.get('namespace')} resumed = {res}")
         state['redis']= res
 
-    if(ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
+    if(cfg.get('components.minio') and ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
         state['static']= True
 
-    if(ucfg.get('mongodb.enabled')):
+    if(cfg.get('components.mongodb') and ucfg.get('mongodb.enabled')):
         state['mongodb']= True          
