@@ -125,15 +125,10 @@ tasks:
   minio: 
     - task: t:minio        
 
-  #nuv:
-  #  - task: kind:config
-  #  - nuv setup --context=kind-nuvolaris --apihost=auto --image-tag={{.TAG}}
-
-  re-nuv:
+  install:
     cmds:
-    - git pull origin main
-    - task rebuild
-    dir: ../nuv
+    - task install
+    dir: nuv
 
 
   all:
