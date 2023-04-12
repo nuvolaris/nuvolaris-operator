@@ -46,7 +46,7 @@ def whisk_user_create(spec, name, **kwargs):
     user_metadata = UserMetadata(ucfg)
     owner = kube.get(f"wsku/{name}")
     
-    if(ucfg.get("namespace") and ucfg.get("password")):
+    if(ucfg.get("namespace") and ucfg.get("auth")):
         res = cdb.create_ow_user(ucfg,user_metadata)
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res

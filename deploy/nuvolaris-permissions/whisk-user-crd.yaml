@@ -66,7 +66,9 @@ spec:
                 password:
                   type: string
                 namespace:
-                  type: string                  
+                  type: string 
+                auth:
+                  type: string                                 
                 redis:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
@@ -114,7 +116,8 @@ spec:
               required:
                 - email
                 - password
-                - namespace 
+                - namespace
+                - auth
             status:
               x-kubernetes-preserve-unknown-fields: true
               # type: object

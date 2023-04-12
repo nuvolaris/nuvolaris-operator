@@ -195,7 +195,7 @@ def init_users_metadata(db):
 
 def create_ow_user(ucfg: UserConfig, user_metadata: UserMetadata):
     subject = ucfg.get("namespace")
-    auth = ucfg.get("password")
+    auth = ucfg.get("auth")
 
     logging.info(f"authorizing OpenWhisk namespace {subject}")
 
@@ -207,7 +207,7 @@ def create_ow_user(ucfg: UserConfig, user_metadata: UserMetadata):
             res = add_subject(db, subject, auth)
 
             if(res):
-                user_metadata.add_metadata("AUTH",ucfg.get('password'))
+                user_metadata.add_metadata("AUTH",auth)
 
             return res    
         else:
@@ -236,7 +236,6 @@ def delete_ow_user(subject):
     except Exception as e:
         logging.error(f"failed to remove Openwhisk namespace {subject} authorization id and key: {e}")
         return None
-
 
     
     
