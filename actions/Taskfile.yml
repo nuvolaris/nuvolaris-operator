@@ -51,7 +51,7 @@ tasks:
     - zip -j {{.DEPLOY}}/echo.zip echo/*
     - "{{.WSKSYS}} action update echo {{.DEPLOY}}/echo.zip --kind python:3"
 
-  login:deploy:
+  login:prepare:
     - |- 
       mkdir -p login/nuvolaris
       cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py login/nuvolaris
@@ -59,6 +59,8 @@ tasks:
       cd login
       rm  -f ../{{.DEPLOY}}/login.zip
       zip -r ../{{.DEPLOY}}/login.zip *
+
+  login:deploy:
     - > 
       {{.WSKSYS}} package update nuv
       -p couchdb_user "{{.CDB_USER}}"
@@ -72,5 +74,14 @@ tasks:
 
   login:webtest:
     - >
-      curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "franztt", "password": "51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc"}'
+      curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "franztt", "password": "apassw0rd"}'
+
+  login:all:
+    - task: login:prepare
+    - task: login:deploy
+    - task: login:webtest
+
+  # prepares all the system related actions
+  whisk-system:prepare:
+    - task: login:prepare   
                     
