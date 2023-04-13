@@ -23,7 +23,7 @@ vars:
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "../tests/{{.KUBE}}/{{.WHISK}}.yaml"
   APIHOST: 
-    sh: kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}' | sed -e 's/https:/http:/'
+    sh: kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}'
   SYSTEM:
     sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}'
   WSKSYS: wsk --apihost {{.APIHOST}} -u {{.SYSTEM}}
