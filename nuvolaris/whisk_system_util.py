@@ -55,28 +55,4 @@ class WhiskSystemClient:
             return returncode == 0
         except Exception as e:
             logging.error(e)
-            return e
-
-    # wraps a wsk delpoy--apihost <> -u <auth> *kwargs
-    def wskdeploy(self, *kwargs):        
-        cmd = ["wskdeploy","--apihost",self.ow_host_url,"-u",self.admin_auth]
-        cmd += list(kwargs)
-
-        # executing
-        logging.debug(cmd)
-        try:
-            res = subprocess.run(cmd, capture_output=True)
-
-            returncode = res.returncode
-            output = res.stdout.decode()
-            error = res.stderr.decode()
-            
-            if returncode != 0:
-                logging.error(error)
-            else:
-                logging.info(output)
-
-            return returncode == 0
-        except Exception as e:
-            logging.error(e)
-            return e            
+            return e           

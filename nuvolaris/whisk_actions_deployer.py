@@ -46,7 +46,7 @@ def deploy_whisk_system_action():
 
         data = prepare_system_actions_data()
         tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
-        res = util.check(wskClient.wskdeploy("-p","deploy/whisk-system"),"deploy_whisk_system_action",True)
+        res = util.check(wskClient.wsk("project","deploy","--project","deploy/whisk-system"),"deploy_whisk_system_action",True)
         return res
     except Exception as e:
         logging.error(e)

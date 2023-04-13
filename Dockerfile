@@ -45,15 +45,6 @@ RUN WSK_VERSION=1.2.0 ;\
     ARCH=$(dpkg --print-architecture) ;\
     WSK_URL="$WSK_BASE/$WSK_VERSION/OpenWhisk_CLI-$WSK_VERSION-linux-$ARCH.tgz" ;\
     curl -sL "$WSK_URL" | tar xzvf - -C /usr/bin/
-# Download WSKDEPLOY
-RUN WSKD_VERSION=1.2.0 ;\
-    WSKD_BASE=https://github.com/apache/openwhisk-wskdeploy/releases/download ;\
-    ARCH=$(dpkg --print-architecture) ;\
-    WSKD_URL="$WSKD_BASE/$WSKD_VERSION/openwhisk_wskdeploy-$WSKD_VERSION-linux-$ARCH.tgz" ;\
-    mkdir /tmp/wskdeploy; \
-    curl -sL "$WSKD_URL" | tar xzvf - -C /tmp/wskdeploy ;\
-    cp /tmp/wskdeploy/wskdeploy /usr/bin/wskdeploy ;\
-    rm -rf /tmp/wskdeploy
 # Download MINIO client
 RUN rm -Rvf /tmp/minio-binaries ;\
     mkdir /tmp/minio-binaries ;\
