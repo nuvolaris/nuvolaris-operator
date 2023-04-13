@@ -62,6 +62,9 @@ includes:
   osh:
     taskfile: clusters/openshift.yml
     dir: clusters
+  sys:
+    taskfile: actions/system.yml
+    dir: actions
 
 tasks:
 
@@ -108,6 +111,7 @@ tasks:
 
   instance:
     - task: d:instance
+    - task: sys:prepare
 
   instance-wfx:
     - task: d:instance-wfx

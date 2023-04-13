@@ -265,11 +265,15 @@ def raw(where, yamlfile):
   with open(f"deploy/{where}/{yamlfile}", 'r') as f:
     return list(yaml.load_all(f, yaml.Loader))
 
-def processTemplate(where,template,data):
+def processTemplate(where,template,data,out_template=None):
     """
     merges the given template and write it under the deply/{where} folder returning the file path
     """  
     out = f"deploy/{where}/_{template}"
+
+    if(out_template):
+      out = f"deploy/{where}/{out_template}"
+
     ntp.spool_template(template, out, data)
     with open(out, 'r') as f:
       res = list(yaml.load_all(f, yaml.Loader))

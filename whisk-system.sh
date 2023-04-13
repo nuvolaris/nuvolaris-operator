@@ -19,6 +19,8 @@
 echo CONTROLLER: "$CONTROLLER_IMAGE:$CONTROLLER_TAG"
 echo OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
 
+echo preparing nuvolaris system actions....
+
 mkdir -p ${HOME}/actions/login/nuvolaris
 cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/login/nuvolaris
 cd ${HOME}/actions/login

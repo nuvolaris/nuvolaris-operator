@@ -36,7 +36,7 @@ vars:
   MINIO_HOST: "minio"
   MINIO_PORT: 9000
   MINIO_USER: "minioadmin"
-  MINIO_PWD : "minioadmin" 
+  MINIO_PWD : "minioadmin"
   T: ""
   
 tasks:
