@@ -22,6 +22,8 @@ import nuvolaris.config as cfg
 import nuvolaris.kustomize as kus
 import nuvolaris.kube as kube
 import nuvolaris.redis as redis
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
 
 import requests as req
 import yaml, sys, os
@@ -38,10 +40,16 @@ while not kube.wait("po/redis-0", "condition=ready"): pass
 assert(kube.get("po/redis-0"))
 assert(kube.get("svc/redis"))
 
-assert(redis.create_db_user('franztt','ftt','hjdgfkjdgfkdsgfkjhdsgfkgfadksjfgdkfgsdakfgdskgk'))
+spec = tu.load_sample_config("whisk-user")
+assert(spec)
 
-#assert(redis.delete_db_user('franztt'))
-#assert(redis.delete())
+ucfg = UserConfig(spec)
+udata = UserMetadata(ucfg)
 
-#!kubectl -n nuvolaris delete all --all
-#!kubectl -n nuvolaris delete pvc --all
+assert(redis.create_db_user(ucfg, udata))
+
+assert(redis.delete_db_user(ucfg.get('namespace')))
+assert(redis.delete())
+
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
