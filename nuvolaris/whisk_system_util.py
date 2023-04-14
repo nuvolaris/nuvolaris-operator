@@ -35,11 +35,11 @@ class WhiskSystemClient:
 
     # wraps a wsk --apihost <> -u <auth> *kwargs
     def wsk(self, *kwargs):        
-        cmd = ["wsk","--apihost",self.ow_host_url,"-u",self.admin_auth]
+        cmd = ["wsk","--apihost",self.ow_host_url,"--auth",self.admin_auth]
         cmd += list(kwargs)
 
         # executing
-        logging.debug(cmd)
+        logging.info(cmd)
         try:
             res = subprocess.run(cmd, capture_output=True)
 

@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+# wsk project deploy --project deploy/whisk-system —-apihost http://localhost:3233 --auth 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+#
 
 import logging
 import json
@@ -27,12 +29,15 @@ from nuvolaris.whisk_system_util import WhiskSystemClient
 
 def prepare_system_actions_data():
     data = {}
+    
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
 
     globals=[]
     globals.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
     globals.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    globals.append({"key":"couchdb_host", "value":cfg.get("couchdb.host", "COUCHDB_SERVICE_HOST", "couchdb")})
-    globals.append({"key":"couchdb_port", "value":cfg.get("couchdb.port", "COUCHDB_SERVICE_PORT", "5984")})
+    globals.append({"key":"couchdb_host", "value":couchdb_host})
+    globals.append({"key":"couchdb_port", "value":couchdb_port})
     data = {
         "globals":globals
     }
