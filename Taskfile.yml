@@ -97,6 +97,7 @@ tasks:
     - task: d:cli
 
   run:
+    - task: sys:prepare
     - task: d:run
   
   irun:
@@ -111,7 +112,6 @@ tasks:
 
   instance:
     - task: d:instance
-    - task: sys:prepare
 
   instance-wfx:
     - task: d:instance-wfx
