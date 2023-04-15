@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: $APIHOST
+      apihost: auto
       #apiport: 80
       #protocol: http 
   components:
