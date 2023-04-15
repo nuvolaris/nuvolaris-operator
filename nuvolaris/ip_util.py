@@ -50,78 +50,40 @@ class IpUtil:
             using an exponential backoff algorithm.  This is a safe way to retry
             failed requests without giving up.
         """
-        logging.info(f"querying ip from {api_uri}")
+        logging.debug(f"querying ip from {api_uri}")
         return get(api_uri, headers={'user-agent': self.USER_AGENT})
 
-
-    def get_ip_from_ipify(self):
+    def handle_ip_request(self,url):
         """
-        Query the ipify service (https://www.ipify.org) to retrieve this machine's public IP address.
+        Query a public api retuning the machine's public ip address
+        >>> from nuvolaris.ip_util import IpUtil
+        >>> ip_util = IpUtil()
+        >>> ipify_ip = ip_util.handle_ip_request('https://api.ipify.org')
+        >>> ifconfig_ip = ip_util.handle_ip_request('https://ifconfig.me/ip')
+        >>> ifinfo_ip = ip_util.handle_ip_request('https://ipinfo.io/ip')
+        >>> identme_ip = ip_util.handle_ip_request('https://ident.me/')
+        >>> ipify_ip == ifconfig_ip
+        True
+        >>> ipify_ip == ifinfo_ip
+        True
+        >>> ipify_ip == identme_ip
+        True
         """
         try:
-            resp = self._get_ip_resp(self.IPIFY_API_URI)
+            resp = self._get_ip_resp(url)
         except RequestException as e:
             logging.error(e)
             return None
 
         if resp.status_code != 200:
-            logging.error('Received an invalid status code from ipify:' + str(resp.status_code) + '. The service might be experiencing issues.')
+            logging.error('Received an invalid status code from ip service:' + str(resp.status_code) + '. The service might be experiencing issues.')
             return None
 
-        return resp.text
+        return resp.text      
 
-
-    def get_ip_from_ifconfig(self):
-        """
-        Query the ifconfig.me service (https://ifconfig.me/ip) to retrieve this machine's public IP address.
-        """
-        try:
-            resp =self._get_ip_resp(self.IFCONFIG_API_URI)
-        except RequestException as e:
-            logging.error(e)
-            return None
-
-        if resp.status_code != 200:
-            logging.error('Received an invalid status code from ifconfig.me:' + str(resp.status_code) + '. The service might be experiencing issues.')
-            return None
-
-        return resp.text
-
-    def get_ip_from_ifinfo(self):
-        """
-        Query the ipinfo service (https://ipinfo.io/ip) to retrieve this machine's public IP address.
-        """
-        try:
-            resp = self._get_ip_resp(self.IP_INFO_API_URI)
-        except RequestException as e:
-            logging.error(e)
-            return None
-
-        if resp.status_code != 200:
-            logging.error('Received an invalid status code from ipinfo:' + str(resp.status_code) + '. The service might be experiencing issues.')
-            return None
-
-        return resp.text
-
-    def get_ip_from_identme(self):
-        """
-        Query the ident.me service (https://ident.me/) to retrieve this machine's public IP address.
-        """
-        try:
-            resp = self._get_ip_resp(self.IDENT_ME_API_URI)
-        except RequestException as e:
-            logging.error(e)
-            return None
-
-        if resp.status_code != 200:
-            logging.error('Received an invalid status code from ipinfo:' + str(resp.status_code) + '. The service might be experiencing issues.')
-            return None
-
-        return resp.text
-
-    def get_ip_chain(self, func):
+    def get_ip_chain(self, url):
         if not self._machine_ip:
-           self._machine_ip = func()
+           self._machine_ip = self.handle_ip_request(url)
         else :
             logging.info(f"current ip address {self._machine_ip}")
 
@@ -133,23 +95,14 @@ class IpUtil:
         >>> ip = ip_util.get_public_ip()
         >>> ip != None
         True
-        >>> ipify_ip = ip_util.get_ip_from_ipify()
-        >>> ifconfig_ip = ip_util.get_ip_from_ifconfig()
-        >>> ifinfo_ip = ip_util.get_ip_from_ifinfo()
-        >>> identme_ip = ip_util.get_ip_from_identme()
-        >>> ipify_ip == ifconfig_ip
-        True
-        >>> ipify_ip == ifinfo_ip
-        True
-        >>> ipify_ip == identme_ip
-        True
+        >>> ipify_ip = ip_util.handle_ip_request('https://api.ipify.org')
         >>> ip == ipify_ip
         True
        """
-       self.get_ip_chain(self.get_ip_from_ipify)
-       self.get_ip_chain(self.get_ip_from_ifconfig)
-       self.get_ip_chain(self.get_ip_from_ifinfo)
-       self.get_ip_chain(self.get_ip_from_identme)
+       self.get_ip_chain(self.IPIFY_API_URI)
+       self.get_ip_chain(self.IFCONFIG_API_URI)
+       self.get_ip_chain(self.IP_INFO_API_URI)
+       self.get_ip_chain(self.IDENT_ME_API_URI)
 
        return self._machine_ip
    
