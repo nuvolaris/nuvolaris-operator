@@ -41,15 +41,20 @@ def ensure_host(ip_address_str):
 def is_load_balanced_kube(runtime_str):
     """
     Test if the runtime has load balancer or not
-    >>> import nuvolaris.endpoint as endpoint
-    >>> endpoint.is_load_balanced_kube("k3s")
+    >>> is_load_balanced_kube("k3s")
     False
-    >>> endpoint.is_load_balanced_kube("microk8s")
+    >>> is_load_balanced_kube("microk8s")
     False
-    >>> endpoint.is_load_balanced_kube("eks")
+    >>> is_load_balanced_kube("eks")
     True
+    >>> is_load_balanced_kube("lks")
+    True
+    >>> is_load_balanced_kube("aks")
+    True
+    >>> is_load_balanced_kube("kind")
+    False
     """
-    return runtime_str not in ["k3s","microk8s"]
+    return runtime_str not in ["k3s","microk8s","kind"]
 
 def to_ingress_ip(machine_ip_str):
     """
