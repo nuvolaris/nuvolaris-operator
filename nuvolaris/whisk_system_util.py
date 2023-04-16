@@ -39,7 +39,7 @@ class WhiskSystemClient:
         cmd += list(kwargs)
 
         # executing
-        logging.info(cmd)
+        logging.debug(cmd)
         try:
             res = subprocess.run(cmd, capture_output=True)
 

@@ -15,54 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import re
 import logging
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk_standalone as standalone
 import nuvolaris.kube as kube
-import urllib.parse
-import os, os.path
-
-# ensure if is an hostname, adding a suffix
-def ensure_host(ip_address_str):
-    """
-    >>> ensure_host("142.251.163.105")
-    '142.251.163.105.nip.io'
-    >>> ensure_host("www.google.com")
-    'www.google.com'
-    """
-    ip_address_regex = r'^(\d{1,3}\.){3}\d{1,3}$'
-    if re.match(ip_address_regex, ip_address_str):
-        return f"{ip_address_str}.nip.io"
-    return ip_address_str
-
-
-# this functions returns the apihost to be stored as annotation
-def apihost(apiHost=None):
-    logging.info(f"*** openwhisk received ingress {apiHost}")
-    runtime = cfg.get('nuvolaris.kube')
-    url = urllib.parse.urlparse("https://pending")
-
-    if apiHost and len(apiHost) > 0: 
-        if "hostname" in apiHost[0]:
-            url = url._replace(netloc = apiHost[0]['hostname'])
-        elif "ip" in apiHost[0]:
-            url = url._replace(netloc = apiHost[0]['ip'])
-
-    if cfg.exists("nuvolaris.apihost"):
-        url =  url._replace(netloc = ensure_host(cfg.get("nuvolaris.apihost")))
-    if cfg.exists("nuvolaris.protocol"):
-        url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
-    if cfg.exists("nuvolaris.apiport"):
-        url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
-
-    # overrides the protocols in case tls is enabled
-    if cfg.get('components.tls') and not runtime=="kind":
-        url = url._replace(scheme = "https")
-    else:
-        url = url._replace(scheme = "http")    
-
-    return url.geturl()
 
 def annotate(keyval):
     kube.kubectl("annotate", "cm/config",  keyval, "--overwrite")
