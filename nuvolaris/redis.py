@@ -23,8 +23,33 @@ import nuvolaris.template as ntp
 import nuvolaris.util as util
 import urllib.parse
 import os, os.path
-import logging
+import logging, json
 import kopf
+
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
+
+def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
+    """
+    adds an entry for the redis connectivity, i.e
+    something like "redis://{namespace}:{auth}@redis"}
+    """ 
+
+    try:
+        redis_service =  util.get_service("{.items[?(@.spec.selector.name == 'redis')]}")
+        if(redis_service):
+            redis_service_name = redis_service['metadata']['name']
+            redis_ns = redis_service['metadata']['namespace']
+
+            username = ucfg.get('namespace')
+            auth = ucfg.get('redis.password')
+
+            redis_url = f"redis://{username}:{auth}@{redis_service_name}"
+            user_metadata.add_metadata("REDIS_URL",redis_url)
+        return None
+    except Exception as e:
+        logging.error(f"failed to build redis_url for {ucfg.get('namespace')}: {e}")
+        return None 
 
 def create(owner=None):
     logging.info("create redis")
@@ -70,26 +95,30 @@ def exec_redis_command(pod_name,path_to_script):
     os.remove(path_to_script)
     return res
 
-def create_db_user(namespace,prefix,auth):
-    logging.info(f"authorizing new redis namespace {namespace}")    
+def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
+    logging.info(f"authorizing new redis namespace {ucfg.get('namespace')}")    
     try:
         wait_for_redis_ready()
         data = util.get_redis_config_data()
-        data['namespace']=namespace
-        data['password']=auth
-        data['prefix']=prefix
+        data['namespace']=ucfg.get('namespace')
+        data['password']=ucfg.get('redis.password')
+        data['prefix']=ucfg.get('redis.prefix')
         data['mode']="create"
 
-        path_to_script = render_redis_script(namespace,"redis_manage_user_tpl.txt",data)
+        path_to_script = render_redis_script(ucfg.get('namespace'),"redis_manage_user_tpl.txt",data)
         pod_name = util.get_pod_name("{.items[?(@.metadata.labels.name == 'redis')].metadata.name}")
 
         if(pod_name):
             res = exec_redis_command(pod_name,path_to_script)
+
+            if(res):
+                _add_redis_user_metadata(ucfg, user_metadata)
+
             return res
 
         return None
     except Exception as e:
-        logging.error(f"failed to add redis namespace {namespace}: {e}")
+        logging.error(f"failed to add redis namespace {ucfg.get('namespace')}: {e}")
         return None
 
 def delete_db_user(namespace):

@@ -62,6 +62,8 @@ tasks:
       OPERATOR_TAG: "{{.OPERATOR_TAG}}"
       COUCHDB_SERVICE_HOST: "localhost"
       MINIO_API_HOST: "localhost"
+      CONTROLLER_HOST : "localhost"
+      CONTROLLER_PORT : 3233 
   
   instance:
     -  envsubst <{{.CONFIG}} | kubectl -n nuvolaris apply -f -

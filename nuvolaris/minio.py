@@ -22,6 +22,34 @@ import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.minio_util as mutil
 
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
+
+def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
+    """
+    adds entries for minio connectivity MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+    this is becasue MINIO
+    """ 
+
+    try:
+        minio_service =  util.get_service("{.items[?(@.spec.selector.app == 'minio')]}")
+        if(minio_service):
+            minio_endpoint = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
+            access_key = ucfg.get('namespace')
+            secret_key = ucfg.get("object-storage.password")
+            user_metadata.add_metadata("MINIO_ENDPOINT",minio_endpoint)
+            user_metadata.add_metadata("MINIO_ACCESS_KEY",access_key)
+            user_metadata.add_metadata("MINIO_SECRET_KEY",secret_key)
+
+            ports = list(minio_service['spec']['ports'])
+            for port in ports:
+                if(port[name]=='minio-api'):
+                    user_metadata.add_metadata("MINIO_PORT",port['port'])
+        return None
+    except Exception as e:
+        logging.error(f"failed to build redis_url for {ucfg.get('namespace')}: {e}")
+        return None 
+
 def find_content_path(filename):
     absolute_path = os.path.dirname(__file__)
     relative_path = "../deploy/content"
@@ -62,7 +90,7 @@ def delete():
         logging.info(f"delete minio: {res}")
     return res
 
-def create_ow_storage(state, ucfg, owner=None):
+def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owner=None):
     minioClient = mutil.MinioClient()
     
     namespace = ucfg.get("namespace")
@@ -72,6 +100,10 @@ def create_ow_storage(state, ucfg, owner=None):
 
     res = minioClient.add_user(namespace, secretkey)
     state['storage_user']=res
+
+    if(res):
+        _add_miniouser_metadata(ucfg, user_metadata)
+
     bucket_policy_names = []
 
     if(ucfg.get('object-storage.data.enabled')):
@@ -80,12 +112,19 @@ def create_ow_storage(state, ucfg, owner=None):
         res = minioClient.make_bucket(bucket_name)                
         bucket_policy_names.append(f"{bucket_name}/*")
         state['storage_data']=res
+
+        if(res):
+            user_metadata.add_metadata("MINIO_DATA_BUCKET",bucket_name)
+
     
     if(ucfg.get('object-storage.route.enabled')):
         bucket_name = ucfg.get("object-storage.route.bucket")
         logging.info(f"*** adding public bucket {bucket_name} for {namespace}")
         res = minioClient.make_public_bucket(bucket_name)   
         bucket_policy_names.append(f"{bucket_name}/*")
+
+        if(res):
+            user_metadata.add_metadata("MINIO_STATIC_BUCKET",bucket_name)
 
         content_path = find_content_path("index.html")
 

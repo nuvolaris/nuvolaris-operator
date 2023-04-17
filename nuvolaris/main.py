@@ -31,6 +31,7 @@ import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
 import nuvolaris.openwhisk_patcher as patcher
 import nuvolaris.minio_static as static
+import nuvolaris.whisk_actions_deployer as system
 
 # tested by an integration test
 @kopf.on.login()
@@ -171,9 +172,18 @@ def whisk_create(spec, name, **kwargs):
             state['endpoint'] = "error"
     else:
         state['openwhisk'] = "off"
-        state['endpoint'] = "off"                
+        state['endpoint'] = "off"
 
+    whisk_post_create(name,state)
     return state
+
+def whisk_post_create(name, state):
+    logging.info(f"*** whisk_post_create {name}")
+    sysres = system.deploy_whisk_system_action()
+    if(sysres):
+        state['whisk-system']="on"
+    else:                   
+        state['whisk-system']="on"
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')

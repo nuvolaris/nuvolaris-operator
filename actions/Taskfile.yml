@@ -23,9 +23,9 @@ vars:
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "../tests/{{.KUBE}}/{{.WHISK}}.yaml"
   APIHOST: 
-    sh: kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}' | sed -e 's/https:/http:/'
-  SYSTEM: 
-    sh: kubectl -n nuvolaris get wsk/controller -o yaml | awk '/whisk-system:/{print $2}'
+    sh: kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}'
+  SYSTEM:
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}'
   WSKSYS: wsk --apihost {{.APIHOST}} -u {{.SYSTEM}}
   DEPLOY: ../deploy/whisk-system
   CDB_USER:
@@ -39,6 +39,10 @@ tasks:
 
   list: "{{.WSKSYS}} action list"
 
+  activation:list: "{{.WSKSYS}} activation list"
+
+  activation:get: "{{.WSKSYS}} activation get {{.ID}}"
+
   invoke: "{{.WSKSYS}} action invoke -r {{.CLI_ARGS}}"
 
   config: wsk property set --apihost '{{.APIHOST}}' -u '{{.SYSTEM}}'
@@ -47,17 +51,37 @@ tasks:
     - zip -j {{.DEPLOY}}/echo.zip echo/*
     - "{{.WSKSYS}} action update echo {{.DEPLOY}}/echo.zip --kind python:3"
 
-  user_manager:
+  login:prepare:
     - |- 
-      mkdir -p user_manager/nuvolaris
-      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py user_manager/nuvolaris
+      mkdir -p login/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py login/nuvolaris
     - |-
-      cd user_manager
-      rm  ../{{.DEPLOY}}/user_manager.zip
-      zip -r ../{{.DEPLOY}}/user_manager.zip *
+      cd login
+      rm  -f ../{{.DEPLOY}}/login.zip
+      zip -r ../{{.DEPLOY}}/login.zip *
+
+  login:deploy:
     - > 
-      {{.WSKSYS}} action update user_manager 
-      {{.DEPLOY}}/user_manager.zip --kind python:3
+      {{.WSKSYS}} package update nuv
       -p couchdb_user "{{.CDB_USER}}"
       -p couchdb_password "{{.CDB_PASSWORD}}"
-      -p couchdb_host "{{.CDB_HOST}}"
+      -p couchdb_host "{{.CDB_HOST}}"  
+    - > 
+      {{.WSKSYS}} action update nuv/login 
+      {{.DEPLOY}}/login.zip --kind python:3 --web true
+    - > 
+      {{.WSKSYS}} action get nuv/login --url
+
+  login:webtest:
+    - >
+      curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "franztt", "password": "apassw0rd"}'
+
+  login:all:
+    - task: login:prepare
+    - task: login:deploy
+    - task: login:webtest
+
+  # prepares all the system related actions
+  prepare:
+    - task: login:prepare   
+                    

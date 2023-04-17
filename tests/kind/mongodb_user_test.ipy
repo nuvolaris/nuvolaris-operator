@@ -24,6 +24,9 @@ import nuvolaris.kube as kube
 import nuvolaris.mongodb as mdb
 import logging
 
+from nuvolaris.user_config import UserConfig
+from nuvolaris.user_metadata import UserMetadata
+
 # test
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.put("mongodb.useOperator", False))
@@ -34,8 +37,14 @@ assert(kube.get("service/nuvolaris-mongodb-svc"))
 flavour = kube.kubectl("get", "pod/nuvolaris-mongodb-0", jsonpath="{.metadata.labels.nuvolaris\.mongodb\.flavour}")
 assert("standalone"==flavour[0])
 
-assert(mdb.create_db_user('franztt','ftt','1234567890'))
-assert(mdb.delete_db_user('franztt','ftt'))
+spec = tu.load_sample_config("whisk-user")
+assert(spec)
+
+ucfg = UserConfig(spec)
+udata = UserMetadata(ucfg)
+
+assert(mdb.create_db_user(ucfg, udata))
+assert(mdb.delete_db_user(ucfg.get('namespace'),ucfg.get('mongodb.database')))
 assert(mdb.delete())
 
 !kubectl -n nuvolaris delete all --all

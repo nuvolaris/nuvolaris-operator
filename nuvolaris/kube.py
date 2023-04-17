@@ -144,7 +144,7 @@ def get_pods(selector, namespace="nuvolaris"):
     try:
         return json.loads(kubectl("get", "pods", f"--selector={selector}","-ojson",namespace=namespace))
     except:
-        return None        
+        return None            
 
 def wait(name, condition, timeout="600s", namespace="nuvolaris"):
     try:

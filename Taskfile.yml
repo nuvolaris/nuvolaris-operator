@@ -62,6 +62,9 @@ includes:
   osh:
     taskfile: clusters/openshift.yml
     dir: clusters
+  sys:
+    taskfile: actions/system.yml
+    dir: actions
 
 tasks:
 
@@ -94,6 +97,7 @@ tasks:
     - task: d:cli
 
   run:
+    - task: sys:prepare
     - task: d:run
   
   irun:
@@ -188,6 +192,8 @@ tasks:
 
   clean:
     cmds:
+      - cmd: kubectl -n nuvolaris delete wsku --all
+        ignore_error: true
       - cmd: kubectl -n nuvolaris delete wsk/controller
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete all --all

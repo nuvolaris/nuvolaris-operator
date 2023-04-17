@@ -29,7 +29,7 @@ ENV TZ=Europe/London
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # install Python
 RUN apt-get update && apt-get -y upgrade &&\
-    apt-get -y install apt-utils python3.10 python3.10-venv curl sudo telnet inetutils-ping
+    apt-get -y install apt-utils python3.10 python3.10-venv curl sudo telnet inetutils-ping zip unzip
 # Download Kubectl
 RUN KVER="v1.23.0" ;\
     ARCH="$(dpkg --print-architecture)" ;\
@@ -56,6 +56,8 @@ RUN rm -Rvf /tmp/minio-binaries ;\
     chmod +x /tmp/minio-binaries/mc ;\
     mv /tmp/minio-binaries/mc /usr/bin/mc ;\
     rm -Rvf /tmp/minio-binaries
+# Download and instal task
+RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/bin
 # add user
 RUN useradd -m -s /bin/bash -g root -N nuvolaris && \
     echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
@@ -81,7 +83,12 @@ ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
 ADD deploy/nginx-static /home/nuvolaris/deploy/nginx-static
 ADD deploy/content /home/nuvolaris/deploy/content
-ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock /home/nuvolaris/
+ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock whisk-system.sh /home/nuvolaris/
+
+# prepares the required folders to deploy the whisk-system actions
+RUN mkdir /home/nuvolaris/deploy/whisk-system
+ADD actions /home/nuvolaris/actions
+
 USER nuvolaris
 ENV PATH=/home/nuvolaris/.local/bin:/usr/local/bin:/usr/bin:/sbin:/bin
 RUN curl -sSL https://install.python-poetry.org | python3.10 -
@@ -92,4 +99,5 @@ RUN chown -R nuvolaris /home/nuvolaris ;\
     chmod -R 0775 /home/nuvolaris
 USER nuvolaris
 ENV HOME=/home/nuvolaris
+RUN ./whisk-system.sh
 CMD ./run.sh

@@ -93,8 +93,8 @@ def get_pod_name(jsonpath,namespace="nuvolaris"):
     if(pod_name):
         return pod_name[0]
 
-    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")        
-
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")
+  
 # helper method waiting for a pod ready using the given jsonpath to retrieve the pod name
 def wait_for_pod_ready(pod_name_jsonpath, timeout="600s", namespace="nuvolaris"):
     try:        
@@ -121,8 +121,8 @@ def get_standalone_config_data():
     data = {
         "controller_image": cfg.get("controller.image") or  "ghcr.io/nuvolaris/openwhisk-controller",
         "controller_tag": cfg.get("controller.tag") or "0.3.0-morpheus.22122609",
-        "couchdb_host": cfg.get("couchdb.host", "COUCHDB_SERVICE_HOST", "couchdb"),
-        "couchdb_port": cfg.get("couchdb.port", "COUCHDB_SERVICE_PORT", "5984"),
+        "couchdb_host": cfg.get("couchdb.host") or "couchdb",
+        "couchdb_port": cfg.get("couchdb.port") or "5984",
         "couchdb_admin_user": cfg.get("couchdb.admin.user"),
         "couchdb_admin_password": cfg.get("couchdb.admin.password"),
         "couchdb_controller_user": cfg.get("couchdb.controller.user"),
@@ -189,4 +189,11 @@ def get_redis_config_data():
         "storageClass": cfg.get("nuvolaris.storageClass"),
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3"
     }
-    return data                           
+    return data
+
+def get_service(jsonpath,namespace="nuvolaris"):
+    services= kube.kubectl("get", "svc", namespace=namespace, jsonpath=jsonpath)
+    if(services):
+        return services[0]
+
+    raise Exception(f"could not find any svc matching jsonpath={jsonpath}")                                

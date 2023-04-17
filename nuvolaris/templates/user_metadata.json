@@ -1,0 +1,17 @@
+{
+    "_id": "{{login}}",
+    "login": "{{login}}",
+    "password": "{{password}}",
+    "email": "{{email}}",
+    "env": [
+      {% for meta in metadata -%}
+       {
+        "key":"{{meta.key}}",
+        "value":"{{meta.value}}"
+       }
+        {% if not loop.last %}
+        ,
+        {% endif %}
+      {% endfor %}
+    ]
+}

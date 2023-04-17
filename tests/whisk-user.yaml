@@ -22,8 +22,9 @@ metadata:
   namespace: nuvolaris
 spec: 
   email: francesco@nuvolaris.io
-  password: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+  password: apassw0rd
   namespace: franztt
+  auth: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
   redis:
     enabled: false
     prefix: ftt

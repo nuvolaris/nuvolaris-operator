@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,33 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-.git-hooks/
-__pycache__/
-__pypackages__
-.pdm.toml
-.*-version
-kubeconfig
-openwhisk-deploy-kube/
-kustomization.yaml
-playground
-examples/
-aliases
-deploy/extract/
-deploy/whisk-system/
-actions/**/*.zip
-node_modules/
-.env
-__*
-clusters/id_rsa*
-*.kubeconfig
-run.pid
-*.off
-actions/*/nuvolaris/
-_*.yaml
-apihost.txt
-.git-hooks/
-installer
-whisk.properties
-.task/
-*.log
-.latestcheck
+echo CONTROLLER: "$CONTROLLER_IMAGE:$CONTROLLER_TAG"
+echo OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
+
+echo preparing nuvolaris system actions....
+
+mkdir -p ${HOME}/actions/login/nuvolaris
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/login/nuvolaris
+cd ${HOME}/actions/login
+rm  -f ${HOME}/deploy/whisk-system/login.zip
+zip -r ${HOME}/deploy/whisk-system/login.zip *
