@@ -21,25 +21,8 @@ import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.util as util
+import nuvolaris.apihost_util as apihost_util
 import urllib.parse
-
-def get_ingress(namespace="ingress-nginx"):
-    ingress = kube.kubectl("get", "service/ingress-nginx-controller", namespace=namespace,jsonpath="{.status.loadBalancer.ingress[0]}")
-    if ingress:
-        return ingress
-    
-    return None
-
-def get_api_host(runtime):
-    apihost = ""
-
-    if runtime in ["k3s","microk8s", "openshift"]:
-        apihost = openwhisk.apihost(None)
-    else:
-        namespace = util.get_ingress_namespace(runtime)
-        apihost = openwhisk.apihost(get_ingress(namespace))
-
-    return apihost
 
 def get_ingress_data(apihost, tls):
     url = urllib.parse.urlparse(apihost)
@@ -92,7 +75,7 @@ def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     tls = cfg.get('components.tls')
     
-    apihost = get_api_host(runtime)    
+    apihost = apihost_util.get_apihost(runtime)
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
 
