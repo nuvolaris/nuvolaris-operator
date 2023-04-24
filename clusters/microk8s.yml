@@ -26,7 +26,11 @@ vars:
 
   # hack to read a variable from .env
   GITHUB_USER: 
-    sh: awk -F= '/GITHUB_USER=/{print $2}' ../.env
+    sh: |
+        if test -e ../.env
+        then awk -F= '/GITHUB_USER=/{print $2}' ../.env
+        else echo unknown
+        fi
   STACK: "{{.GITHUB_USER}}-nuvolaris-dev"
   KUBECONFIG: "microk8s-{{.GITHUB_USER}}.kubeconfig"
   

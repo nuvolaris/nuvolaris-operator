@@ -19,8 +19,6 @@ version: '3'
 
 vars:
   DOMAIN: "sciabarra.net"
-  SSH_KEY:
-    sh: cat id_rsa.pub
 
 tasks:
 
@@ -29,7 +27,7 @@ tasks:
     - |-
       mkdir -p openshift
       ssh-add id_rsa
-      env SSH_KEY='{{.SSH_KEY}}' DOMAIN={{.DOMAIN}} \
+      env SSH_KEY='$(cat id_rsa.pub)' DOMAIN={{.DOMAIN}} \
       envsubst <openshift-install-config.yaml >openshift/install-config.yaml
 
   create:

@@ -165,10 +165,11 @@ tasks:
   # configure env
   configure-env:
     cmds:
-      - echo "please copy .env.dist in .env and add the keys"
-    status:
-      - test -f .env
-
+      - |
+        if ! test -e .env
+        then echo "please copy .env.dist in .env and add the keys"
+        fi
+ 
   # update configuration files from openwhisk source
   update-files-from-openwhisk: 
     cmds:
