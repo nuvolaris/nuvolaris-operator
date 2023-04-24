@@ -113,6 +113,9 @@ tasks:
   instance:
     - task: d:instance
 
+  minimal:
+    - task d:instance WHISK=minimal
+
   instance-wfx:
     - task: d:instance-wfx
 
