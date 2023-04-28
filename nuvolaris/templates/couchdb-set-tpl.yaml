@@ -1,3 +1,4 @@
+---
 # Source: openwhisk/templates/couchdb-pod.yaml
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -25,32 +26,30 @@ spec:
   selector:
     matchLabels:
       name: couchdb
-  serviceName: "couchdb"
+  serviceName: couchdb
   template:
     metadata:
       labels:
         name: couchdb
     spec:
-      restartPolicy: Always   
+      restartPolicy: Always
       containers:
       - name: couchdb
+        image: "{{container_image}}"
+        {% if runtime == 'openshift' %}
         securityContext:
           capabilities:
             drop:
             - ALL
-          #seccompProfile:
-          #  type: RuntimeDefault
-          #allowPrivilegeEscalation: false
-          #readOnlyRootFilesystem: false 
-          #runAsNonRoot: true
-        image: "ghcr.io/nuvolaris/couchdb:2.3.1-morpheus.22090618"
         imagePullPolicy: "Always"
         resources:
           requests:
             memory: "1G"
           limits:
             memory: "4G"
-        #command: ["sleep", "inf"]
+        {% else %}
+        imagePullPolicy: "IfNotPresent"
+        {% endif %}
         ports:
         - name: couchdb
           containerPort: 5984

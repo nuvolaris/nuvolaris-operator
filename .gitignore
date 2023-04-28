@@ -28,6 +28,7 @@ examples/
 aliases
 deploy/extract/
 deploy/whisk-system/
+deploy/couchdb/*_generated.yaml
 actions/**/*.zip
 node_modules/
 .env

@@ -218,7 +218,7 @@ tasks:
         done
     silent: true
 
-  iclean: rm -f deploy/*/kustomization.yaml deploy/*/__*
+  iclean: rm -f deploy/*/kustomization.yaml deploy/*/__* deploy/*/*_generated.yaml
 
   itest: 
     cmds:
