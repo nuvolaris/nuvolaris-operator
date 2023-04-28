@@ -25,7 +25,7 @@ items:
         rbac.authorization.k8s.io/aggregate-to-edit: "true" 
     rules:
       - apiGroups: ["nuvolaris.org"] 
-        resources: ["whisks"] 
+        resources: ["whisks","whiskusers","workflows"] 
         verbs: ["get", "list", "watch", "create",
                 "update", "patch", "delete", "deletecollection"] 
   - metadata:
@@ -36,6 +36,6 @@ items:
         rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true" 
     rules:
       - apiGroups: ["nuvolaris.org"] 
-        resources: ["whisks"] 
+        resources: ["whisks","whiskusers","workflows"] 
         verbs: ["get", "list", "watch"]
   

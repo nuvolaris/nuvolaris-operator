@@ -39,7 +39,6 @@ tasks:
       --dir openshift \
       --log-level=debug
 
-
   user:
     - oc apply -f openshift-user.yaml
     - oc adm policy add-role-to-user admin nuvolaris
@@ -49,7 +48,7 @@ tasks:
   project:
     - oc new-project nuvolaris --description="Nuvolaris" --display-name="Nuvolaris"
     - oc project nuvolaris
- 
+
   config: 
     - oc login "$OPENSHIFT_API"  --username="$OPENSHIFT_USER" --password="$OPENSHIFT_PASSWORD"
     - oc whoami --show-token | docker login -u kubeadmin --password-stdin $OPENSHIFT_REGISTRY
@@ -62,4 +61,3 @@ tasks:
     cmds: 
     - >
       openshift-install destroy cluster --dir openshift --log-level=debug
-
