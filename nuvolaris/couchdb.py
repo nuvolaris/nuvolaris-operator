@@ -37,6 +37,7 @@ def update_templated_doc(db, database, template, data):
 
 def create(owner=None):
     logging.info("create couchdb")
+    runtime = cfg.get('nuvolaris.kube')
     u = cfg.get('couchdb.admin.user', "COUCHDB_ADMIN_USER", "whisk_admin")
     p = cfg.get('couchdb.admin.password', "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")
     user = f"db_username={u}"
@@ -45,9 +46,13 @@ def create(owner=None):
     img = cfg.get('operator.image') or "missing-operator-image"
     tag = cfg.get('operator.tag') or "missing-operator-tag"
     image = f"{img}:{tag}"
+    container_image = runtime=='openshift' and "ghcr.io/nuvolaris/couchdb:2.3.1-morpheus.22090618" or "apache/couchdb:2.3"
+
 
     config = json.dumps(cfg.getall())
     data = {
+        "runtime":runtime,
+        "container_image":container_image,
         "image": image,
         "config": config,
         "name": "couchdb", 
@@ -56,9 +61,11 @@ def create(owner=None):
         "storageClass": cfg.get("nuvolaris.storageClass")
     }
 
+    kus.processTemplate("couchdb","couchdb-set-tpl.yaml",data,"couchdb-set_generated.yaml")
+
     kust =  kus.secretLiteral("couchdb-auth", user, pasw)
     kust += kus.patchTemplate("couchdb", "set-attach.yaml", data) 
-    spec = kus.kustom_list("couchdb", kust, templates=["couchdb-init.yaml"], data=data)
+    spec = kus.restricted_kustom_list("couchdb", kust, templates=["couchdb-init.yaml"],templates_filter=["couchdb-set_generated.yaml","couchdb-svc.yaml"],data=data)
     
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
