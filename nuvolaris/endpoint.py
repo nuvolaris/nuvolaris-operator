@@ -78,6 +78,7 @@ def create(owner=None):
     apihost = apihost_util.get_apihost(runtime)
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
+    cfg.put("config.apihost", apihost)
 
     data = runtime=='openshift' and get_osh_data(apihost, tls) or get_ingress_data(apihost, tls)
     spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)

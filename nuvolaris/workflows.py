@@ -34,7 +34,7 @@ def generate_job(name, spec, action, id):
     environ = [
         { "name": "_WORKFLOW_", "value": ""}, # to be replaced with name
         { "name": "_ACTION_", "value": action },
-        { "name":  "_APIHOST_", "value": cfg.get("nuvolaris.apihost", defval="undefined-apihost") },
+        { "name":  "_APIHOST_", "value": cfg.get("config.apihost", defval="undefined-apihost") },
         { "name": "_AUTH_", "value": cfg.get("openwhisk.namespaces.nuvolaris",  defval="undefined-auth") }
     ]
 

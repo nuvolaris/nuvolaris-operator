@@ -51,6 +51,7 @@ def whisk_create(spec, name, **kwargs):
     cfg.clean()
     cfg.configure(spec)
     cfg.detect()
+    cfg.put("config.apihost", "https://pending")
     cfg.dump_config()
     owner = kube.get(f"wsk/{name}")
 
@@ -241,6 +242,7 @@ def service_update(old, new, name, **kwargs):
     
     apihost = openwhisk.apihost(ingress)
     openwhisk.annotate(f"apihost={apihost}")
+    cfg.put("config.apihost", apihost)
 
 #@kopf.on.field("sts", field='status.availableReplicas')
 def deploy_update(old, new, name, **kwargs):
