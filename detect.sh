@@ -20,6 +20,9 @@ if ! test -e .env
 then echo "kind" ; exit 0
 else export $(grep -v '^#' .env | xargs)
 fi
+if test -n "$MY_DETECT"
+then echo "$MY_DETECT" ; exit 0
+fi
 LABELS="$(kubectl get nodes -ojsonpath='{.items[].metadata.labels}' 2>/dev/null)"
 #echo $LABELS | jq .
 if echo "$LABELS" | jq . | grep eksctl.io >/dev/null
