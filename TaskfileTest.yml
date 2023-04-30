@@ -76,7 +76,7 @@ tasks:
   - >
     cat tests/{{.KUBE}}/whisk.yaml 
     | kubectl apply -f -
-  - |    
+  - |
     while ! kubectl -n nuvolaris wait pod --for=condition=ready -l app=controller
     do sleep 1 ; echo waiting controller...
     done
@@ -100,6 +100,7 @@ tasks:
   cleanup: kubectl -n nuvolaris delete pvc --all
   
   config: |-
+    rm -f ~/.wskprops
     while true
     do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}')
       if [[ `echo $APIHOST | grep pending` || -z "$APIHOST" ]];

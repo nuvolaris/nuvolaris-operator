@@ -16,6 +16,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+if test -e detect.force
+then cat detect.force ; exit 0
+fi
 if ! test -e .env
 then echo "kind" ; exit 0
 else export $(grep -v '^#' .env | xargs)

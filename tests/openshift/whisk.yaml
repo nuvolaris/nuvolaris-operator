@@ -23,8 +23,8 @@ metadata:
 spec:
   nuvolaris:
       apihost: $APIHOST_OSH
-      #apiport: 80
-      #protocol: http 
+      apiport: 80
+      protocol: http 
   components:
     # start openwhisk controller
     openwhisk: true
