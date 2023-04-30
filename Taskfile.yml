@@ -128,7 +128,7 @@ tasks:
 
 
   minimal:
-    - task: permission
+    - #task: permission
     - task: operator
     - task  instance WHISK=minimal
     - task: config
@@ -197,7 +197,8 @@ tasks:
     cmds:
       - cmd: kubectl -n nuvolaris delete wsk/controller --grace-period=0 --timeout=5s
         ignore_error: true
-      - task: defin
+      - cmd: task defin
+        ignore_error: true
       - cmd: kubectl -n nuvolaris delete all --all --grace-period=0
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete pvc --all --grace-period=0

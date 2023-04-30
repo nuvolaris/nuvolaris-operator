@@ -37,8 +37,17 @@ vars:
   MINIO_PORT: 9000
   MINIO_USER: "minioadmin"
   MINIO_PWD : "minioadmin"
+  APIKUBE:
+      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' 
   T: ""
-  
+
+env:
+    APIHOST:
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|'
+    APIHOST_OSH:
+      sh: echo {{.APIKUBE}} | sed -e 's|^.*//\(.*\):.*$|\1|' | sed -e 's/^api./nuvolaris.apps./'
+
+
 tasks:
   
   kustomization:
@@ -72,12 +81,11 @@ tasks:
   - kubectl delete -k deploy/nuvolaris-operator
 
   instance:
-    silent: true
+    silent: false
     cmds:
     - kubectl config set-context --current --namespace nuvolaris
     - >
-      cat tests/{{.KUBE}}/{{.WHISK}}.yaml 
-      | kubectl apply -f -
+      cat tests/{{.KUBE}}/{{.WHISK}}.yaml | envsubst | kubectl apply -f -
     - |
       while ! kubectl -n nuvolaris wait --for=condition=ready pod/couchdb-0 2>/dev/null
       do sleep 5 ; echo $((N++)) waiting couchdb...
