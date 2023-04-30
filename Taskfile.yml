@@ -157,6 +157,10 @@ tasks:
   ping: 
     - task: t:ping
 
+  workflow: 
+    - kubectl -n nuvolaris apply -f tests/workflow-test.yaml
+
+
   defin:
     - task: d:defin
 

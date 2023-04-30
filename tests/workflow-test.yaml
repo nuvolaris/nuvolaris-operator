@@ -21,7 +21,7 @@ metadata:
   name: workflow-test
   namespace: nuvolaris
 spec:
-  image: busybox
+  image: ghcr.io/msciabarra/busybox:stable
   command: 
   - env
   env:
