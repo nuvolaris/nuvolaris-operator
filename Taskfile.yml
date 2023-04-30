@@ -111,10 +111,7 @@ tasks:
     - task: t:operator
 
   instance:
-    - task: d:instance
-
-  minimal:
-    - task d:instance WHISK=minimal
+    - task: t:instance
 
   instance-wfx:
     - task: d:instance-wfx
@@ -123,20 +120,19 @@ tasks:
     - task: d:instance
     - kubectl -n nuvolaris logs pod/nuvolaris-operator -f
 
-  destroy: 
-    - task: d:destroy
-
   mongo: 
     - task: t:mongo 
 
   minio: 
     - task: t:minio        
 
-  install:
-    cmds:
-    - task install
-    dir: nuv
 
+  minimal:
+    - task: permission
+    - task: operator
+    - task  instance WHISK=minimal
+    - task: config
+    - task: hello
 
   all:
     - task: permission
@@ -160,7 +156,6 @@ tasks:
   workflow: 
     - kubectl -n nuvolaris apply -f tests/workflow-test.yaml
 
-
   defin:
     - task: d:defin
 
@@ -176,7 +171,7 @@ tasks:
         if ! test -e .env
         then echo "please copy .env.dist in .env and add the keys"
         fi
- 
+
   # update configuration files from openwhisk source
   update-files-from-openwhisk: 
     cmds:
@@ -200,18 +195,15 @@ tasks:
 
   clean:
     cmds:
-      - cmd: kubectl -n nuvolaris delete wsku --all
+      - cmd: kubectl -n nuvolaris delete wsk/controller --grace-period=0 --timeout=5s
         ignore_error: true
-      - cmd: kubectl -n nuvolaris delete wsk/controller
+      - task: defin
+      - cmd: kubectl -n nuvolaris delete all --all --grace-period=0
         ignore_error: true
-      - cmd: kubectl -n nuvolaris delete all --all
+      - cmd: kubectl -n nuvolaris delete pvc --all --grace-period=0
         ignore_error: true
-      - cmd: kubectl -n nuvolaris delete pvc --all
+      - cmd: kubectl -n nuvolaris delete ing --all --grace-period=0
         ignore_error: true
-      - cmd: kubectl -n nuvolaris delete ing --all
-        ignore_error: true
-      - cmd: kubectl -n nuvolaris delete deployments --all
-        ignore_error: true        
 
   utest:
     cmds:

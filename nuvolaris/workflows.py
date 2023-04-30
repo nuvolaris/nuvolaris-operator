@@ -34,10 +34,10 @@ def generate_job(name, spec, action, id):
         data['command'] = json.dumps(spec['command'])
 
     environ = [
+        { "name": "_WORKFLOW_", "value": ""}, # to be replaced with name - MUST BE FIRST!
         { "name": "_NAMESPACE_", "value": "nuvolaris" },
-        { "name": "_INSTANCE_": "value": name }
+        { "name": "_INSTANCE_", "value": name },
         { "name": "_JOB_",  "value": job_name },
-        { "name": "_WORKFLOW_", "value": ""}, # to be replaced with name
         { "name": "_ACTION_", "value": action },
         { "name":  "_APIHOST_", "value": cfg.get("config.apihost", defval="undefined-apihost") },
         { "name": "_AUTH_", "value": cfg.get("openwhisk.namespaces.nuvolaris",  defval="undefined-auth") }

@@ -72,23 +72,26 @@ tasks:
   - kubectl delete -k deploy/nuvolaris-operator
 
   instance:
-  - kubectl config set-context --current --namespace nuvolaris
-  - >
-    cat tests/{{.KUBE}}/whisk.yaml 
-    | kubectl apply -f -
-  - |
-    while ! kubectl -n nuvolaris wait pod --for=condition=ready -l app=controller
-    do sleep 1 ; echo waiting controller...
-    done
-  - |    
-    while ! kubectl -n nuvolaris wait pod redis-0 --for=condition=ready 
-    do sleep 1 ; echo waiting redis...
-    done
-  - |    
-    while ! kubectl -n nuvolaris wait pod --for=condition=ready -l user-action-pod=true
-    do sleep 1 ; echo waiting actions... 
-    done
-  
+    silent: true
+    cmds:
+    - kubectl config set-context --current --namespace nuvolaris
+    - >
+      cat tests/{{.KUBE}}/{{.WHISK}}.yaml 
+      | kubectl apply -f -
+    - |
+      while ! kubectl -n nuvolaris wait --for=condition=ready pod/couchdb-0 2>/dev/null
+      do sleep 5 ; echo $((N++)) waiting couchdb...
+      done 
+    - |
+      while ! kubectl -n nuvolaris wait  --for=condition=complete job/couchdb-init 2>/dev/null
+      do sleep 5 ; echo $((N++)) waiting couchdb init...
+      done
+    - |
+      N=1
+      while ! kubectl -n nuvolaris wait --for=condition=ready pod/controller-0 2>/dev/null
+      do sleep 5 ; echo $((N++)) waiting controller...
+      done
+    
   destroy-instance:
     - (sleep 5 ; task defin) &
     - kubectl -n nuvolaris delete wsk/controller
@@ -104,7 +107,7 @@ tasks:
     while true
     do APIHOST=$(kubectl -n nuvolaris get cm/config -o yaml | awk '/apihost:/ {print $2}')
       if [[ `echo $APIHOST | grep pending` || -z "$APIHOST" ]];
-      then echo "apihost still pending..." ; sleep 5
+      then sleep 5 ; echo "$((N++)) apihost still pending..."
       else break
       fi
     done
