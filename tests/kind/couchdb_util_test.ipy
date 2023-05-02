@@ -25,13 +25,16 @@ import nuvolaris.couchdb as cdb
 import nuvolaris.couchdb_util as cu
 
 !kubectl apply -f deploy/nuvolaris-permissions/nuvolaris-common.yaml
-!kubectl apply -f deploy/couchdb
-!kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
-
 # init
 assert(cfg.configure(tu.load_sample_config()))
+cfg.detect()
 cfg.put("couchdb.host", "localhost")
 assert(cfg.get("couchdb.host") == "localhost")
+cdb.create(None)
+
+!kubectl -n nuvolaris wait --for=condition=ready pod couchdb-0
+
+
 import nuvolaris.couchdb_util 
 db = cu.CouchDB()
 
@@ -70,5 +73,5 @@ assert(db.delete_doc("test", "test"))
 assert(db.delete_db("test"))
 
 # cleanup
-!kubectl delete -f deploy/couchdb
+cdb.delete()
 !kubectl wait deploy/couchdb --for=delete
