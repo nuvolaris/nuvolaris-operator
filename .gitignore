@@ -38,6 +38,7 @@ clusters/id_rsa*
 run.pid
 *.off
 actions/*/nuvolaris/
+!actions/*/__main__.py
 _*.yaml
 apihost.txt
 .git-hooks/
