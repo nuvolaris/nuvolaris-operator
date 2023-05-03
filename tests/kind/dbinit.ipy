@@ -15,13 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-!kubectl -n nuvolaris apply -f deploy/couchdb
 import nuvolaris.couchdb as cdb
+import nuvolaris.config as cfg
 import nuvolaris.testutil as tu
 import os, json
 
 os.environ["NUVOLARIS_CONFIG"] = json.dumps(tu.load_sample_config())
 os.environ["COUCHDB_SERVICE_HOST"] = "localhost"
+
+cfg.detect()
+cdb.create(None)
 
 assert(not cdb.init())
 

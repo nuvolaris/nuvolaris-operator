@@ -34,7 +34,7 @@ spec:
       containers:
       - name: init-couchdb
         image: "{{image}}"
-        imagePullPolicy: "Always"
+        #imagePullPolicy: "Always"
         command: ["./dbinit.sh"]
         env:
         - name: "NUVOLARIS_CONFIG"

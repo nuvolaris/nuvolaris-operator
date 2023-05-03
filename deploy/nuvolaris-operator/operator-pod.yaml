@@ -25,7 +25,7 @@ spec:
   containers:
     - name: nuvolaris-operator
       image: ghcr.io/nuvolaris/nuvolaris-operator:latest
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotPresent
       command: ["./run.sh"]
       args: ["--verbose"]
       securityContext:

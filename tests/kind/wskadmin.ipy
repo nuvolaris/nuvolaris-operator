@@ -18,9 +18,6 @@
 !kubectl -n nuvolaris delete all --all
 !kubectl -n nuvolaris delete pvc --all
 
-!kubectl -n nuvolaris apply -f deploy/couchdb
-!cat tests/kind/whisk.yaml | sed -e 's/host: couchdb/host: localhost/' | kubectl apply -f -
-
 import nuvolaris.couchdb as cdb
 import nuvolaris.couchdb_util as cu
 import nuvolaris.testutil as tu
@@ -31,6 +28,10 @@ scf = tu.load_sample_config()
 assert(cfg.configure(scf))
 cfg.put("couchdb.host", "localhost")
 assert(cfg.get("couchdb.host") == "localhost")
+cfg.detect()
+cdb.create(None)
+
+!cat tests/kind/whisk.yaml | sed -e 's/host: couchdb/host: localhost/' | kubectl apply -f -
 assert(not cdb.init())
 
 !./wskadmin.sh user create -ns msciab msciab
