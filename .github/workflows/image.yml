@@ -73,6 +73,8 @@ jobs:
             config: .github/kind.yaml
       - name: Install
         run: poetry install
+      - name: Tag
+        run: task image-tag          
       - name: BuildAndLoad
         run: task build-and-load
       - name: Ngrok
@@ -90,7 +92,7 @@ jobs:
         run: task test
       - name: DockerLogin
         if:  ${{ github.actor != 'nuvolaris'}}
-        run: task docker-login        
+        run: task docker-login             
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
         with:

@@ -59,11 +59,10 @@ tasks:
       images:
       - name: ghcr.io/nuvolaris/nuvolaris-operator:latest
         newName: ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-        newTag: {{.OPERATOR_TAG}}                
+        newTag: {{.OPERATOR_TAG}}             
       resources:
-      - operator-pod.yaml
+      - operator-pod.yaml             
       __EOF__
-
 
   permission: 
     - kubectl apply -f deploy/nuvolaris-permissions
