@@ -50,7 +50,7 @@ jobs:
       - name: License
         uses: apache/skywalking-eyes@main
       - name: Make envfile
-        if:  ${{ github.actor != 'nuvolaris'}}
+        if:  ${{ github.repository_owner != 'nuvolaris'}}
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_MY_OPERATOR_IMAGE: ${{ secrets.MY_OPERATOR_IMAGE }}
@@ -91,7 +91,7 @@ jobs:
       - name: Test
         run: task test
       - name: DockerLogin
-        if:  ${{ github.actor != 'nuvolaris'}}
+        if:  ${{ github.repository_owner != 'nuvolaris'}}
         run: task docker-login             
       - name: Buildx
         uses: crazy-max/ghaction-docker-buildx@v1
