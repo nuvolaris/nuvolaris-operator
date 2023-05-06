@@ -35,9 +35,7 @@ spec:
     # start mongodb
     mongodb: true
     # start redis
-    redis: true   
-    # start s3ninja
-    s3bucket: false    
+    redis: true     
     # start cron based action parser
     cron: true 
     # tls enabled or not
@@ -77,11 +75,6 @@ spec:
   kafka:
     host: kafka
     volume-size: 10
-  s3:
-    volume-size: 10
-    id: AKIAIOSFODNN7EXAMPLE
-    key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    region: eu-central-1
   scheduler:
     schedule: "* * * * *"
   tls:
@@ -103,5 +96,6 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    volume-size: 10
     default:
       password: s0meP@ass3

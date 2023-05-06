@@ -23,8 +23,6 @@ metadata:
 spec:
   nuvolaris:
       apihost: auto
-      #apiport: 80
-      #protocol: http 
   components:
     # start openwhisk controller
     openwhisk: true
@@ -38,8 +36,6 @@ spec:
     mongodb: true
     # start redis
     redis: true
-    # start s3ninja
-    s3bucket: false
     # start cron based action parser
     cron: true 
     # enable TLS
@@ -53,6 +49,8 @@ spec:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
       nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
   couchdb:
+    host: couchdb
+    port: 5984
     volume-size: 10
     admin:
       user: whisk_admin
@@ -76,11 +74,6 @@ spec:
   kafka:
     host: kafka
     volume-size: 10
-  s3:
-    volume-size: 10
-    id: AKIAIOSFODNN7EXAMPLE
-    key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    region: eu-central-1
   scheduler:
     schedule: "* * * * *"
   tls:
@@ -102,6 +95,7 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    volume-size: 10
     default:
       password: s0meP@ass3               
 
