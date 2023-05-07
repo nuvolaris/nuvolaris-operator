@@ -34,7 +34,7 @@ spec:
     - name: v1
       served: true
       storage: true
-      subresources: { status: { } } 
+      subresources: { status: { } }
       schema:
         openAPIV3Schema:
           type: object
@@ -42,6 +42,373 @@ spec:
             spec:
               type: object
               x-kubernetes-preserve-unknown-fields: true
+              properties:              
+                nuvolaris:
+                  description: Used to specify the openwishk apihost. It can be omitted on kubernetes having ingress attached to external LB (AKS, EKS, LKS etc)
+                  type: object
+                  properties:
+                    apihost:
+                      description: a valid api hostname or ip address. If set to auto the ip address of the kubernetes cluster will be used to generate a hostname with <ip>.nip.io
+                      type: string
+                    apiport:
+                      type: integer
+                    protocol:
+                      description: protocol to be used. Defaulted to http if TLS is not enabled. On Kind it will be always http
+                      type: string
+                      enum:
+                      - http
+                      - https
+                components:
+                  description: it allows which components needs to be deployed by default. For a minimal setup openwhisk and couchdb are required to be set to true
+                  type: object
+                  properties:
+                    openwhisk:
+                      description: deploys ow controller in lean mode
+                      type: boolean
+                    invoker:
+                      description: deploys ow invoker if supported by the operator
+                      type: boolean
+                    couchdb:
+                      description: deploys couchdb
+                      type: boolean
+                    kafka:
+                      description: deploys kafka
+                      type: boolean
+                    mongodb:
+                      description: deploys mongodb
+                      type: boolean
+                    redis:
+                      description: deploys redis
+                      type: boolean
+                    cron:
+                      description: activate the nuvolaris internal scheduled action executor
+                      type: boolean
+                    tls:
+                      description: enables TLS support via let's encrypt certificate for the ow apihost
+                      type: boolean
+                    minio:
+                      description: deploys MINIO as storage
+                      type: boolean
+                    static:
+                      description: activate the MINIO static internal service (requires components.minio to be true)
+                      type: boolean
+                    zookeeper:
+                      description: deploys zookeeper if supported by the operator
+                      type: boolean
+                  required:
+                    - openwhisk
+                    - couchdb
+                openwhisk:
+                  description: Used to setup the default OW namespaces assigned to whisk-system and nuvolaris
+                  type: object
+                  properties:
+                    namespaces:
+                      type: object
+                      properties:
+                        whisk-system:
+                          description: the auth value to be used for the whisk-system user
+                          type: string
+                        nuvolaris:
+                          description: the auth value to be used for the nuvolaris user
+                          type: string
+                      required:
+                      - whisk-system
+                      - nuvolaris
+                  required:
+                  - namespaces    
+                couchdb:
+                  description: used to configure the couchdb instance used internally by OW
+                  type: object
+                  properties:
+                    host:
+                      description: couchdb internal service name. Defaulted to couchdb
+                      type: string
+                    port:
+                      description: couchdb port defaulted to 5984
+                      type: integer
+                    volume-size:
+                      description: couchdb volume size in GB
+                      type: integer
+                    admin:
+                      description: Couchdb admin credentials
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password
+                    controller:
+                      description: Couchdb credentials used by the OW controller to read/write data
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password
+                    invoker:
+                      description: Couchdb credentials used by the OW invoker to read/write data
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password                                           
+                  required:
+                  - volume-size
+                  - admin
+                  - controller
+                mongodb:
+                  description: used to configure a nuvolaris shared mongodb instance
+                  type: object
+                  properties:
+                    host:
+                      description: mongodb hostname
+                      type: string
+                    volume-size:
+                      description: mongodb volume size in GB
+                      type: integer
+                    exposedExternally:
+                      type: boolean
+                    useOperator:
+                      description: boolean flag used to deploy mongodb using teh community operator. It default to false
+                      type: boolean
+                    admin:
+                      description: mongodb admin suer credentials
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password
+                    nuvolaris:
+                      description: mongodb nuvolaris database credentials
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password                      
+                  required:
+                    - host
+                    - volume-size
+                    - admin
+                    - nuvolaris
+                kafka:
+                  description: setup a kafka instance
+                  type: object
+                  properties:
+                    host:
+                      description: kafka hostname defaulted to kafka
+                      type: string
+                    volume-size:
+                      type: integer
+                  required:
+                  - host
+                  - volume-size
+                zookeeper:
+                  description: configure zookeeper properties
+                  type: object
+                  properties:
+                    host:
+                      description: zookeeper hostname defaulted to zookeeper
+                      type: string
+                    data-volume-size:
+                      description: data volume size in GB
+                      type: integer
+                    log-volume-size:
+                      description: log volume size in GB
+                      type: integer
+                  required:
+                  - host
+                  - data-volume-size
+                  - log-volume-size
+                scheduler:
+                  description: used to configure the internal scheduled based action executor when cron is set to true
+                  type: object
+                  properties:
+                    schedule:
+                      description: a cron expression used to define the scheduler execution interval defaults to "* * * * *" every minutes
+                      type: string
+                  required:
+                  - schedule
+                tls:
+                  description: required to configure a let's encrypt cluster issue used to autorenew the apihost SSL certificates
+                  type: object
+                  properties:
+                    acme-registered-email:
+                      description: an email address to receive let's encrypt notification about SSL/TLS certificate expiration
+                      type: string
+                    acme-server-url:
+                      description: a valid let's encypt url. For prod certificates use https://acme-staging-v02.api.letsencrypt.org/directory
+                      type: string
+                  required:
+                  - acme-registered-email
+                  - acme-server-url
+                minio:
+                  description: used to oconfigure the internal minio data storage service
+                  type: object
+                  properties:
+                    volume-size:
+                      description: volume size in GB
+                      type: integer
+                    nuvolaris:
+                      description: used to configure the MINIO root admin user used by nuvolaris itself
+                      type: object
+                      properties:
+                        root-user:
+                          type: string
+                        root-password:
+                          type: string
+                      required:
+                      - root-user
+                      - root-password
+                  required:
+                  - volume-size
+                  - nuvolaris 
+                redis:
+                  description: used to configure redis default credentials
+                  type: object
+                  properties:
+                    volume-size:
+                      description: redis volume size in GB 
+                      type: integer
+                    default:
+                      type: object
+                      properties:
+                        password:
+                          type: string
+                      required:
+                      - password
+                  required:
+                  - volume-size
+                  - default
+                configs:
+                  description: Configuration parameters to customize OW controller/invoker
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        actions:
+                          description: control ow actions execution limits
+                          type: object
+                          properties:
+                            sequence-maxLength:
+                              description: default to 50
+                              type: integer
+                            invokes-perMinute:
+                              description: default to 999
+                              type: integer
+                            invokes-concurrent:
+                              description: default to 250
+                              type: integer
+                          required:
+                          - sequence-maxLength
+                          - invokes-perMinute
+                          - invokes-concurrent    
+                        triggers:
+                          type: object
+                          properties:
+                            fires-perMinute:
+                              description: default to 999
+                              type: integer
+                          required:
+                          - fires-perMinute    
+                        time:
+                          description: controls ow action timeout
+                          type: object
+                          properties:
+                            limit-min:
+                              description: defaulted to "100ms"
+                              type: string
+                            limit-std:
+                              description: defaulted to "1min"
+                              type: string
+                            limit-max:
+                              description: defaulted to "5min"
+                              type: string
+                          required:
+                          - limit-min
+                          - limit-std
+                          - limit-max    
+                        memory:
+                          description: controls memory limits per ow actions
+                          type: object
+                          properties:
+                            limit-min:
+                              description: defaulted to "128m"
+                              type: string
+                            limit-std:
+                              description: defaulted to "256m"
+                              type: string
+                            limit-max:
+                              description: defaulted to "512m"
+                              type: string
+                          required:
+                          - limit-min 
+                          - limit-std 
+                          - limit-max     
+                    controller:
+                      description: configure the OW controller
+                      type: object
+                      properties:
+                        javaOpts:
+                          description: controller java memory settings defaulted to "-Xmx2048M"
+                          type: string
+                        loggingLevel:                          
+                          description: controller logging level defaulted to INFO
+                          type: string
+                          enum:
+                          - INFO
+                          - DEBUG
+                          - WARN
+                          - ERROR
+                          - TRACE
+                      required:
+                      - javaOpts                           
+                    invoker:
+                      description: configure the OW invoker if supported by the oeprator
+                      type: object
+                      properties:
+                        javaOpts:
+                          description: invoker memory settings defaulted to "-Xmx1024M"
+                          type: string
+                        loggingLevel:
+                          description: invoker logging level defaulted to INFO
+                          type: string
+                          enum:
+                          - INFO
+                          - DEBUG
+                          - WARN
+                          - ERROR
+                          - TRACE
+                        containerPool:
+                          type: object
+                          properties:
+                            userMemory:
+                              description: containerPool user memory defaulted to "2048m". This values allows to control how many action per invoker instance can be launched by dividing this value by the
+                                avg memory action memory settings
+                              type: string
+                          required:
+                          - userMemory
+                      required:
+                      - javaOpts
+                      - containerPool                                                                                                                                                                                  
             status:
               x-kubernetes-preserve-unknown-fields: true
               # type: object

@@ -23,8 +23,6 @@ metadata:
 spec:
   nuvolaris:
       apihost: $APIHOST
-      #apiport: 80
-      #protocol: http 
   components:
     # start openwhisk controller
     openwhisk: true
@@ -38,8 +36,6 @@ spec:
     mongodb: false
     # start redis
     redis: false
-    # start s3ninja
-    s3bucket: false
     # start cron based action parser
     cron: false
     # enable TLS
@@ -73,11 +69,6 @@ spec:
   kafka:
     host: kafka
     volume-size: 10
-  s3:
-    volume-size: 10
-    id: AKIAIOSFODNN7EXAMPLE
-    key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    region: eu-central-1
   scheduler:
     schedule: "* * * * *"
   tls:
