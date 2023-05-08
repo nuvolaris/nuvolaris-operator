@@ -185,7 +185,7 @@ def get_redis_config_data():
     data = {
         "name": "redis",
         "dir": "/redis-master-data",
-        "size": cfg.get("couchdb.volume-size", "REDIS_VOLUME_SIZE", 10),
+        "size": cfg.get("redis.volume-size", "REDIS_VOLUME_SIZE", 10),
         "storageClass": cfg.get("nuvolaris.storageClass"),
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3"
     }
