@@ -345,7 +345,7 @@ spec:
                           required:
                           - limit-min
                           - limit-std
-                          - limit-max    
+                          - limit-max
                         memory:
                           description: controls memory limits per ow actions
                           type: object
@@ -362,7 +362,37 @@ spec:
                           required:
                           - limit-min 
                           - limit-std 
-                          - limit-max     
+                          - limit-max
+                        concurrency:
+                          description: controls ow action concurrency
+                          type: object
+                          properties:
+                            limit-min:
+                              description: defaulted to 1
+                              type: integer
+                            limit-std:
+                              description: defaulted to 1
+                              type: integer
+                            limit-max:
+                              description: defaulted to 1
+                              type: integer
+                          required:
+                          - limit-min
+                          - limit-std
+                          - limit-max
+                        loadbalancer:
+                          description: controls load balancer behavior
+                          type: object
+                          properties:
+                            blackbox-fraction:
+                              description: blackbox images load balancer max allowed blackbox-fraction. Defaulted to "10%"
+                              type: string
+                            timeout-factor:
+                              description: Defaultd to 2
+                              type: integer
+                          required:
+                          - blackbox-fraction
+                          - timeout-factor                                
                     controller:
                       description: configure the OW controller
                       type: object
@@ -408,7 +438,7 @@ spec:
                           - userMemory
                       required:
                       - javaOpts
-                      - containerPool                                                                                                                                                                                  
+                      - containerPool                                                                                                                                                                                
             status:
               x-kubernetes-preserve-unknown-fields: true
               # type: object
