@@ -61,6 +61,7 @@ spec:
                 components:
                   description: it allows which components needs to be deployed by default. For a minimal setup openwhisk and couchdb are required to be set to true
                   type: object
+                  x-kubernetes-preserve-unknown-fields: true
                   properties:
                     openwhisk:
                       description: deploys ow controller in lean mode
