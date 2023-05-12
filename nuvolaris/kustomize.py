@@ -267,7 +267,7 @@ def raw(where, yamlfile):
 
 def processTemplate(where,template,data,out_template=None):
     """
-    merges the given template and write it under the deply/{where} folder returning the file path
+    merges the given template and write it under the deploy/{where} folder returning a kind list items
     """  
     out = f"deploy/{where}/_{template}"
 
@@ -278,3 +278,12 @@ def processTemplate(where,template,data,out_template=None):
     with open(out, 'r') as f:
       res = list(yaml.load_all(f, yaml.Loader))
       return {"apiVersion": "v1", "kind": "List", "items": res }
+
+def renderTemplate(where,template,data,out_template):
+    """
+    merges the given template and write it under the deploy/{where} folder returning the relative generated file path
+    """  
+    out = f"deploy/{where}/{out_template}"
+    ntp.spool_template(template, out, data)
+    return out
+   
