@@ -57,16 +57,6 @@ spec:
     invoker:
       user: controller_admin
       password: s0meP@ass2
-  mongodb:
-    host: mongodb
-    volume-size: 10
-    admin: 
-      user: whisk_admin
-      password: 0therPa55
-    nuvolaris:
-      user: nuvolaris
-      password: s0meP@ass3
-    exposed: true
   kafka:
     host: kafka
     volume-size: 10
@@ -76,11 +66,6 @@ spec:
     port: "3233"
   scheduler:
     schedule: "* * * * *"
-  minio:
-    volume-size: 2
-    nuvolaris:
-      root-user: minioadmin
-      root-password: minioadmin
   configs:
     limits:
       actions:
@@ -94,5 +79,27 @@ spec:
   redis:
     volume-size: 10
     default:
-      password: s0meP@ass3            
+      password: s0meP@ass3
+    nuvolaris:
+      prefix: nuv      
+      password: s0meP@ass3
+  mongodb:
+    host: mongodb
+    volume-size: 10
+    admin: 
+      user: whisk_admin
+      password: 0therPa55
+    nuvolaris:
+      user: nuvolaris
+      password: s0meP@ass3
+    exposedExternally: False
+    useOperator: False
+  minio:
+    volume-size: 2
+    admin:
+      user: minioadmin
+      password: minioadmin    
+    nuvolaris:
+      user: nuvolaris
+      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG             
 

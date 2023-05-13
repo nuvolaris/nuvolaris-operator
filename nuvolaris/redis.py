@@ -21,6 +21,7 @@ import nuvolaris.kube as kube
 import nuvolaris.config as cfg
 import nuvolaris.template as ntp
 import nuvolaris.util as util
+import nuvolaris.openwhisk as openwhisk
 import urllib.parse
 import os, os.path
 import logging, json
@@ -28,6 +29,7 @@ import kopf
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
+
 
 def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     """
@@ -38,13 +40,11 @@ def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     try:
         redis_service =  util.get_service("{.items[?(@.spec.selector.name == 'redis')]}")
         if(redis_service):
-            redis_service_name = redis_service['metadata']['name']
-            redis_ns = redis_service['metadata']['namespace']
-
-            username = ucfg.get('namespace')
-            auth = ucfg.get('redis.password')
-
-            redis_url = f"redis://{username}:{auth}@{redis_service_name}"
+            redis_service_name = redis_service['metadata']['name']            
+            username = urllib.parse.quote(ucfg.get('namespace'))
+            password = urllib.parse.quote(ucfg.get('redis.password'))
+            auth = f"{username}:{password}"
+            redis_url = f"redis://{auth}@{redis_service_name}"
             user_metadata.add_metadata("REDIS_URL",redis_url)
         return None
     except Exception as e:
@@ -64,6 +64,7 @@ def create(owner=None):
     res = kube.apply(spec)
 
     wait_for_redis_ready()
+    create_nuvolaris_db_user(data)
 
     logging.info(f"create redis: {res}")
     return res
@@ -71,6 +72,34 @@ def create(owner=None):
 def wait_for_redis_ready():
     # dynamically detect redis pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.name == 'redis')].metadata.name}")
+
+def create_nuvolaris_db_user(data):
+    logging.info(f"authorizing redis for namespace nuvolaris")
+    try:        
+        data['mode']="create"
+        path_to_script = render_redis_script(data['namespace'],"redis_manage_user_tpl.txt",data)
+        pod_name = util.get_pod_name("{.items[?(@.metadata.labels.name == 'redis')].metadata.name}")
+
+        if(pod_name):
+            res = exec_redis_command(pod_name,path_to_script)
+
+            if(res):
+                redis_service =  util.get_service("{.items[?(@.spec.selector.name == 'redis')]}")
+                if(redis_service):
+                    redis_service_name = redis_service['metadata']['name']                    
+                    username = urllib.parse.quote(data['namespace'])
+                    password = urllib.parse.quote(data['password'])
+                    auth = f"{username}:{password}"
+                    redis_url = f"redis://{auth}@{redis_service_name}"                   
+                    openwhisk.annotate(f"redis_url={redis_url}")
+                    openwhisk.annotate(f"redis_prefix={data['prefix']}")
+                    logging.info("*** saved annotation for redis nuvolaris user")
+            return res
+
+        return None
+    except Exception as e:
+        logging.error(f"failed to add redis namespace {data['namespace']}: {e}")
+        return None   
 
 def delete():
     spec = cfg.get("state.redis.spec")

@@ -180,14 +180,17 @@ def check(f, what, res):
         logging.warn(f"ERR: {what}")
         return False
 
-# return redis configuration parameter with default valued if not configured
+# return redis configuration parameters with default values if not configured
 def get_redis_config_data():
     data = {
         "name": "redis",
         "dir": "/redis-master-data",
         "size": cfg.get("redis.volume-size", "REDIS_VOLUME_SIZE", 10),
         "storageClass": cfg.get("nuvolaris.storageClass"),
-        "redis_password":cfg.get("redis.default.password") or "s0meP@ass3"
+        "redis_password":cfg.get("redis.default.password") or "s0meP@ass3",
+        "namespace":"nuvolaris",
+        "password":cfg.get("redis.nuvolaris.password") or "s0meP@ass3",
+        "prefix":cfg.get("redis.nuvolaris.prefix") or "nuv"
     }
     return data
 
@@ -196,4 +199,17 @@ def get_service(jsonpath,namespace="nuvolaris"):
     if(services):
         return services[0]
 
-    raise Exception(f"could not find any svc matching jsonpath={jsonpath}")                                
+    raise Exception(f"could not find any svc matching jsonpath={jsonpath}")
+
+# return minio configuration parameters with default values if not configured
+def get_minio_config_data():
+    data = {
+        "minio_host": cfg.get('minio.host') or "minio",
+        "minio_volume_size": cfg.get('minio.volume-size') or "5",
+        "minio_root_user": cfg.get('minio.admin.user') or "minio",
+        "minio_root_password": cfg.get('minio.admin.password') or "minio123",
+        "storage_class": cfg.get("nuvolaris.storageClass"),
+        "minio_nuv_user": cfg.get('minio.nuvolaris.user') or "nuvolaris",
+        "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+    }
+    return data                               

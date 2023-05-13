@@ -15,12 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import kopf, logging, json, os
+import kopf, logging, time, os
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.minio_util as mutil
+import nuvolaris.openwhisk as openwhisk
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
@@ -43,13 +44,13 @@ def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
 
             ports = list(minio_service['spec']['ports'])
             for port in ports:
-                if(port[name]=='minio-api'):
+                if(port['name']=='minio-api'):
                     user_metadata.add_metadata("MINIO_PORT",port['port'])
         return None
     except Exception as e:
         logging.error(f"failed to build redis_url for {ucfg.get('namespace')}: {e}")
         return None 
-
+    
 def find_content_path(filename):
     absolute_path = os.path.dirname(__file__)
     relative_path = "../deploy/content"
@@ -58,14 +59,7 @@ def find_content_path(filename):
 def create(owner=None):
     logging.info(f"*** configuring minio standalone")
 
-    data = {
-        "minio_host": cfg.get('minio.host') or "minio",
-        "minio_volume_size": cfg.get('minio.volume-size') or "5",
-        "minio_root_user": cfg.get('minio.nuvolaris.root-user') or "minio",
-        "minio_root_password": cfg.get('minio.nuvolaris.root-password') or "minio123",
-        "storage_class": cfg.get("nuvolaris.storageClass")
-    }
-    
+    data = util.get_minio_config_data()    
     kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"], data)    
     spec = kus.kustom_list("minio", kust, templates=[], data=data)
 
@@ -78,9 +72,74 @@ def create(owner=None):
 
     # dynamically detect minio pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
-
+    create_nuv_storage(data)
     logging.info("*** configured minio standalone")
     return res
+
+def _annotate_nuv_metadata(data):
+    """
+    annotate nuvolaris confgimap with entries for minio connectivity MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+    this is becasue MINIO
+    """ 
+    try:
+        minio_service =  util.get_service("{.items[?(@.spec.selector.app == 'minio')]}")
+        if(minio_service):
+            minio_endpoint = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
+            access_key = data["minio_nuv_user"]
+            secret_key = data["minio_nuv_password"]
+            openwhisk.annotate(f"minio_url={minio_endpoint}")
+            openwhisk.annotate(f"minio_access_key={access_key}")
+            openwhisk.annotate(f"minio_secret_key={secret_key}")
+
+            ports = list(minio_service['spec']['ports'])
+            for port in ports:
+                if(port['name']=='minio-api'):
+                    openwhisk.annotate(f"minio_port={port['port']}")                    
+        return None
+    except Exception as e:
+        logging.error(f"failed to build redis_url for nuvolaris: {e}")
+        return None      
+
+def create_nuv_storage(data):
+    """
+    Creates nuvolaris MINIO custom resources
+    """
+    logging.info(f"*** configuring MINIO storage for nuvolaris")
+    # introduce a 10 seconds delay to be sure that MINIO server is up and running completely as pod readines not to be enough
+    time.sleep(10)
+    minioClient = mutil.MinioClient()
+    res = minioClient.add_user(data["minio_nuv_user"], data["minio_nuv_password"])
+    
+    if(res):
+        _annotate_nuv_metadata(data)
+        bucket_policy_names = []
+
+        logging.info(f"*** adding nuvolaris MINIO data bucket")
+        res = minioClient.make_bucket("nuvolaris-data")                
+        bucket_policy_names.append("nuvolaris-data/*")
+
+        if(res):
+            openwhisk.annotate(f"nuvolaris_minio_data_bucket=nuvolaris-data")
+
+        logging.info(f"*** adding nuvolaris MINIO static bucket")
+        res = minioClient.make_bucket("nuvolaris-web")                
+        bucket_policy_names.append("nuvolaris-web/*")
+
+        if(res):
+            openwhisk.annotate(f"nuvolaris_minio_static_bucket=nuvolaris-web")
+            content_path = find_content_path("index.html")
+
+            if(content_path):
+                logging.info(f"uploading example content to nuvolaris-web from {content_path}")
+                res = minioClient.upload_folder_content(content_path,"nuvolaris-web")
+            else:
+                logging.warn("could not find example static content to upload")
+
+        if(len(bucket_policy_names)>0):
+            logging.info(f"granting rw access to created policies under username {data['minio_nuv_user']}")
+            minioClient.assign_rw_bucket_policy_to_user(data["minio_nuv_user"],bucket_policy_names)
+
+        logging.info(f"*** configured MINIO storage for nuvolaris") 
 
 def delete():
     spec = cfg.get("state.minio.spec")
@@ -91,8 +150,7 @@ def delete():
     return res
 
 def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owner=None):
-    minioClient = mutil.MinioClient()
-    
+    minioClient = mutil.MinioClient()    
     namespace = ucfg.get("namespace")
     secretkey = ucfg.get("object-storage.password")
 

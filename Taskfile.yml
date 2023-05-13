@@ -204,6 +204,8 @@ tasks:
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete ing --all --grace-period=0
         ignore_error: true
+      - cmd: kubectl -n nuvolaris delete cm/config --grace-period=0
+        ignore_error: true        
 
   utest:
     cmds:

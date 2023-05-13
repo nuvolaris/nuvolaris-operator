@@ -25,18 +25,24 @@ import nuvolaris.minio as minio
 import nuvolaris.couchdb as cdb
 import nuvolaris.couchdb_util as cdbu
 import nuvolaris.util as util
-import logging
+import logging, os
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.detect_storage()["nuvolaris.storageClass"])
+
+# for this test minioClient should see this env variable
+os.environ['MINIO_API_HOST']='localhost'
+
 assert(minio.create())
 
 pod_name = util.get_pod_name("{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
 assert(pod_name)
 
 actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name}", jsonpath="{.spec.containers[0].env[0].value}")
-configured_minio_root_user = cfg.get('minio.nuvolaris.root-user')
+configured_minio_root_user = cfg.get('minio.admin.user')
 assert(actual_minio_root_user[0] == configured_minio_root_user)
 
+cm_minio_url = kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.minio_url}")
+assert(cm_minio_url)
 assert(minio.delete())

@@ -36,5 +36,5 @@ assert(kube.get("mdbc/nuvolaris-mongodb"))
 
 assert(mdb.delete())
 
-!kubectl -n nuvolaris delete all --all
-!kubectl -n nuvolaris delete pvc --all
+#!kubectl -n nuvolaris delete all --all
+#!kubectl -n nuvolaris delete pvc --all
