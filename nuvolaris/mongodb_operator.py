@@ -99,8 +99,9 @@ def create(owner=None):
         else:
             cfg.put("state.mongodb.spec", mspec)
         
-        # skipping this at the moment
         res = kube.apply(mspec)
+        # dynamically detect mongodb pod and wait for readiness
+        util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb-svc')].metadata.name}")
     else:
         logging.info("*** something went wrong deploying mongodb operator")    
     return res 

@@ -267,19 +267,31 @@ spec:
                     volume-size:
                       description: volume size in GB
                       type: integer
-                    nuvolaris:
-                      description: used to configure the MINIO root admin user used by nuvolaris itself
+                    admin:
+                      description: used to configure the MINIO admin user
                       type: object
                       properties:
-                        root-user:
+                        user:
                           type: string
-                        root-password:
+                        password:
                           type: string
                       required:
-                      - root-user
-                      - root-password
+                      - user
+                      - password
+                    nuvolaris:
+                      description: used to configure the MINIO nuvolaris user used for non administrative purposes
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - user
+                      - password
                   required:
                   - volume-size
+                  - admin
                   - nuvolaris 
                 redis:
                   description: used to configure redis default credentials
@@ -289,15 +301,28 @@ spec:
                       description: redis volume size in GB 
                       type: integer
                     default:
+                      description: used to configure REDIS default admin credentials
                       type: object
                       properties:
                         password:
                           type: string
                       required:
                       - password
+                    nuvolaris:
+                      description: used to configure nuvolaris REDIS user
+                      type: object
+                      properties:
+                        prefix:
+                          description: nuvolaris key prefix. Defaulted to nuv
+                          type: string
+                        password:
+                          type: string
+                      required:
+                      - password                      
                   required:
                   - volume-size
                   - default
+                  - nuvolaris
                 configs:
                   description: Configuration parameters to customize OW controller/invoker
                   type: object

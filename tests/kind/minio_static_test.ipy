@@ -24,10 +24,15 @@ import nuvolaris.minio as minio
 import nuvolaris.util as util
 import nuvolaris.minio_static as nginx
 import logging
+import os
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.detect_storage()["nuvolaris.storageClass"])
+
+# for this test minioClient should see this env variable
+os.environ['MINIO_API_HOST']='localhost'
+
 assert(minio.create())
 assert(nginx.create())
 

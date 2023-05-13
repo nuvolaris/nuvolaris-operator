@@ -47,3 +47,4 @@ whisk.properties
 .task/
 *.log
 .latestcheck
+_failed.txt

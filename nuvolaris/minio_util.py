@@ -31,8 +31,8 @@ class MinioClient:
     def __init__(self):
         self.minio_api_host   = cfg.get("minio.host", "MINIO_API_HOST", "minio")
         self.minio_api_port   = cfg.get("9000", "MINIO_API_PORT", "9000")        
-        self.admin_username   = cfg.get("minio.nuvolaris.root-user", "MINIO_ADMIN_USER", "minio")
-        self.admin_password   = cfg.get("minio.nuvolaris.root-password", "MINIO_ADMIN_PASSWORD", "minio123")
+        self.admin_username   = cfg.get("minio.admin.user", "MINIO_ADMIN_USER", "minioadmin")
+        self.admin_password   = cfg.get("minio.admin.password", "MINIO_ADMIN_PASSWORD", "minioadmin")
         self.minio_api_url   = f"http://{self.minio_api_host}:{self.minio_api_port}"
         self.alias = "local"        
 

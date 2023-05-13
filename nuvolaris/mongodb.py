@@ -29,9 +29,16 @@ import nuvolaris.kube as kube
 import nuvolaris.template as ntp
 import logging, json
 import os
+import urllib.parse
+import nuvolaris.openwhisk as openwhisk
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
+
+def get_mdb_pod_name():
+    useOperator = cfg.get('mongodb.useOperator') or False
+    pod_name_jsonpath = useOperator and "{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb-svc')].metadata.name}" or "{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb')].metadata.name}"
+    return util.get_pod_name(pod_name_jsonpath)
 
 def _add_mdb_user_metadata(ucfg, user_metadata):
     """
@@ -40,18 +47,19 @@ def _add_mdb_user_metadata(ucfg, user_metadata):
     """ 
 
     try:
-        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb')]}")
+        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb-svc')]}")
 
         if(mdb_service):
-            mdb_service_name = mdb_service['metadata']['name']
-            mdb_pod_name = mdb_service['spec']['selector']['statefulset.kubernetes.io/pod-name']
+            mdb_service_name = mdb_service['metadata']['name']            
             mdb_ns = mdb_service['metadata']['namespace']
-
-            username = ucfg.get('namespace')
-            auth = ucfg.get('mongodb.password')
+            mdb_pod_name = get_mdb_pod_name()
+            
+            username = urllib.parse.quote(ucfg.get('namespace'))
+            password = urllib.parse.quote(ucfg.get('mongodb.password'))
+            auth = f"{username}:{password}"
             database = ucfg.get('mongodb.database')
 
-            mdb_url = f"mongodb://{username}:{auth}@{mdb_pod_name}.{mdb_service_name}.{mdb_ns}.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"
+            mdb_url = f"mongodb://{auth}@{mdb_pod_name}.{mdb_service_name}.{mdb_ns}.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"
             user_metadata.add_metadata("MONGODB_URL",mdb_url)
         return None
     except Exception as e:
@@ -64,12 +72,33 @@ def create(owner=None):
     """
     useOperator = cfg.get('mongodb.useOperator') or False
 
-    if useOperator:
-        logging.info("*** creating mongodb using operator mode") 
-        return operator.create(owner)
+    res = useOperator and operator.create(owner) or standalone.create(owner)
 
-    logging.info("*** creating mongodb using standalone mode") 
-    return standalone.create(owner)
+    if(res):
+        update_system_cm_for_mdb()
+
+    return res
+
+def update_system_cm_for_mdb():
+    logging.info("*** annotating configuration for mongodb nuvolaris user")
+    try:        
+        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb-svc')]}")
+        if(mdb_service):
+            mdb_pod_name = get_mdb_pod_name()                
+            mdb_service_name = mdb_service['metadata']['name']            
+            mdb_ns = mdb_service['metadata']['namespace']
+
+            data = util.get_mongodb_config_data()
+
+            username = urllib.parse.quote(data['mongo_nuvolaris_user'])
+            password = urllib.parse.quote(data['mongo_nuvolaris_password'])
+            auth = f"{username}:{password}"
+            
+            mdb_url = f"mongodb://{auth}@{mdb_pod_name}.{mdb_service_name}.{mdb_ns}.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
+            openwhisk.annotate(f"mongodb_url={mdb_url}")
+            logging.info("*** saved annotation for mongodb nuvolaris user")            
+    except Exception as e:
+        logging.error(f"failed to build mongodb_url for nuvolaris database: {e}")    
 
 def delete():
     useOperator = cfg.get('mongodb.useOperator') or False
