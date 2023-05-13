@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import kopf, logging, json, os
+import kopf, logging, time, os
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
@@ -105,6 +105,8 @@ def create_nuv_storage(data):
     Creates nuvolaris MINIO custom resources
     """
     logging.info(f"*** configuring MINIO storage for nuvolaris")
+    # introduce a 10 seconds delay to be sure that MINIO server is up and running completely as pod readines seems to be no enough
+    time.sleep(10)
     minioClient = mutil.MinioClient()
     res = minioClient.add_user(data["minio_nuv_user"], data["minio_nuv_password"])
     
