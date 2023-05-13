@@ -29,14 +29,14 @@ job = wfx.generate_job(name, spec, "create", "123")
 #print(job)
 kube.apply(job)
 
-!kubectl -n nuvolaris wait --for=condition=complete job/123-workflow-test-create  --timeout=600s
+!kubectl -n nuvolaris wait --for=condition=complete job/workflow-test-create-123  --timeout=600s
 
-l = !kubectl -n nuvolaris logs job/123-workflow-test-create -c first
+l = !kubectl -n nuvolaris logs job/workflow-test-create-123 -c first
 
-check = {"_STEP_=start", "_WORKFLOW_=first","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL1=alpha", "VAL2=beta"}
+check = {"_STEP_=start", "_WORKFLOW_=first","_ACTION_=create", "_NAMESPACE_=nuvolaris", "_INSTANCE_=workflow-test", "_JOB_=workflow-test-create-123" ,"_APIHOST_=undefined-apihost", "VAL1=alpha", "VAL2=beta"}
 
 assert(len(set(l) & check) == len(check))
 
-l = !kubectl -n nuvolaris logs job/123-workflow-test-create -c second
+l = !kubectl -n nuvolaris logs job/workflow-test-create-123 -c second
 check = {"_STEP_=start", "_WORKFLOW_=second","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL3=gamma"}
 assert(len(set(l) & check) == len(check))
