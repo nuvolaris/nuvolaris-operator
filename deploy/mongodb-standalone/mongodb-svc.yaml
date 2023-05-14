@@ -27,5 +27,5 @@ spec:
     - port: 27017
       targetPort: 27017
   selector:
-    app: nuvolaris-mongodb-svc
+    app: nuvolaris-mongodb
     statefulset.kubernetes.io/pod-name: nuvolaris-mongodb-0

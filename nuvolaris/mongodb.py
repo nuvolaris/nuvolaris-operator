@@ -47,7 +47,7 @@ def _add_mdb_user_metadata(ucfg, user_metadata):
     """ 
 
     try:
-        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb-svc')]}")
+        mdb_service = util.get_service("{.items[?(@.metadata.name == 'nuvolaris-mongodb-svc')]}")
 
         if(mdb_service):
             mdb_service_name = mdb_service['metadata']['name']            
@@ -82,7 +82,7 @@ def create(owner=None):
 def update_system_cm_for_mdb():
     logging.info("*** annotating configuration for mongodb nuvolaris user")
     try:        
-        mdb_service = util.get_service("{.items[?(@.spec.selector.app == 'nuvolaris-mongodb-svc')]}")
+        mdb_service = util.get_service("{.items[?(@.metadata.name == 'nuvolaris-mongodb-svc')]}")
         if(mdb_service):
             mdb_pod_name = get_mdb_pod_name()                
             mdb_service_name = mdb_service['metadata']['name']            
