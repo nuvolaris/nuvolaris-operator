@@ -286,4 +286,29 @@ def renderTemplate(where,template,data,out_template):
     out = f"deploy/{where}/{out_template}"
     ntp.spool_template(template, out, data)
     return out
+
+# generate a kustomization for a persistence volume claim using inline patchesJson6902 format
+def patchPersistentVolumeClaim(name, path, value):
+    """
+    >>> print(patchPersistentVolumeClaim("mongodb-data", "/spec/resources/requests/storage", "10Gi"), end='')
+    - target:
+        version: v1
+        kind: PersistentVolumeClaim
+        namespace: nuvolaris
+        name: mongodb-data
+      patch: |-
+        - op: replace
+          path: /spec/resources/requests/storage
+          value: 10Gi
+    """
+    return f"""- target:
+    version: v1
+    kind: PersistentVolumeClaim
+    namespace: nuvolaris
+    name: {name}
+  patch: |-
+    - op: replace
+      path: {path}
+      value: {value}
+"""  
    

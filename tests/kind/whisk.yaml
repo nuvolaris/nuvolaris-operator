@@ -82,7 +82,7 @@ spec:
     default:
       password: s0meP@ass3
     nuvolaris:
-      prefix: nuv      
+      prefix: nuvolaris      
       password: s0meP@ass3
   mongodb:
     host: mongodb

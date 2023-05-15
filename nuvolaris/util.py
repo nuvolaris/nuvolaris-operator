@@ -112,8 +112,12 @@ def get_mongodb_config_data():
         'mongo_admin_user': cfg.get('mongodb.admin.user') or "whisk_user",
         'mongo_admin_password': cfg.get('mongodb.admin.password') or "0therPa55",
         'mongo_nuvolaris_user': cfg.get('mongodb.nuvolaris.user') or "nuvolaris",
-        'mongo_nuvolaris_password': cfg.get('mongodb.nuvolaris.password') or "s0meP@ass3"
-    }
+        'mongo_nuvolaris_password': cfg.get('mongodb.nuvolaris.password') or "s0meP@ass3",
+        'size': cfg.get('mongodb.volume-size') or 10,
+        'pvcName': 'mongodb-data',
+        'storageClass':cfg.get("nuvolaris.storageClass"),
+        'pvcAccessMode':'ReadWriteOnce'    
+        }
     return data
 
 # return configuration parameters for the standalone controller
@@ -182,6 +186,12 @@ def check(f, what, res):
 
 # return redis configuration parameters with default values if not configured
 def get_redis_config_data():
+    # ensure prefix key contains : at the end to be compliant with REDIS script ACL creator
+    prefix = cfg.get("redis.nuvolaris.prefix") or "nuvolaris:"
+
+    if(not prefix.endswith(":")):
+        prefix = f"{prefix}:"
+
     data = {
         "name": "redis",
         "dir": "/redis-master-data",
@@ -190,7 +200,7 @@ def get_redis_config_data():
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3",
         "namespace":"nuvolaris",
         "password":cfg.get("redis.nuvolaris.password") or "s0meP@ass3",
-        "prefix":cfg.get("redis.nuvolaris.prefix") or "nuv"
+        "prefix": prefix
     }
     return data
 

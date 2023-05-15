@@ -38,7 +38,8 @@ vars:
   MINIO_USER: "minioadmin"
   MINIO_PWD : "minioadmin"
   APIKUBE:
-      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server' 
+      sh: kubectl config view -o json | jq -r '.clusters[0].cluster.server'
+
   T: ""
 
 env:
@@ -134,10 +135,19 @@ tasks:
       URL=$(wsk -i action get hello --url | tail +2)
       curl -skL $URL | grep hello
 
-  ping:
-    - wsk -i package update redis -p redis "{{.REDIS_URI}}"
-    - wsk -i action update redis/ping tests/ping.js
-    - wsk -i action invoke redis/ping -r | grep "PONG"
+  redis:
+    cmds:
+      - wsk -i package update redis -p redis "{{.REDIS_URI}}"
+      - wsk -i action update redis/ping tests/ping.js   
+      - wsk -i action invoke redis/ping -r | grep "PONG"
+      - wsk -i action invoke redis/ping -p redis "{{.REDIS_NUV_URL}}" -r | grep "PONG"
+      - wsk -i action update redis/redis tests/redis.js -p redis_url "{{.REDIS_NUV_URL}}" -p redis_prefix "{{.REDIS_NUV_PREFIX}}"
+      - wsk -i action invoke redis/redis -r | grep "world"
+    vars:
+        REDIS_NUV_PREFIX:
+          sh:  kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_prefix}'
+        REDIS_NUV_URL:
+          sh:  kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_url}'
 
   echo:
     - wsk -i action update echo tests/echo.js -a provide-api-key true

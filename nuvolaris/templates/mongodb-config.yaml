@@ -62,4 +62,13 @@ spec:
               readinessProbe:
                 failureThreshold: 40
                 initialDelaySeconds: 5
-                timeout: 30    
+                timeout: 30
+      volumeClaimTemplates:
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: data-volume
+        spec:
+          resources:
+            requests:
+              storage: {{size}}G
