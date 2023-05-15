@@ -85,7 +85,7 @@ spec:
       password: s0meP@ass3
   mongodb:
     host: mongodb
-    volume-size: 10
+    volume-size: 5
     admin: 
       user: whisk_admin
       password: 0therPa55

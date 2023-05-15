@@ -14,15 +14,18 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
----
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongodb-data
+  name: {{pvcName}}
   namespace: nuvolaris
+  finalizers:
+  - kubernetes.io/pvc-protection
 spec:
+  storageClassName: {{storageClass}}
   accessModes:
-    - ReadWriteOnce 
+  - {{pvcAccessMode}}
   resources:
     requests:
-      storage: 10Gi
+      storage: {{size}}Gi

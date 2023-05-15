@@ -26,6 +26,7 @@ import logging
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
+cfg.detect_storage()
 assert(cfg.put("mongodb.useOperator", False))
 assert(mdb.create())
 while not kube.wait("pod/nuvolaris-mongodb-0", "condition=ready"): pass
@@ -33,6 +34,8 @@ assert(kube.get("service/nuvolaris-mongodb-svc"))
 
 flavour = kube.kubectl("get", "pod/nuvolaris-mongodb-0", jsonpath="{.metadata.labels.nuvolaris\.mongodb\.flavour}")
 assert("standalone"==flavour[0])
+
+assert(kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.mongodb_url}"))
 
 assert(mdb.delete())
 

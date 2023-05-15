@@ -34,7 +34,8 @@ def create(owner=None):
     exposed = cfg.get('mongodb.exposedExternally') or False 
 
     data = util.get_mongodb_config_data()
-    mkust = kus.patchTemplates("mongodb-standalone", ["mongodb-auth.yaml","mongodb-cm.yaml","mongodb-sts.yaml"], data)    
+    mkust = kus.patchTemplates("mongodb-standalone", ["mongodb-auth.yaml","mongodb-cm.yaml","mongodb-sts.yaml"], data)
+    mkust += kus.patchPersistentVolumeClaim("mongodb-data","/spec/resources/requests/storage",f"{data['size']}Gi")
     mspec = kus.kustom_list("mongodb-standalone", mkust, templates=[], data=data)
 
     if owner:

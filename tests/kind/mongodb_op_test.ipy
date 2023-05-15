@@ -26,6 +26,7 @@ import logging
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
+cfg.detect_storage()
 assert(cfg.put("mongodb.useOperator", True))
 assert(mdb.create())
 while not kube.wait("pod/nuvolaris-mongodb-0", "condition=ready"): pass
@@ -34,6 +35,7 @@ assert(kube.get("mdbc/nuvolaris-mongodb"))
 
 !kubectl get secret -n nuvolaris -ojson nuvolaris-mongodb-nuvolaris-nuvolaris | jq -r '.data | with_entries(.value |= @base64d)'
 
+assert(kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.mongodb_url}"))
 assert(mdb.delete())
 
 #!kubectl -n nuvolaris delete all --all
