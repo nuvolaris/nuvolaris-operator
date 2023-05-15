@@ -139,7 +139,7 @@ tasks:
     - task: instance
     - task: config
     - task: hello
-    - task: ping
+    - task: redis
     - task: mongo
     - task: minio
 
@@ -149,8 +149,8 @@ tasks:
   hello: 
     - task: t:hello
 
-  ping: 
-    - task: t:ping
+  redis: 
+    - task: t:redis
 
   workflow: 
     - kubectl -n nuvolaris apply -f tests/workflow-test.yaml
@@ -252,7 +252,7 @@ tasks:
   actions:
     - task: t:config
     - task: t:hello
-    - task: t:ping
+    - task: t:redis
     - task: t:echo
     - task: t:api
 

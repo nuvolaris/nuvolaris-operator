@@ -45,7 +45,7 @@ def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
             password = urllib.parse.quote(ucfg.get('redis.password'))
             auth = f"{username}:{password}"
             redis_url = f"redis://{auth}@{redis_service_name}"
-            user_metadata.add_metadata("REDIS_URL",redis_url)
+            user_metadata.add_metadata("REDIS_URL",redis_url)            
         return None
     except Exception as e:
         logging.error(f"failed to build redis_url for {ucfg.get('namespace')}: {e}")
@@ -129,9 +129,14 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
     try:
         wait_for_redis_ready()
         data = util.get_redis_config_data()
+
+        # if prefix not provided defaults to user namespace
+        prefix = ucfg.get('redis.prefix') or ucfg.get('namespace') 
+        if(not prefix.endswith(":")):
+            prefix = f"{prefix}:"
+        data['prefix']=prefix
         data['namespace']=ucfg.get('namespace')
-        data['password']=ucfg.get('redis.password')
-        data['prefix']=ucfg.get('redis.prefix')
+        data['password']=ucfg.get('redis.password')        
         data['mode']="create"
 
         path_to_script = render_redis_script(ucfg.get('namespace'),"redis_manage_user_tpl.txt",data)
@@ -141,7 +146,8 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
             res = exec_redis_command(pod_name,path_to_script)
 
             if(res):
-                _add_redis_user_metadata(ucfg, user_metadata)
+                user_metadata.add_metadata("REDIS_PREFIX",prefix)
+                _add_redis_user_metadata(ucfg, user_metadata)                
 
             return res
 
