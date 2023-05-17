@@ -152,6 +152,7 @@ tasks:
   echo:
     - wsk -i action update echo tests/echo.js -a provide-api-key true
     - wsk -i action invoke echo -r | grep "__OW_API_KEY"
+    - wsk -i action invoke echo -r | grep "__OW_API_HOST"
 
   api:
     - wsk -i action update api tests/api.js -a provide-api-key true

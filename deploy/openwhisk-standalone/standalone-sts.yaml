@@ -231,9 +231,9 @@ spec:
           value: "http" 
         
         - name: "WHISK_API_HOST_PORT"
-          value: "8080"                                                                                             
+          value: "3233"                                                                                             
 
         - name: "WHISK_API_HOST_NAME"
-          value: "localhost"        
+          value: "controller.nuvolaris.svc.cluster.local" 
 
         
