@@ -32,6 +32,7 @@ spec:
     metadata:
       labels:
         app: nuvolaris-mongodb
+        name: nuvolaris-mongodb
     spec:
       containers:
       - image: mongo:5.0.11

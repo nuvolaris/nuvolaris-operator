@@ -74,7 +74,7 @@ tasks:
 
   login:webtest:
     - >
-      curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "franztt", "password": "apassw0rd"}'
+      curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
 
   login:all:
     - task: login:prepare

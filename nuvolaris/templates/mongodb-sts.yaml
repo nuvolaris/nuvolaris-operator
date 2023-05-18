@@ -31,8 +31,11 @@ spec:
   template:
     metadata:
       labels:
+        name: mongodb
         app: nuvolaris-mongodb
         nuvolaris.mongodb.flavour: standalone
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"         
     spec:
       containers:
       - image: mongo:5.0.11

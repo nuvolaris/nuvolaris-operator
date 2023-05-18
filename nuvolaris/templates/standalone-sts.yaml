@@ -36,7 +36,8 @@ spec:
       labels:
         name: controller
         app: controller
-
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"
     spec:
       serviceAccountName: nuvolaris-openwhisk-core
       restartPolicy: Always

@@ -28,6 +28,9 @@ spec:
       namespace: nuvolaris
       labels:
         job: couchdb-init
+        name: couchdb-init
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"
     spec:
       serviceAccount: nuvolaris-operator
       restartPolicy: Never      

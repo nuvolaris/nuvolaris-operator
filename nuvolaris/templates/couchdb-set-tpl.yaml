@@ -31,6 +31,8 @@ spec:
     metadata:
       labels:
         name: couchdb
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"  
     spec:
       restartPolicy: Always
       containers:

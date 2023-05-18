@@ -53,10 +53,13 @@ spec:
   statefulSet:
     spec:
       template:
-        spec:
-          metadata:
-            labels:
-              nuvolaris.mongodb.flavour: operator
+        metadata:
+          labels:
+            name: mongodb
+            nuvolaris.mongodb.flavour: operator
+          annotations:
+            whisks.nuvolaris.org/annotate-version: "true"       
+        spec:  
           containers:
             - name: mongodb-agent
               readinessProbe:

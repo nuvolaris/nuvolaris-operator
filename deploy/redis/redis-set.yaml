@@ -30,6 +30,9 @@ spec:
     metadata:
       labels:
         name: redis
+        app: redis
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"         
     spec:
       restartPolicy: Always  
       containers:
