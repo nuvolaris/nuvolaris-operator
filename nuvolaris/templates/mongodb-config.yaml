@@ -56,7 +56,10 @@ spec:
         spec:
           metadata:
             labels:
+              name: mongodb
               nuvolaris.mongodb.flavour: operator
+            annotations:
+              whisks.nuvolaris.org/annotate-version: "true"   
           containers:
             - name: mongodb-agent
               readinessProbe:

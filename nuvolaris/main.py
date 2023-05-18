@@ -32,6 +32,7 @@ import nuvolaris.minio as minio
 import nuvolaris.openwhisk_patcher as patcher
 import nuvolaris.minio_static as static
 import nuvolaris.whisk_actions_deployer as system
+import nuvolaris.version_util as version_util
 
 # tested by an integration test
 @kopf.on.login()
@@ -185,6 +186,8 @@ def whisk_post_create(name, state):
         state['whisk-system']="on"
     else:                   
         state['whisk-system']="on"
+    
+    version_util.annotate_operator_components_version()    
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')

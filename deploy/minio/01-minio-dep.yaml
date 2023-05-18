@@ -31,6 +31,9 @@ spec:
     metadata:
       labels:
         app: minio
+        name: minio
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"   
     spec:
       volumes:
       - name: storage
