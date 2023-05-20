@@ -313,12 +313,12 @@ spec:
                       type: object
                       properties:
                         prefix:
-                          description: nuvolaris key prefix. Defaulted to nuv
+                          description: REDIS nuvolaris key prefix. Defaulted to "nuvolaris:" if missing
                           type: string
                         password:
                           type: string
                       required:
-                      - password                      
+                      - password                    
                   required:
                   - volume-size
                   - default
