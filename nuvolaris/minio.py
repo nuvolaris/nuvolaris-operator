@@ -119,14 +119,14 @@ def create_nuv_storage(data):
         bucket_policy_names.append("nuvolaris-data/*")
 
         if(res):
-            openwhisk.annotate(f"nuvolaris_minio_data_bucket=nuvolaris-data")
+            openwhisk.annotate(f"minio_bucket_data=nuvolaris-data")
 
         logging.info(f"*** adding nuvolaris MINIO static bucket")
         res = minioClient.make_bucket("nuvolaris-web")                
         bucket_policy_names.append("nuvolaris-web/*")
 
         if(res):
-            openwhisk.annotate(f"nuvolaris_minio_static_bucket=nuvolaris-web")
+            openwhisk.annotate(f"minio_bucket_static=nuvolaris-web")
             content_path = find_content_path("index.html")
 
             if(content_path):
