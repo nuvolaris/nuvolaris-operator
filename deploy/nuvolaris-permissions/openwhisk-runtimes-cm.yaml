@@ -44,7 +44,7 @@ data:
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
                     "name": "action-nodejs-v18",
-                    "tag": "0.3.0-morpheus.23040714"
+                    "tag": "0.3.0-dev.2305181905"
                 },
                 "deprecated": false,
                 "attached": {
@@ -71,7 +71,7 @@ data:
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
                     "name": "action-nodejs-v16",
-                    "tag": "0.3.0-morpheus.23040714"
+                    "tag": "0.3.0-dev.2305181905"
                 },
                 "deprecated": false,
                 "attached": {
