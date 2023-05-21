@@ -21,10 +21,12 @@ vars:
   G: ""
   N: ""
   T: ""
+  P: ""
   BASETAG: 0.3.0-dev
   KUBE:
     sh: ./detect.sh
   NS: "nuvolaris"
+  PREFIX: ""
 
 dotenv:
   - .env
@@ -166,7 +168,7 @@ tasks:
 
   image-tag:
     - git tag -d $(git tag) 
-    - git tag -f {{.BASETAG}}.$(date +%y%m%d%H%M) 
+    - git tag -f {{.P}}{{.BASETAG}}.$(date +%y%m%d%H%M)
     - env PAGER= git tag
 
   # configure env

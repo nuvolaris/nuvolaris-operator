@@ -34,7 +34,7 @@ name: Build Image
 on:
   push:
     tags:
-    - '[0-9]*'
+    - 'fast[0-9]*'
     branches-ignore:
     - '*'
 
@@ -47,8 +47,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: License
-        uses: apache/skywalking-eyes@main
       - name: Make envfile
         if:  ${{ github.repository_owner != 'nuvolaris'}}
         uses: SpicyPizza/create-envfile@v1.3
@@ -66,17 +64,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}   
       - name: Setup
         run: bash .github/cisetup.sh
-      - name: Kind
-        uses: helm/kind-action@v1.2.0
-        with:
-            cluster_name: nuvolaris
-            config: .github/kind.yaml
-      - name: Install
-        run: poetry install
-      - name: Tag
-        run: task image-tag          
-      - name: BuildAndLoad
-        run: task build-and-load
       - name: Ngrok
         if: ${{ env.NGROK == 'on' }}
         run: bash .github/debug-github-actions.sh
@@ -86,10 +73,6 @@ jobs:
       - name: Wait
         if: ${{ env.NGROK == 'on' }}
         run: bash .github/wait.sh
-      - name: AddIngress
-        run: task kind:ingress         
-      - name: Test
-        run:  task test
       - name: DockerLogin
         if:  ${{ github.repository_owner != 'nuvolaris'}}
         run: task docker-login             
