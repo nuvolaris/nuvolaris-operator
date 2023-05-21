@@ -53,8 +53,9 @@ header:
     - 'installer/**'
     - 'nuv/**'
     - 'olaris/**'
+    - 'skip-test'
 
- 
+
 dependency:
   files:
     - go.mod

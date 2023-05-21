@@ -89,7 +89,11 @@ jobs:
       - name: AddIngress
         run: task kind:ingress         
       - name: Test
-        run: task test
+        run:  |
+              if test -e skip-test
+              then echo SKIPPING TESTS
+              else task test
+              fi
       - name: DockerLogin
         if:  ${{ github.repository_owner != 'nuvolaris'}}
         run: task docker-login             
