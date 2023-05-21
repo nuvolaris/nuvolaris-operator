@@ -82,22 +82,33 @@ def detect_labels(labels=None):
     kube = None
     for i in labels:
         for j in list(i.keys()):
-            # detect the kube type
-            if j.find("eksctl.io") >= 0:
-                kube ="eks"
-            elif j.find("microk8s.io") >= 0:
-                kube = "microk8s"
-            elif j.find("lke.linode.com") >=0:
-                kube = "lks"
-            elif j.find("node.openshift.io") >=0:
-                kube = "openshift"
-            elif j.endswith("kubernetes.io/instance-type"): 
-                kube = i[j]               
-            # assign all the 'nuvolaris.io' labels
             if j.startswith("nuvolaris.io/"):
                 key = f"nuvolaris.{j[13:]}"
                 res[key] = i[j]
                 _config[key] = i[j]
+
+    for i in labels:
+        for j in list(i.keys()):
+            # detect the kube type
+            if j.find("eksctl.io") >= 0:
+                kube ="eks"
+                break
+            if j.find("k8s.io/cloud-provider-aws"):
+                kube ="eks"
+                break
+            elif j.find("microk8s.io") >= 0:
+                kube = "microk8s"
+                break
+            elif j.find("lke.linode.com") >=0:
+                kube = "lks"
+                break
+            elif j.find("node.openshift.io") >=0:
+                kube = "openshift"
+                break
+            #elif j.endswith("kubernetes.io/instance-type"): 
+            #    kube = i[j]               
+            # assign all the 'nuvolaris.io' labels
+        
     if kube:
         res["nuvolaris.kube"] = kube 
         _config["nuvolaris.kube"] = kube
