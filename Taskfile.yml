@@ -164,7 +164,7 @@ tasks:
   defin:
     - task: d:defin
 
-  image-tag: 
+  image-tag:
     - git tag -d $(git tag) 
     - git tag -f {{.BASETAG}}.$(date +%y%m%d%H%M) 
     - env PAGER= git tag
