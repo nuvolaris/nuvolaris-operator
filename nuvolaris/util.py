@@ -222,4 +222,25 @@ def get_minio_config_data():
         "minio_nuv_user": cfg.get('minio.nuvolaris.user') or "nuvolaris",
         "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
     }
-    return data                               
+    return data
+
+# return postgres configuration parameter with default valued if not configured
+def get_postgres_config_data():
+    data = {
+        'postgres_root_password': cfg.get('postgres.admin.password') or "0therPa55",
+        'postgres_root_replica_password': cfg.get('postgres.admin.password') or "0therPa55sd",
+        'postgres_nuvolaris_user': "nuvolaris",
+        'postgres_nuvolaris_password': cfg.get('postgres.nuvolaris.password') or "s0meP@ass3",
+        'size': cfg.get('postgres.volume-size') or 10,
+        'replicas': cfg.get('postgres.admin.replicas') or 2
+        }
+    return data
+
+# wait for a service matching the given jsonpath name
+@nuv_retry()
+def wait_for_service(jsonpath,namespace="nuvolaris"):
+    service_names = kube.kubectl("get", "svc", namespace=namespace, jsonpath=jsonpath)
+    if(service_names):
+        return service_names[0]
+
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")                               

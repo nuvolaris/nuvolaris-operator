@@ -33,6 +33,7 @@ import nuvolaris.openwhisk_patcher as patcher
 import nuvolaris.minio_static as static
 import nuvolaris.whisk_actions_deployer as system
 import nuvolaris.version_util as version_util
+import nuvolaris.postgres_operator as postgres
 
 # tested by an integration test
 @kopf.on.login()
@@ -144,7 +145,14 @@ def whisk_create(spec, name, **kwargs):
         logging.info(msg)
         state['static'] = "on"
     else:
-        state['static'] = "off"         
+        state['static'] = "off"
+
+    if cfg.get('components.postgres'):
+        msg = postgres.create(owner)
+        logging.info(msg)
+        state['postgres'] = "on"
+    else:
+        state['postgres'] = "off"                 
     
     if cfg.get('components.kafka'):
         logging.warn("invoker not yet implemented")
@@ -229,6 +237,9 @@ def whisk_delete(spec, **kwargs):
         msg = minio.delete()
         logging.info(msg)
 
+    if cfg.get('components.postgres'):
+        msg = postgres.delete()
+        logging.info(msg)
              
     
                          

@@ -15,34 +15,31 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: nuvolaris.org/v1
-kind: WhiskUser
+---
+apiVersion: kubegres.reactive-tech.io/v1
+kind: Kubegres
 metadata:
-  name: franztt
+  name: nuvolaris-postgres
   namespace: nuvolaris
-spec: 
-  email: francesco@nuvolaris.io
-  password: apassw0rd
-  namespace: franztt
-  auth: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-  redis:
-    enabled: true
-    prefix: franztt
-    password: fttredispwd
-  object-storage:        
-    password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-    data:
-      enabled: true
-      bucket: franztt-data
-    route:
-      enabled: true
-      host: localhost
-      bucket: franztt-web
-  mongodb:
-    enabled: true
-    database: franztt
-    password: ahfdajsfdafdasffdasdja
-  postgres:
-    enabled: true
-    database: franztt
-    password: urghgdghhggkjdgksdjh  
+spec:
+   replicas: 2
+   image: postgres:14.1
+   database:
+      size: 200Mi
+   customConfig: nuvolaris-postgres-conf 
+   env:
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+           secretKeyRef:
+              name: postgres-nuvolaris-secret
+              key: superUserPassword
+      - name: POSTGRES_REPLICATION_PASSWORD
+        valueFrom:
+           secretKeyRef:
+              name: postgres-nuvolaris-secret
+              key: replicationUserPassword
+      - name: POSTGRES_NUVOLARIS_DB_PASSWORD
+        valueFrom:
+           secretKeyRef:
+              name: postgres-nuvolaris-secret
+              key: nuvolarisUserPassword             

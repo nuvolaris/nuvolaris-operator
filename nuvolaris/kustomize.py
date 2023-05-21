@@ -310,5 +310,30 @@ def patchPersistentVolumeClaim(name, path, value):
     - op: replace
       path: {path}
       value: {value}
-"""  
+""" 
+
+# generate a generic customization
+def patchGenericEntry(kind, name, path, value, op="replace",apiVersion="v1"):
+    """
+    >>> print(patchGenericEntry("Secret","postgres-nuvolaris-secret", "/stringData/superUserPassword","xyz"), end='')
+    - target:
+        version: v1
+        kind: Secret
+        namespace: nuvolaris
+        name: postgres-nuvolaris-secret
+      patch: |-
+        - op: replace
+          path: /stringData/superUserPassword
+          value: xyz
+    """
+    return f"""- target:
+    version: {apiVersion}
+    kind: {kind}
+    namespace: nuvolaris
+    name: {name}
+  patch: |-
+    - op: {op}
+      path: {path}
+      value: {value}
+""" 
    

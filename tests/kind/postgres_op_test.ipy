@@ -15,34 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: nuvolaris.org/v1
-kind: WhiskUser
-metadata:
-  name: franztt
-  namespace: nuvolaris
-spec: 
-  email: francesco@nuvolaris.io
-  password: apassw0rd
-  namespace: franztt
-  auth: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-  redis:
-    enabled: true
-    prefix: franztt
-    password: fttredispwd
-  object-storage:        
-    password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-    data:
-      enabled: true
-      bucket: franztt-data
-    route:
-      enabled: true
-      host: localhost
-      bucket: franztt-web
-  mongodb:
-    enabled: true
-    database: franztt
-    password: ahfdajsfdafdasffdasdja
-  postgres:
-    enabled: true
-    database: franztt
-    password: urghgdghhggkjdgksdjh  
+!kubectl -n nuvolaris delete kubegres --all
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.postgres_operator as pdb
+import logging
+
+# test
+assert(cfg.configure(tu.load_sample_config()))
+cfg.detect_storage()
+assert(pdb.create())
+
+assert(kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.postgres_host}"))
+assert(pdb.delete())
+
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

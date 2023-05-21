@@ -45,7 +45,9 @@ spec:
     # minio enabled or not
     minio: true
     # minio static enabled or not
-    static: true    
+    static: true
+    # postgres enabled or not
+    postgres: true         
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -106,4 +108,12 @@ spec:
       password: minioadmin    
     nuvolaris:
       user: nuvolaris
-      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG                  
+      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+  postgres:    
+    volume-size: 5
+    replicas: 2
+    admin:      
+      password: 0therPa55
+      replica-password: 0therPa55RR
+    nuvolaris:
+      password: s0meP@ass3                       

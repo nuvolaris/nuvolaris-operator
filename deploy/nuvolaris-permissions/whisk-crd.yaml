@@ -96,6 +96,9 @@ spec:
                     zookeeper:
                       description: deploys zookeeper if supported by the operator
                       type: boolean
+                    postgres:
+                      description: deploys postgress if supported by the operator
+                      type: boolean                      
                   required:
                     - openwhisk
                     - couchdb
@@ -209,6 +212,39 @@ spec:
                     - volume-size
                     - admin
                     - nuvolaris
+                postgres:
+                  description: used to configure a nuvolaris shared postgres instance
+                  type: object
+                  properties:
+                    volume-size:
+                      description: postgres volume size in GB
+                      type: integer
+                    replicas:
+                      description: number of total postgres replicas (1 primary, N-1 replicas). Defaulted to 2
+                      type: integer                      
+                    admin:
+                      description: postgres admin user credentials
+                      type: object
+                      properties:
+                        password:
+                          type: string
+                        replica-password:
+                          type: string
+                      required:
+                      - password
+                      - replica-password
+                    nuvolaris:
+                      description: postgres nuvolaris database credentials
+                      type: object
+                      properties:
+                        password:
+                          type: string
+                      required:
+                      - password                      
+                  required:
+                    - volume-size
+                    - admin
+                    - nuvolaris                    
                 kafka:
                   description: setup a kafka instance
                   type: object
@@ -489,7 +525,9 @@ spec:
               #       tls:
               #         type: string
               #       minio:
-              #         type: string                            
+              #         type: string
+              #       postgres:
+              #         type: string              
       additionalPrinterColumns:
         - name: OpenWhisk
           type: string
@@ -535,4 +573,9 @@ spec:
           type: string
           priority: 0
           jsonPath: .status.whisk_create.minio
-          description: Minio                              
+          description: Minio 
+        - name: Postgres
+          type: string
+          priority: 0
+          jsonPath: .status.whisk_create.postgres
+          description: Postgres                                        
