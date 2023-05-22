@@ -19,7 +19,7 @@
 -->
 # Nuvolaris Operator 
 
-This is the Kubernetes Operator of the [bit.ly/nuvolaris](nuvolaris project).
+This is the Kubernetes Operator of the [https://github.com/nuvolaris/nuvolaris](nuvolaris project).
 
 If you are interested in developing it, please read the [design document](DESIGN.md). Please also read the [development environment document](https://github.com/nuvolaris/nuvolaris/blob/main/docs/DEVEL.md) to learn how to setup it.
 
