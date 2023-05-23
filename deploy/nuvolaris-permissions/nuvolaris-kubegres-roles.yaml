@@ -16,12 +16,6 @@
 # under the License.
 #
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: kubegres-controller-manager
-  namespace: nuvolaris
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

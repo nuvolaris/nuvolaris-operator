@@ -131,7 +131,10 @@ tasks:
     - task: t:mongo 
 
   minio: 
-    - task: t:minio        
+    - task: t:minio
+
+  postgres:
+    - task: t:postgres      
 
   minimal:
     #- task: permission
@@ -149,6 +152,7 @@ tasks:
     - task: redis
     - task: mongo
     - task: minio
+    - task: postgres
 
   config:
     - task: t:config
