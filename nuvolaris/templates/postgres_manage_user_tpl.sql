@@ -16,22 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-conn = Mongo("mongodb://{{mongo_admin_user}}:{{mongo_admin_password}}@127.0.0.1:27017")
-db = conn.getDB('admin')
-db = db.getSiblingDB('{{database}}');
 
-{% if mode == 'create'%}
-db.createUser({
-    user: "{{subject}}",
-    pwd: "{{auth}}",
-    roles: [
-        {role: "readWrite", db: "{{subject}}"}
-    ]
-});
-db.nuv_test_collection.insertOne({"message":"Welcome to nuvolaris!"});
+{% if mode == 'create' %}
+CREATE DATABASE {{database}};
+CREATE USER {{username}} WITH PASSWORD '{{password}}';
+GRANT ALL PRIVILEGES ON DATABASE {{database}} to {{username}};
 {% endif %}
 
-{% if mode == 'delete'%}
-db.dropUser("{{subject}}", {w: "majority", wtimeout: 4000});
-db.dropDatabase();
+{% if mode == 'delete' %}
+DROP DATABASE {{database}};
+DROP USER {{username}};
 {% endif %}

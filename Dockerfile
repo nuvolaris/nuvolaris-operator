@@ -83,6 +83,8 @@ ADD deploy/issuer /home/nuvolaris/deploy/issuer
 ADD deploy/minio /home/nuvolaris/deploy/minio
 ADD deploy/nginx-static /home/nuvolaris/deploy/nginx-static
 ADD deploy/content /home/nuvolaris/deploy/content
+ADD deploy/postgres-operator /home/nuvolaris/deploy/postgres-operator
+ADD deploy/postgres-operator-deploy /home/nuvolaris/deploy/postgres-operator-deploy
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock whisk-system.sh /home/nuvolaris/
 
 # prepares the required folders to deploy the whisk-system actions

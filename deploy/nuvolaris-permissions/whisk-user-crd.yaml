@@ -148,7 +148,25 @@ spec:
                   required:
                   - enabled 
                   - database 
-                  - password    
+                  - password
+                postgres:
+                  description: used to configure a user dedicated postgres database
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                  properties:
+                    enabled:
+                      description: boolean flag to enable postgres configuration. Defaulted to false
+                      type: boolean
+                    database:
+                      description: user dedicated postgres database
+                      type: string
+                    password:
+                      description: user mongodb password
+                      type: string
+                  required:
+                  - enabled
+                  - database 
+                  - password                      
               required:
                 - email
                 - password

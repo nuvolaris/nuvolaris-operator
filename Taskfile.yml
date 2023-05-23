@@ -106,6 +106,7 @@ tasks:
 
   run:
     - task: sys:prepare
+    - task: t:permission
     - task: d:run
   
   irun:
@@ -132,7 +133,10 @@ tasks:
     - task: t:mongo 
 
   minio: 
-    - task: t:minio        
+    - task: t:minio
+
+  postgres:
+    - task: t:postgres      
 
   minimal:
     #- task: permission
@@ -150,6 +154,7 @@ tasks:
     - task: redis
     - task: mongo
     - task: minio
+    - task: postgres
 
   config:
     - task: t:config
@@ -211,6 +216,8 @@ tasks:
       - cmd: kubectl -n nuvolaris delete pvc --all --grace-period=0
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete ing --all --grace-period=0
+        ignore_error: true
+      - cmd: kubectl -n nuvolaris delete kubegres --all
         ignore_error: true
       - cmd: kubectl -n nuvolaris delete cm/config --grace-period=0
         ignore_error: true        

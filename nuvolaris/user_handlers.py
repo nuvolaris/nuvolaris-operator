@@ -18,7 +18,7 @@
 # Provides extra kopf handlers to manage nuvolaris users
 import kopf
 import logging
-import json, flatdict, os, os.path
+import json, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.couchdb as cdb
 import nuvolaris.minio as minio
@@ -27,6 +27,7 @@ import nuvolaris.mongodb as mdb
 import nuvolaris.minio_static as static
 import nuvolaris.redis as redis
 import nuvolaris.userdb_util as userdb
+import nuvolaris.postgres_operator as postgres
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
@@ -69,6 +70,11 @@ def whisk_user_create(spec, name, **kwargs):
         logging.info(f"Redis setup for {ucfg.get('namespace')} added = {res}")
         state['redis']= res
 
+    if(cfg.get('components.postgres') and ucfg.get('postgres.enabled')):
+        res = postgres.create_db_user(ucfg, user_metadata)
+        logging.info(f"Postgres setup for {ucfg.get('namespace')} added = {res}")
+        state['postgres']= res        
+
     # finally persists user metadata into the internal couchdb database
     user_metadata.dump()
     res = userdb.save_user_metadata(user_metadata)
@@ -101,6 +107,10 @@ def whisk_user_delete(spec, name, **kwargs):
     if(cfg.get('components.redis') and ucfg.get('redis.enabled')):
         res = redis.delete_db_user(ucfg.get('namespace'))
         logging.info(f"Redis setup for {ucfg.get('namespace')} removed = {res}")
+
+    if(cfg.get('components.postgres') and ucfg.get('postgres.enabled')):
+        res = postgres.delete_db_user(ucfg.get('namespace'),ucfg.get('postgres.database'))
+        logging.info(f"Postgres setup for {ucfg.get('namespace')} removed = {res}")        
 
     res = userdb.delete_user_metadata(ucfg.get('namespace'))
 

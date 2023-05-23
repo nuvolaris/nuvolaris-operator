@@ -82,6 +82,11 @@ rules:
   resources: ["middlewares"]
   verbs: ["get","patch","list","update","watch","create","delete"]
 
+# required for kubegres
+- apiGroups: ["kubegres.reactive-tech.io"]
+  resources: ["kubegres","kubegres/finalizers","kubegres/status"]
+  verbs: ["get","patch","list","update","watch","create","delete"]
+
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

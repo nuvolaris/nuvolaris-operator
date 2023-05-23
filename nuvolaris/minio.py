@@ -35,10 +35,10 @@ def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     try:
         minio_service =  util.get_service("{.items[?(@.spec.selector.app == 'minio')]}")
         if(minio_service):
-            minio_endpoint = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
+            minio_host = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
             access_key = ucfg.get('namespace')
             secret_key = ucfg.get("object-storage.password")
-            user_metadata.add_metadata("MINIO_ENDPOINT",minio_endpoint)
+            user_metadata.add_metadata("MINIO_HOST",minio_host)
             user_metadata.add_metadata("MINIO_ACCESS_KEY",access_key)
             user_metadata.add_metadata("MINIO_SECRET_KEY",secret_key)
 
@@ -84,10 +84,10 @@ def _annotate_nuv_metadata(data):
     try:
         minio_service =  util.get_service("{.items[?(@.spec.selector.app == 'minio')]}")
         if(minio_service):
-            minio_endpoint = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
+            minio_host = f"{minio_service['metadata']['name']}.{minio_service['metadata']['namespace']}.svc.cluster.local"
             access_key = data["minio_nuv_user"]
             secret_key = data["minio_nuv_password"]
-            openwhisk.annotate(f"minio_url={minio_endpoint}")
+            openwhisk.annotate(f"minio_host={minio_host}")
             openwhisk.annotate(f"minio_access_key={access_key}")
             openwhisk.annotate(f"minio_secret_key={secret_key}")
 
