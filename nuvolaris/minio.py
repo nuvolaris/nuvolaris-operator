@@ -97,7 +97,7 @@ def _annotate_nuv_metadata(data):
                     openwhisk.annotate(f"minio_port={port['port']}")                    
         return None
     except Exception as e:
-        logging.error(f"failed to build redis_url for nuvolaris: {e}")
+        logging.error(f"failed to build minio_host for nuvolaris: {e}")
         return None      
 
 def create_nuv_storage(data):
@@ -140,14 +140,6 @@ def create_nuv_storage(data):
             minioClient.assign_rw_bucket_policy_to_user(data["minio_nuv_user"],bucket_policy_names)
 
         logging.info(f"*** configured MINIO storage for nuvolaris") 
-
-def delete():
-    spec = cfg.get("state.minio.spec")
-    res = False
-    if spec:
-        res = kube.delete(spec)
-        logging.info(f"delete minio: {res}")
-    return res
 
 def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owner=None):
     minioClient = mutil.MinioClient()    
@@ -215,4 +207,43 @@ def delete_ow_storage(ucfg):
         res = minioClient.force_bucket_remove(bucket_name)
 
     return minioClient.delete_user(namespace)
+
+def delete_by_owner():
+    spec = kus.build("minio")
+    res = kube.delete(spec)
+    logging.info(f"delete minio: {res}")
+    return res
+
+def delete_by_spec():
+    spec = cfg.get("state.minio.spec")
+    res = False
+    if spec:
+        res = kube.delete(spec)
+        logging.info(f"delete minio: {res}")
+    return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called by the operator patcher to create/delete minio component
+    """
+    try:
+        logging.info(f"*** handling request to {action} minio")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['minio']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['minio']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} minio") 
+    except Exception as e:
+        logging.error('*** failed to update minio: %s' % e)
+        status['whisk_create']['minio']='error'         
 

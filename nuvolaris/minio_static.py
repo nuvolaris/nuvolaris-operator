@@ -46,14 +46,6 @@ def create(owner=None):
     logging.info("*** configured nuvolaris nginx static provider")
     return res
 
-def delete():
-    spec = cfg.get("state.ngix-static.spec")
-    res = False
-    if spec:
-        res = kube.delete(spec)
-        logging.info(f"delete nuvolaris nginx static provider: {res}")
-    return res
-
 def static_ingress_name(namespace):
     return f"{namespace}-static-ingress"
 
@@ -191,3 +183,42 @@ def delete_ow_static_endpoint(ucfg):
     except Exception as e:
         logging.warn(e)       
         return False
+    
+def delete_by_owner():
+    spec = kus.build("nginx-static")
+    res = kube.delete(spec)
+    logging.info(f"delete nuvolaris nginx static provider: {res}")
+    return res
+
+def delete_by_spec():
+    spec = cfg.get("state.ngix-static.spec")
+    res = False
+    if spec:
+        res = kube.delete(spec)
+        logging.info(f"delete nuvolaris nginx static provider: {res}")
+    return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called by the operator patcher to create/delete minio static component
+    """
+    try:
+        logging.info(f"*** handling request to {action} static")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['static']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['static']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} static") 
+    except Exception as e:
+        logging.error('*** failed to update static: %s' % e)
+        status['whisk_create']['static']='error'      

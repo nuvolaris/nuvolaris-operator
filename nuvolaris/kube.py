@@ -120,16 +120,15 @@ def apply(obj, namespace="nuvolaris"):
         obj = json.dumps(obj)
     return kubectl("apply", "-f", "-", namespace=namespace, input=obj)
 
-# apply an object
+# apply an expanded template
 def applyTemplate(name, data, namespace="nuvolaris"):
     obj = tpl.expand_template(name, data)
     return kubectl("apply", "-f", "-", namespace=namespace, input=obj)
 
-# delete an object
+# delete an expanded template
 def deleteTemplate(name, data, namespace="nuvolaris"):
     obj = tpl.expand_template(name, data)
     return kubectl("delete", "-f", "-", namespace=namespace, input=obj)
-
 
 def get(name, namespace="nuvolaris"):
     try:

@@ -29,7 +29,7 @@ import nuvolaris.mongodb as mongodb
 import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
-import nuvolaris.openwhisk_patcher as patcher
+import nuvolaris.patcher as patcher
 import nuvolaris.minio_static as static
 import nuvolaris.whisk_actions_deployer as system
 import nuvolaris.version_util as version_util
@@ -195,7 +195,7 @@ def whisk_post_create(name, state):
     else:                   
         state['whisk-system']="on"
     
-    version_util.annotate_operator_components_version()    
+    version_util.annotate_operator_components_version()  
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
@@ -240,9 +240,7 @@ def whisk_delete(spec, **kwargs):
     if cfg.get('components.postgres'):
         msg = postgres.delete()
         logging.info(msg)
-             
-    
-                         
+                 
 # tested by integration test
 #@kopf.on.field("service", field='status.loadBalancer')
 def service_update(old, new, name, **kwargs):
@@ -288,10 +286,9 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
 
     logging.debug("*** dumping new configuration parameters")
     cfg.dump_config()
+    
     owner = kube.get(f"wsk/{name}")
-
-    if cfg.get('components.openwhisk'):
-        patcher.redeploy_whisk(owner)
+    patcher.patch(diff, status, owner)
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
 def whisk_resume(spec, name, **kwargs):
