@@ -106,7 +106,16 @@ def create(owner=None):
         logging.info("*** something went wrong deploying mongodb operator")    
     return res 
 
-def delete():
+
+def delete_by_owner():
+    spec = kus.build("mongodb-operator-deploy")
+    res = kube.delete(spec)
+    spec = kus.build("mongodb-operator")
+    res = kube.delete(spec)
+    logging.info(f"delete mongodb: {res}")
+    return res
+
+def delete_by_spec():
     spec = cfg.get("state.mongodb.spec")
     res = False
     if spec:
@@ -119,5 +128,8 @@ def delete():
         logging.info(f"delete mongodb-operator: {res}")        
     return res
 
-def init():
-    return "TODO"
+def delete(owner=None):
+    if owner:       
+        return delete_by_owner()
+    else:
+        return delete_by_spec()

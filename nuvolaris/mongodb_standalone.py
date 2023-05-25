@@ -49,16 +49,25 @@ def create(owner=None):
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb')].metadata.name}")
  
     logging.info("*** created mongodb-standalone")    
-    return res 
+    return res
 
-def delete():
+def delete_by_owner():
+    spec = kus.build("mongodb-standalone")
+    res = kube.delete(spec)
+    logging.info(f"delete mongodb: {res}")
+    return res
+
+def delete_by_spec():
     spec = cfg.get("state.mongodb.spec")
     res = False
     if spec:
         res = kube.delete(spec)
         logging.info(f"delete mongodb: {res}")
-
+    
     return res
 
-def init():
-    return "TODO"
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()

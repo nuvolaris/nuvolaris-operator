@@ -143,19 +143,6 @@ def _add_pdb_user_metadata(ucfg, user_metadata):
         logging.error(f"failed to build postgres_host for {ucfg.get('postgres.database')}: {e}")
         return None 
 
-def delete():
-    spec = cfg.get("state.postgres.spec")
-    res = False
-    if spec:
-        res = kube.delete(spec)
-        logging.info(f"delete postgres: {res}")
-
-    spec = cfg.get("state.postgres-operator.spec")
-    if spec:
-        res = kube.delete(spec)
-        logging.info(f"delete postgres-operator: {res}")        
-    return res
-
 def render_postgres_script(namespace,template,data):
     """
     uses the given template to render a sh script to execute via psql.
@@ -221,4 +208,51 @@ def delete_db_user(namespace, database):
         return None
     except Exception as e:
         logging.error(f"failed to remove Postgres database {namespace} authorization id and key: {e}")
-        return None             
+        return None
+
+def delete_by_owner():
+    spec = kus.build("postgres-operator-deploy")
+    res = kube.delete(spec)
+    logging.info(f"delete postgres: {res}")
+    spec = kus.build("postgres-operator")
+    res = kube.delete(spec)    
+    logging.info(f"delete postgres-operator: {res}") 
+    return res
+
+def delete_by_spec():
+    spec = cfg.get("state.postgres.spec")
+    res = False
+    if spec:
+        res = kube.delete(spec)
+        logging.info(f"delete postgres: {res}")
+
+    spec = cfg.get("state.postgres-operator.spec")
+    if spec:
+        res = kube.delete(spec)
+        logging.info(f"delete postgres-operator: {res}")        
+    return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called by the operator patcher to create/delete postgres component
+    """
+    try:
+        logging.info(f"*** handling request to {action} postgres")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['postgres']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['postgres']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} postgres") 
+    except Exception as e:
+        logging.error('*** failed to update postgres: %s' % e)
+        status['whisk_create']['postgres']='error'                     

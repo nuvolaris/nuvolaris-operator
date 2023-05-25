@@ -17,9 +17,17 @@
 #
 import logging, time
 import nuvolaris.openwhisk as openwhisk
+import nuvolaris.mongodb as mongodb
+import nuvolaris.redis as redis
+import nuvolaris.cronjob as cron
+import nuvolaris.minio as minio
+import nuvolaris.minio_static as static
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.util as util
+import nuvolaris.kopf_util as kopf_util
+import nuvolaris.postgres_operator as postgres
+import nuvolaris.endpoint as endpoint
 
 def rollout(kube_name):
     try:
@@ -60,3 +68,49 @@ def restart_whisk(owner=None):
 
 def redeploy_whisk(owner=None):
     redeploy_controller(owner)
+    
+
+def patch(diff, status, owner=None):
+    """
+    Implements the patching logic of the nuvolaris operator by analyzing the kopf
+    provided diff object to identify which components needs to be added/removed.
+    """
+    logging.info(status)
+    what_to_do = kopf_util.detect_component_changes(diff)
+
+    if len(what_to_do) == 0:
+        logging.warn("*** no relevant changes identified by the operator patcher. Skipping processing")
+        return None
+    
+    for key in what_to_do.keys():
+        logging.info(f"{key}={what_to_do[key]}")
+
+    # components 1st
+    if "mongodb" in what_to_do:
+        mongodb.patch(status,what_to_do['mongodb'], owner)
+
+    if "redis" in what_to_do:
+        redis.patch(status,what_to_do['redis'], owner) 
+
+    if "cron" in what_to_do:
+        cron.patch(status,what_to_do['cron'], owner) 
+
+    if "minio" in what_to_do:
+        minio.patch(status,what_to_do['minio'], owner) 
+
+    if "static" in what_to_do:
+        static.patch(status,what_to_do['static'], owner) 
+
+    if "postgres" in what_to_do:
+        postgres.patch(status,what_to_do['postgres'], owner)
+
+    # handle update action on openwhisk
+    if "openwhisk" in what_to_do and what_to_do['openwhisk'] == "update":        
+        redeploy_whisk(owner)
+
+    # handle update action on endpoint
+    if "endpoint" in what_to_do and what_to_do['endpoint'] == "update":        
+        endpoint.patch(status,what_to_do['endpoint'], owner)
+    
+        
+    

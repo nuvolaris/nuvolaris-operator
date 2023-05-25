@@ -101,13 +101,25 @@ def create_nuvolaris_db_user(data):
         logging.error(f"failed to add redis namespace {data['namespace']}: {e}")
         return None   
 
-def delete():
+def delete_by_owner():
+    spec = kus.build("redis")
+    res = kube.delete(spec)
+    logging.info(f"delete redis: {res}")
+    return res
+
+def delete_by_spec():
     spec = cfg.get("state.redis.spec")
     res = False
     if spec:
         res = kube.delete(spec)
         logging.info(f"delete redis: {res}")
     return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()    
 
 def render_redis_script(namespace,template,data):
     """
@@ -174,5 +186,24 @@ def delete_db_user(namespace):
         return None
     except Exception as e:
         logging.error(f"failed to remove redis namespace {namespace}: {e}")
-        return None     
+        return None
+
+def patch(status, action, owner=None):
+    """
+    Called the the operator patcher to create/delete redis
+    """
+    try:
+        logging.info(f"*** handling request to {action} redis")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['redis']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['redis']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} redis") 
+    except Exception as e:
+        logging.error('*** failed to update redis: %s' % e)
+        status['whisk_create']['redis']='error'             
 

@@ -28,6 +28,11 @@ _config = {}
 def configure(spec: dict):
     global _config
     _config = dict(flatdict.FlatDict(spec, delimiter="."))
+
+    #forces autodetect of kube if not provided
+    if not exists('nuvolaris.kube'):
+        put('nuvolaris.kube','detect')
+
     return True
 
 def clean():
@@ -72,11 +77,16 @@ def keys(prefix=""):
                 res.append(key)
     return res
 
-def detect_labels(labels=None):
-    # read labels if not avaibale
+def detect_labels(labels=None):    
+    # read labels if not available
     if not labels:
         import nuvolaris.kube as kube
         labels = kube.kubectl("get", "nodes", jsonpath='{.items[].metadata.labels}')
+    
+    # skip autodetection of nuvolaris.kube if already available in _config
+    if exists('nuvolaris.kube') and get('nuvolaris.kube') != 'detect':
+        logging.info(f"*** configuration provided already a nuvolaris.kube={get('nuvolaris.kube')}")
+        return {}
     
     res = {}
     kube = None
@@ -93,7 +103,7 @@ def detect_labels(labels=None):
             if j.find("eksctl.io") >= 0:
                 kube ="eks"
                 break
-            if j.find("k8s.io/cloud-provider-aws"):
+            if j.find("k8s.io/cloud-provider-aws") >= 0:
                 kube ="eks"
                 break
             elif j.find("microk8s.io") >= 0:

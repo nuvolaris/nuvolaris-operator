@@ -100,13 +100,13 @@ def update_system_cm_for_mdb():
     except Exception as e:
         logging.error(f"failed to build mongodb_url for nuvolaris database: {e}")    
 
-def delete():
+def delete(owner=None):
     useOperator = cfg.get('mongodb.useOperator') or False
 
     if useOperator:
-        return operator.delete()
+        return operator.delete(owner)
 
-    return standalone.delete()    
+    return standalone.delete(owner)    
 
 def init():
     return "TODO"
@@ -171,4 +171,23 @@ def delete_db_user(namespace, database):
         return None
     except Exception as e:
         logging.error(f"failed to remove Mongodb database {namespace} authorization id and key: {e}")
-        return None         
+        return None
+
+def patch(status, action, owner=None):
+    """
+    Called the the operator patcher to create/delete mongodb
+    """
+    try:
+        logging.info(f"*** handling request to {action} mongodb")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['mongodb']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['mongodb']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} mongodb") 
+    except Exception as e:
+        logging.error('*** failed to update mongodb: %s' % e)
+        status['whisk_create']['mongodb']='error'                 

@@ -70,6 +70,16 @@ def kustomize(where, *what, templates=[], data={}):
     return res.stdout.decode("utf-8")
 
 # execute the kustomization of a folder under "deploy"
+# specified with `where` returning the expanded kustomization
+# it expects that the folder contains already a full kustomization
+# this methid will be used to extract the existing kustomization in case
+# the nuvolaris operator needs to delete a component
+def build(where):
+    dir = f"deploy/{where}"
+    res = subprocess.run(["kustomize", "build", dir], capture_output=True)
+    return res.stdout.decode("utf-8")   
+
+# execute the kustomization of a folder under "deploy"
 # specified with `where`
 # it generate a kustomization.yaml, adding the header 
 # then including all the files of that folder as resources limited to the one

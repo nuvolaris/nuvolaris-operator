@@ -89,10 +89,45 @@ def create(owner=None):
         cfg.put("state.endpoint.spec", spec)
         
     return kube.apply(spec)
+    
+def delete_by_owner():
+    runtime = cfg.get('nuvolaris.kube')
+    tpl = runtime=='openshift' and "_generic-openshift-route-tpl.yaml" or "_generic-ingress-tpl.yaml"
+    res = kube.kubectl("delete", "-f", f"deploy/openwhisk-endpoint/{tpl}")
+    logging.info(f"delete endpoint: {res}")
+    return res
 
-def delete():
+def delete_by_spec():
     spec = cfg.get("state.endpoint.spec")
     res = False
     if spec:
         res = kube.delete(spec)
         return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called the the operator patcher to create/delete endpoint for apihost
+    """
+    try:
+        logging.info(f"*** handling request to {action} endpoint")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['endpoint']='on'
+        elif action == 'delete':
+            msg = delete(owner)
+            status['whisk_create']['endpoint']='off'
+        else:
+            msg = create(owner)
+            status['whisk_create']['endpoint']='updated'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} endpoint") 
+    except Exception as e:
+        logging.error('*** failed to update endpoint: %s' % e)
+        status['whisk_create']['endpoint']='error'                       

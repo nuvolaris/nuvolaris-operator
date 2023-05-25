@@ -58,10 +58,41 @@ def create(owner=None):
     logging.info(f"create cron: {res}")
     return res    
 
-def delete():
+def delete_by_owner():
+    spec = kus.build("scheduler")
+    res = kube.delete(spec)
+    logging.info(f"delete cron: {res}")
+    return res
+
+def delete_by_spec():
     spec = cfg.get("state.cron.spec")
     res = False
     if spec:
         res = kube.delete(spec)
         logging.info(f"delete cron: {res}")
     return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called the the operator patcher to create/delete cron component
+    """
+    try:
+        logging.info(f"*** handling request to {action} cron")  
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['cron']='on'
+        else:
+            msg = delete(owner)
+            status['whisk_create']['cron']='off'
+
+        logging.info(msg)        
+        logging.info(f"*** hanlded request to {action} cron") 
+    except Exception as e:
+        logging.error('*** failed to update cron: %s' % e)
+        status['whisk_create']['cron']='error'       

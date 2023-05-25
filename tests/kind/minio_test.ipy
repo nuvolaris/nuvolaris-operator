@@ -43,6 +43,6 @@ actual_minio_root_user = kube.kubectl("get", f"pods/{pod_name}", jsonpath="{.spe
 configured_minio_root_user = cfg.get('minio.admin.user')
 assert(actual_minio_root_user[0] == configured_minio_root_user)
 
-cm_minio_url = kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.minio_url}")
+cm_minio_url = kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.minio_host}")
 assert(cm_minio_url)
 assert(minio.delete())
