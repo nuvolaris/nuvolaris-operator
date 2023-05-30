@@ -28,6 +28,8 @@ import nuvolaris.util as util
 import nuvolaris.kopf_util as kopf_util
 import nuvolaris.postgres_operator as postgres
 import nuvolaris.endpoint as endpoint
+import nuvolaris.issuer as issuer
+import nuvolaris.version_util as version_util
 
 def rollout(kube_name):
     try:
@@ -85,32 +87,45 @@ def patch(diff, status, owner=None):
     for key in what_to_do.keys():
         logging.info(f"{key}={what_to_do[key]}")
 
+    components_updated = False    
+
     # components 1st
     if "mongodb" in what_to_do:
         mongodb.patch(status,what_to_do['mongodb'], owner)
+        components_updated = True
 
     if "redis" in what_to_do:
-        redis.patch(status,what_to_do['redis'], owner) 
+        redis.patch(status,what_to_do['redis'], owner)
+        components_updated = True 
 
     if "cron" in what_to_do:
-        cron.patch(status,what_to_do['cron'], owner) 
+        cron.patch(status,what_to_do['cron'], owner)
+        components_updated = True 
 
     if "minio" in what_to_do:
-        minio.patch(status,what_to_do['minio'], owner) 
+        minio.patch(status,what_to_do['minio'], owner)
+        components_updated = True 
 
     if "static" in what_to_do:
-        static.patch(status,what_to_do['static'], owner) 
+        static.patch(status,what_to_do['static'], owner)
+        components_updated = True 
 
     if "postgres" in what_to_do:
         postgres.patch(status,what_to_do['postgres'], owner)
+        components_updated = True
 
     # handle update action on openwhisk
     if "openwhisk" in what_to_do and what_to_do['openwhisk'] == "update":        
         redeploy_whisk(owner)
+        components_updated = True
 
     # handle update action on endpoint
-    if "endpoint" in what_to_do and what_to_do['endpoint'] == "update":        
+    if "endpoint" in what_to_do and what_to_do['endpoint'] == "update":
+        issuer.patch(status,what_to_do['endpoint'], owner)       
         endpoint.patch(status,what_to_do['endpoint'], owner)
+
+    if components_updated:
+        version_util.annotate_operator_components_version()          
     
         
     

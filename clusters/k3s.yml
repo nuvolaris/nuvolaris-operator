@@ -29,11 +29,11 @@ tasks:
     - ssh $KS3_USER@$K3S_HOST /usr/local/bin/k3s-uninstall.sh
 
   enter:
-    - ssh $KS3_USER@$K3S_HOST 
+    - ssh $KS3_USER@$K3S_HOST --ssh-key $PWD/id_rsa
 
   config:
    - >
-     ssh $KS3_USER@$K3S_HOST cat /etc/rancher/k3s/k3s.yaml 
+     ssh $KS3_USER@$K3S_HOST --ssh-key $PWD/id_rsa cat /etc/rancher/k3s/k3s.yaml 
      | sed -e "s!server: .*!server: https://$K3S_HOST:6443!"
      > k3s-$K3S_HOST.kubeconfig
    - cp k3s-$K3S_HOST.kubeconfig ~/.kube/config 
