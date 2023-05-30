@@ -115,8 +115,9 @@ def detect_labels(labels=None):
             elif j.find("node.openshift.io") >=0:
                 kube = "openshift"
                 break
-            #elif j.endswith("kubernetes.io/instance-type"): 
-            #    kube = i[j]               
+            elif j.endswith("kubernetes.io/instance-type") and i[j] == "k3s":
+                kube = "k3s"
+                break
             # assign all the 'nuvolaris.io' labels
         
     if kube:
