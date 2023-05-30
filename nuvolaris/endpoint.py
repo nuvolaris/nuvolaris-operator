@@ -112,7 +112,7 @@ def delete(owner=None):
 
 def patch(status, action, owner=None):
     """
-    Called the the operator patcher to create/delete endpoint for apihost
+    Called the the operator patcher to create/update/delete endpoint for apihost
     """
     try:
         logging.info(f"*** handling request to {action} endpoint")  

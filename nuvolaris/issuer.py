@@ -54,10 +54,44 @@ def create(owner=None):
     res = kube.kubectl("apply", "-f", spec,namespace=None)
     return res
 
-def delete():
+def delete_by_owner():
+    spec = "deploy/issuer/__cluster-issuer.yaml"
+    res = kube.kubectl("delete", "-f", spec,namespace=None)
+    logging.info(f"delete minio: {res}")
+    return res
+
+def delete_by_spec():
     spec = cfg.get("state.issuer.spec")
     res = False
     if spec:
         res = kube.kubectl("delete", "-f", spec,namespace=None)
         return res
+
+def delete(owner=None):
+    if owner:        
+        return delete_by_owner()
+    else:
+        return delete_by_spec()
+
+def patch(status, action, owner=None):
+    """
+    Called by the operator patcher to create/update/delete issuer component
+    """
+    try:
+        logging.info(f"*** handling request to {action} certificate issuer")
+        if  action == 'create':
+            msg = create(owner)
+            status['whisk_create']['issuer']='on'
+        elif action == 'delete':
+            msg = delete(owner)
+            status['whisk_create']['issuer']='off'
+        else:
+            msg = create(owner)
+            status['whisk_create']['issuer']='updated'
+
+        logging.info(msg)        
+        logging.info(f"*** handled request to {action} issuer") 
+    except Exception as e:
+        logging.error('*** failed to update issuer: %s' % e)
+        status['whisk_create']['issuer']='error'          
 
