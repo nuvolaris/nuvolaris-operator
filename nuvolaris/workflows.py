@@ -21,9 +21,9 @@ import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.template as tpl
 
-def generate_job(name, spec, action, id):
+def generate_job(name, spec, action):
 
-    job_name = f"{name}-{action}-{id}"
+    job_name = f"{name}-{action}"
     
     data = {
         'name': job_name,
@@ -67,11 +67,11 @@ def generate_job(name, spec, action, id):
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
 def workflows_create(spec, name, **kwargs):
     logging.info(f"*** workflows_create {name}")
-    id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    kube.apply(generate_job(name, spec, "create", id))
+    #id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    kube.apply(generate_job(name, spec, "create"))
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'workflows')
 def workflows_delete(spec, name, **kwargs):
     logging.info(f"*** workflows_delete {name}")
-    id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    kube.apply(generate_job(name, spec, "delete", id))
+    #id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    kube.apply(generate_job(name, spec, "delete"))
