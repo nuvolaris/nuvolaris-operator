@@ -21,15 +21,15 @@ import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.template as tpl
 
-
 def status():
-     jpath = '{.items[*].metadata.name}'
-     total = len(kube.kubectl("get", "workflows", jsonpath=jpath))
-     count = len(kube.kubectl("get", "jobs", jsonpath=jpath))
-     return {
+    jpath = '{.items[*].metadata.name}'
+    total = len(kube.kubectl("get", "workflows", jsonpath=jpath))
+    count = len(kube.kubectl("get", "jobs", jsonpath=jpath))
+    return {
         "total": total,
         "count": count
-     }
+    }
+
 
 def generate_job(name, spec, action):
 
@@ -77,13 +77,20 @@ def generate_job(name, spec, action):
 @kopf.on.create('nuvolaris.org', 'v1', 'workflows')
 def workflows_create(spec, name, **kwargs):
     logging.info(f"*** workflows_create {name}")
-    #id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    try:
+        kube.kubectl("delete", f"job/{name}-delete")
+    except:
+        pass
     kube.apply(generate_job(name, spec, "create"))
     return status()
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'workflows')
 def workflows_delete(spec, name, **kwargs):
     logging.info(f"*** workflows_delete {name}")
-    #id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    job_name = f"{name}-create"
+    try:
+        kube.kubectl("delete", f"job/{name}-create")
+    except:
+        pass
     kube.apply(generate_job(name, spec, "delete"))
     return status()

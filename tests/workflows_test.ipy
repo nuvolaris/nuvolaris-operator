@@ -41,3 +41,15 @@ assert(len(set(l) & check) == len(check))
 l = !kubectl -n nuvolaris logs job/workflow-test-create -c second
 check = {"_STEP_=start", "_WORKFLOW_=second","_ACTION_=create", "_APIHOST_=undefined-apihost", "VAL3=gamma"}
 assert(len(set(l) & check) == len(check))
+
+!kubectl -n nuvolaris delete all --all
+
+wfx.workflows_create(spec, "workflow-test")
+
+assert(kube.get("job/workflow-test-create")['metadata']['name'] == "workflow-test-create")
+
+wfx.workflows_delete(spec, "workflow-test")
+
+assert(kube.get("job/workflow-test-delete")['metadata']['name'] == "workflow-test-delete")
+
+!kubectl -n nuvolaris delete all --all
