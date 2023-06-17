@@ -20,6 +20,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{name}}
+  labels:
+    group: workflow
 spec:
   template:
     spec:
