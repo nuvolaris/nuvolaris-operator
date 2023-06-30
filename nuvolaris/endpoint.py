@@ -23,6 +23,7 @@ import nuvolaris.openwhisk as openwhisk
 import nuvolaris.util as util
 import nuvolaris.apihost_util as apihost_util
 import urllib.parse
+import nuvolaris.time_util as tutil
 
 def get_ingress_data(apihost, tls):
     url = urllib.parse.urlparse(apihost)
@@ -59,7 +60,11 @@ def get_osh_data(apihost, tls):
         "static_ingress": False
     }
 
-    return data    
+    return data
+
+def assign_route_timeout(data):
+    data["route_timeout_seconds"]= tutil.duration_in_second(util.get_controller_http_timeout())
+    logging.info(f"setting controller http/s timeout to {data['route_timeout_seconds']} seconds")
 
 def create_osh_route_spec(data):
     tpl = "generic-openshift-route-tpl.yaml"
@@ -80,7 +85,9 @@ def create(owner=None):
     openwhisk.annotate(f"apihost={apihost}")
     cfg.put("config.apihost", apihost)
 
-    data = runtime=='openshift' and get_osh_data(apihost, tls) or get_ingress_data(apihost, tls)
+    data = runtime=='openshift' and get_osh_data(apihost, tls) or get_ingress_data(apihost, tls)    
+    assign_route_timeout(data)
+
     spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)
 
     if owner:

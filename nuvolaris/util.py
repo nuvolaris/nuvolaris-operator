@@ -243,4 +243,7 @@ def wait_for_service(jsonpath,namespace="nuvolaris"):
     if(service_names):
         return service_names[0]
 
-    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")                               
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")
+
+def get_controller_http_timeout():    
+    return cfg.get("configs.limits.time.limit-max") or "5min"                          

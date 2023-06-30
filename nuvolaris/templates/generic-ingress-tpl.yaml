@@ -26,14 +26,20 @@ metadata:
       {% if tls %}
       cert-manager.io/cluster-issuer: "letsencrypt-issuer"
       {% endif %}
-      {% if is_static_ingress and apply_nginx_rewrite_rule %}
+      {% if ingress_class == 'traefik' %}
+      traefik.ingress.kubernetes.io/transport.respondingTimeouts.readTimeout: "{{route_timeout_seconds}}"
+      traefik.ingress.kubernetes.io/transport.respondingTimeouts.writeTimeout: "{{route_timeout_seconds}}"
+      traefik.ingress.kubernetes.io/transport.respondingTimeouts.idleTimeout: "{{route_timeout_seconds}}"
+      {% else %}
       nginx.ingress.kubernetes.io/proxy-body-size: "48m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{route_timeout_seconds}}"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "{{route_timeout_seconds}}"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "{{route_timeout_seconds}}"      
+      {% endif %}       
+      {% if is_static_ingress and apply_nginx_rewrite_rule %}
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}/$1
-      {% endif %}
+      {% endif %}     
       {% if is_static_ingress and apply_traefik_prefix_middleware %}
       traefik.ingress.kubernetes.io/router.middlewares: nuvolaris-{{middleware_ingress_name}}@kubernetescrd
       {% endif %}      
