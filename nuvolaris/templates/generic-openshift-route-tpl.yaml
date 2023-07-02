@@ -23,7 +23,7 @@ metadata:
   labels:
     app: {{route_name}}
   annotations:
-    haproxy.router.openshift.io/timeout={{route_timeout_seconds}}s   
+    haproxy.router.openshift.io/timeout: {{route_timeout_seconds}}s   
   {% if is_static_ingress and apply_route_rewrite_rule %}
     haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/      
   {% endif %}  
