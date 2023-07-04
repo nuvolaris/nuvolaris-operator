@@ -121,4 +121,33 @@ def get_apihost(runtime_str):
         namespace = util.get_ingress_namespace(runtime_str)
         apihost = calculate_apihost(runtime_str,get_ingress(namespace))
 
-    return apihost   
+    return apihost
+
+def extract_hostname(url):
+    """
+    Parse a url and extract the hostname part
+    >>> extract_hostname('http://localhost:8080')
+    'localhost'
+    >>> extract_hostname('https://nuvolaris.org')    
+    'nuvolaris.org'
+    """
+    parsed_url = urllib.parse.urlparse(url)
+    return parsed_url.hostname
+
+
+def get_user_static_hostname(runtime_str, username):
+    """
+    Determine the api host to be associated to a user namespace. It is normally derived by reading the apihost annotated
+    inside the cm/config configMap prepending the user_namespace when needed.
+    """
+    
+    if runtime_str == 'kind':
+        return 'localhost'
+
+    apihost_url = util.get_apihost_from_config_map()
+
+    if apihost_url:
+        apihost = extract_hostname(apihost_url)
+        return f"{username}.{apihost}"
+
+    raise Exception(f"Could not determine hostname for static bucket for username {username}")

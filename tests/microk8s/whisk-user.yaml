@@ -36,7 +36,6 @@ spec:
       bucket: franztt-data
     route:
       enabled: true
-      host: franztt.44.203.144.96.nip.io
       bucket: franztt-web
   mongodb:
     enabled: true

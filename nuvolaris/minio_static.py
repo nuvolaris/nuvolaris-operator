@@ -21,6 +21,7 @@ import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.template as ntp
+import nuvolaris.apihost_util as apihost_util
 
 def create(owner=None):
     logging.info(f"*** configuring nuvolaris nginx static provider")
@@ -74,10 +75,9 @@ def render_traefik_middleware_template(namespace,template,data):
     file = ntp.spool_template(template, out, data)
     return os.path.abspath(file)
 
-def prepare_static_ingress_data(ucfg):
+def prepare_static_ingress_data(ucfg, hostname):
     namespace = ucfg.get("namespace")
-    runtime = cfg.get('nuvolaris.kube')
-    host = ucfg.get('object-storage.route.host')
+    runtime = cfg.get('nuvolaris.kube')    
     bucket = ucfg.get('object-storage.route.bucket')
     tls = cfg.get('components.tls') and not runtime=='kind'
     ingress_class = cfg.detect_ingress_class()
@@ -92,7 +92,7 @@ def prepare_static_ingress_data(ucfg):
         "secret_name": static_secret_name(namespace),
         "ingress_class": ingress_class,
         "tls": tls,
-        "hostname": host,        
+        "hostname": hostname,        
         "rewrite_target":f"/{bucket}",
         "service_name": "nuvolaris-static-svc",
         "service_port": 80,
@@ -104,10 +104,9 @@ def prepare_static_ingress_data(ucfg):
 
     return data
 
-def prepare_static_osh_data(ucfg):
+def prepare_static_osh_data(ucfg, hostname):
     namespace = ucfg.get("namespace")
     runtime = cfg.get('nuvolaris.kube')
-    hostname = ucfg.get('object-storage.route.host')
     bucket = ucfg.get('object-storage.route.bucket')    
     tls = cfg.get('components.tls') and not runtime=='kind'
     context_path = tls and "/" or f"/{bucket}"
@@ -152,9 +151,11 @@ def create_static_route(namespace,data):
 def create_ow_static_endpoint(ucfg, owner=None):
     namespace = ucfg.get("namespace")
     runtime = cfg.get('nuvolaris.kube')
+    hostname = apihost_util.get_user_static_hostname(runtime, namespace) 
+    logging.debug(f"using hostname {hostname} to configure access to user web static space")
 
     try:
-        data = runtime=='openshift' and prepare_static_osh_data(ucfg) or prepare_static_ingress_data(ucfg)
+        data = runtime=='openshift' and prepare_static_osh_data(ucfg, hostname) or prepare_static_ingress_data(ucfg, hostname)
         if(runtime=='openshift'):
             return create_static_route(namespace, data)
         
@@ -221,4 +222,4 @@ def patch(status, action, owner=None):
         logging.info(f"*** hanlded request to {action} static") 
     except Exception as e:
         logging.error('*** failed to update static: %s' % e)
-        status['whisk_create']['static']='error'      
+        status['whisk_create']['static']='error'           
