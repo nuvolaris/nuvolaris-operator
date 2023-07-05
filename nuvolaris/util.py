@@ -246,4 +246,11 @@ def wait_for_service(jsonpath,namespace="nuvolaris"):
     raise Exception(f"could not find any pod matching jsonpath={jsonpath}")
 
 def get_controller_http_timeout():    
-    return cfg.get("configs.limits.time.limit-max") or "5min"                          
+    return cfg.get("configs.limits.time.limit-max") or "5min"
+
+def get_apihost_from_config_map(namespace="nuvolaris"):
+    annotations= kube.kubectl("get", "cm/config", namespace=namespace, jsonpath='{.metadata.annotations.apihost}')
+    if(annotations):
+        return annotations[0]
+
+    raise Exception("Could not find apihost annotation inside internal cm/config config Map")                              

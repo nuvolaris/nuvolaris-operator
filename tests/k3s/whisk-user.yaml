@@ -36,7 +36,6 @@ spec:
       bucket: franztt-data
     route:
       enabled: true
-      host: franztt.nuvolaris.org
       bucket: franztt-web
   mongodb:
     enabled: true

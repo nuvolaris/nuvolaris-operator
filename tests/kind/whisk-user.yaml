@@ -36,7 +36,6 @@ spec:
       bucket: franztt-data
     route:
       enabled: true
-      host: localhost
       bucket: franztt-web
   mongodb:
     enabled: true

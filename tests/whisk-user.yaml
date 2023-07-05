@@ -36,7 +36,6 @@ spec:
       bucket: ftt-data
     route:
       enabled: false
-      host: localhost
       bucket: ftt-web
   mongodb:
     enabled: false

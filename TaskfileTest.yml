@@ -173,4 +173,23 @@ tasks:
   postgres:
     - wsk -i package update postgres -p dburi {{.POSTGRES_URI}}
     - wsk -i action update postgres/postgres tests/postgres.js
-    - wsk -i action invoke postgres/postgres -r | grep "Nuvolaris Postgres is up and running!"    
+    - wsk -i action invoke postgres/postgres -r | grep "Nuvolaris Postgres is up and running!"
+
+  minio2:
+    silent: true
+    desc: minio test
+    cmds:    
+    - |
+      MINIO_ACCESS_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_access_key}')
+      MINIO_SECRET_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_secret_key}')
+      MINIO_HOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_host}')
+      MINIO_PORT=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_port}')
+      MINIO_BUCKET_DATA=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_bucket_data}')
+      MINIO_BUCKET_WEB=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_bucket_static}')
+      wsk -i action update minio/minio-nuv tests/minio-nuv.js \
+      -p minio_access "$MINIO_ACCESS_KEY" \
+      -p minio_secret "$MINIO_SECRET_KEY" \
+      -p minio_host "$MINIO_HOST" \
+      -p minio_port "$MINIO_PORT" \
+      -p minio_data "$MINIO_BUCKET_DATA" 
+    - wsk -i action invoke minio/minio-nuv -r        

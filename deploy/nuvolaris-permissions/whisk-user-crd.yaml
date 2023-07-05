@@ -124,13 +124,9 @@ spec:
                         bucket:
                           description: name of the bucket
                           type: string
-                        host:
-                          description: hostname to be used to provide access to the user static content. Typically this is something like <spec.namespace>.<apihost.domain> e.g franztt.nuvolaris.org
-                          type: string 
                       required:
                       - enabled 
-                      - bucket 
-                      - host                     
+                      - bucket                   
                 mongodb:
                   description: used to configure a user dedicated mongodb database
                   type: object
