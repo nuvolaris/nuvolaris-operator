@@ -41,3 +41,7 @@ spec:
     enabled: true
     database: franztt
     password: ahfdajsfdafdasffdasdja
+  postgres:
+    enabled: true
+    database: franztt
+    password: urghgdghhggkjdgksdjh     
