@@ -151,3 +151,19 @@ def get_user_static_hostname(runtime_str, username):
         return f"{username}.{apihost}"
 
     raise Exception(f"Could not determine hostname for static bucket for username {username}")
+
+def get_user_static_url(runtime_str, hostname, bucket_name):
+    """
+    Build the full URL that will give access to the user web bucket via the static endpoint
+    """
+    if runtime_str=="kind":
+        hostname = f"{hostname}/{bucket_name}"
+
+    url = urllib.parse.urlparse(f"http://{hostname}")
+
+    if cfg.get('components.tls') and not runtime_str=="kind":
+        url = url._replace(scheme = "https")
+    else:
+        url = url._replace(scheme = "http")
+
+    return url.geturl() 

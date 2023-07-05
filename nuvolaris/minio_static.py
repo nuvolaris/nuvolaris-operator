@@ -23,6 +23,8 @@ import nuvolaris.util as util
 import nuvolaris.template as ntp
 import nuvolaris.apihost_util as apihost_util
 
+from nuvolaris.user_metadata import UserMetadata
+
 def create(owner=None):
     logging.info(f"*** configuring nuvolaris nginx static provider")
 
@@ -148,14 +150,18 @@ def create_static_route(namespace,data):
     return res      
 
                   
-def create_ow_static_endpoint(ucfg, owner=None):
+def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     namespace = ucfg.get("namespace")
     runtime = cfg.get('nuvolaris.kube')
-    hostname = apihost_util.get_user_static_hostname(runtime, namespace) 
+    bucket_name = ucfg.get("object-storage.route.bucket") 
+    
+    hostname = apihost_util.get_user_static_hostname(runtime, namespace)    
     logging.debug(f"using hostname {hostname} to configure access to user web static space")
 
-    try:
+    try:     
+        user_metadata.add_metadata("STATIC_CONTENT_URL",apihost_util.get_user_static_url(runtime, hostname, bucket_name))
         data = runtime=='openshift' and prepare_static_osh_data(ucfg, hostname) or prepare_static_ingress_data(ucfg, hostname)
+        
         if(runtime=='openshift'):
             return create_static_route(namespace, data)
         

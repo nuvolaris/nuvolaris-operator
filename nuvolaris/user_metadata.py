@@ -41,6 +41,6 @@ class UserMetadata:
         self._data['metadata'].append({"key":key, "value":value})
 
     def get_metadata(self):
-        return self._data  
+        return self._data
     
 
