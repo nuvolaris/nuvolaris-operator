@@ -45,7 +45,7 @@ spec:
       - name: controller
         imagePullPolicy: "IfNotPresent"
         image: "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"       
-        command: ["/bin/bash", "-c", "/init.sh `hostname | awk -F '-' '{print $NF}'`"]     
+        command: ["/bin/bash", "-c", "/init.sh `hostname | awk -F '-' '{print $NF}'`"]             
         ports:
         - name: controller
           containerPort: 8080
@@ -73,6 +73,13 @@ spec:
           capabilities:
             drop:
             - ALL
+        resources:
+          requests:
+            memory: "{{container_mem_req}}"
+            cpu : "{{container_cpu_req}}"
+          limits:
+            memory: "{{container_mem_lim}}"
+            cpu : "{{container_cpu_lim}}"            
         env:
 
         - name: "PORT"
