@@ -467,10 +467,10 @@ spec:
                           type: object
                           properties:
                             cpu-req:
-                              description: container cpu requested resources. Defaulted to 2
+                              description: container cpu requested resources. Defaulted to 256m
                               type: string
                             cpu-lim:
-                              description: max container cpu allowed resources. Defaulted to 4
+                              description: max container cpu allowed resources. Defaulted to 1
                               type: string
                             mem-req:
                               description: container memory requested. Defaulted to 1G
@@ -504,12 +504,12 @@ spec:
                         resources:
                           description: resource limits specification for the controller container
                           type: object
-                          properties:
+                          properties:                         
                             cpu-req:
-                              description: container cpu requested resources. Defaulted to 2
+                              description: container cpu requested resources. Defaulted to 500m
                               type: string
                             cpu-lim:
-                              description: max container cpu allowed resources. Defaulted to 4
+                              description: max container cpu allowed resources. Defaulted to 1
                               type: string
                             mem-req:
                               description: container memory requested. Defaulted to 1G
@@ -550,14 +550,14 @@ spec:
                           required:
                           - userMemory
                         resources:
-                          description: resource limits specification for the controller container
+                          description: resource limits specification for the invoker container
                           type: object
                           properties:
                             cpu-req:
-                              description: container cpu requested resources. Defaulted to 2
+                              description: container cpu requested resources. Defaulted to 500m
                               type: string
                             cpu-lim:
-                              description: max container cpu allowed resources. Defaulted to 4
+                              description: max container cpu allowed resources. Defaulted to 1
                               type: string
                             mem-req:
                               description: container memory requested. Defaulted to 1G

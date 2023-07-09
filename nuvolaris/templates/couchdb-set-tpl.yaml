@@ -47,6 +47,7 @@ spec:
         {% else %}
         imagePullPolicy: "IfNotPresent"
         {% endif %}
+        {% if container_manage_resources %}
         resources:
           requests:
             memory: "{{container_mem_req}}"
@@ -54,6 +55,7 @@ spec:
           limits:
             memory: "{{container_mem_lim}}"
             cpu : "{{container_cpu_lim}}"
+        {% endif %}
         ports:
         - name: couchdb
           containerPort: 5984

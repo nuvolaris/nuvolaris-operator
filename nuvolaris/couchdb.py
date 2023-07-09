@@ -59,10 +59,11 @@ def create(owner=None):
         "size": cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 10), 
         "dir": "/opt/couchdb/data",
         "storageClass": cfg.get("nuvolaris.storageClass"),
-        "container_cpu_req": cfg.get('configs.couchdb.resources.cpu-req') or "1",
-        "container_cpu_lim": cfg.get('configs.couchdb.resources.cpu-lim') or "2",
+        "container_cpu_req": cfg.get('configs.couchdb.resources.cpu-req') or "500m",
+        "container_cpu_lim": cfg.get('configs.couchdb.resources.cpu-lim') or "1",
         "container_mem_req": cfg.get('configs.couchdb.resources.mem-req') or "1G",
-        "container_mem_lim": cfg.get('configs.couchdb.resources.mem-lim') or "2G"
+        "container_mem_lim": cfg.get('configs.couchdb.resources.mem-lim') or "2G",
+        "container_manage_resources": cfg.exists('configs.couchdb.resources.cpu-req')
     }
 
     kus.processTemplate("couchdb","couchdb-set-tpl.yaml",data,"couchdb-set_generated.yaml")

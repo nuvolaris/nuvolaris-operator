@@ -73,13 +73,15 @@ spec:
           capabilities:
             drop:
             - ALL
+        {% if container_manage_resources %}
         resources:
           requests:
             memory: "{{container_mem_req}}"
             cpu : "{{container_cpu_req}}"
           limits:
             memory: "{{container_mem_lim}}"
-            cpu : "{{container_cpu_lim}}"            
+            cpu : "{{container_cpu_lim}}"
+        {% endif %}
         env:
 
         - name: "PORT"

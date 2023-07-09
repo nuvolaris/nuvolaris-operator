@@ -79,17 +79,17 @@ spec:
         fires-perMinute: 999
     controller:
       javaOpts: "-Xmx2048M"
-      resources:
-        cpu-req: "1"
-        cpu-lim: "2"
-        mem-req: "1G"
-        mem-lim: "2G"
-    couchdb:
-      resources:
-        cpu-req: "1"
-        cpu-lim: "2"
-        mem-req: "512M"
-        mem-lim: "1G"        
+      #resources:
+      #  cpu-req: "500m"
+      #  cpu-lim: "1"
+      #  mem-req: "1G"
+      #  mem-lim: "2G"
+    #couchdb:
+      #resources:
+        #cpu-req: "500m"
+        #cpu-lim: "1"
+        #mem-req: "512M"
+        #mem-lim: "1G"        
   redis:
     volume-size: 10
     default:
