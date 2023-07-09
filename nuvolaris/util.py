@@ -145,6 +145,10 @@ def get_standalone_config_data():
         "concurrency_limit_std": cfg.get("configs.limits.concurrency.limit-std") or 1, 
         "concurrency_limit_max": cfg.get("configs.limits.concurrency.limit-max") or 1,
         "controller_java_opts": cfg.get('configs.controller.javaOpts') or "-Xmx2048M",
+        "container_cpu_req": cfg.get('configs.controller.resources.cpu-req') or "1",
+        "container_cpu_lim": cfg.get('configs.controller.resources.cpu-lim') or "2",
+        "container_mem_req": cfg.get('configs.controller.resources.mem-req') or "1G",
+        "container_mem_lim": cfg.get('configs.controller.resources.mem-lim') or "2G"
     }
     return data
 

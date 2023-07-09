@@ -457,7 +457,34 @@ spec:
                               type: integer
                           required:
                           - blackbox-fraction
-                          - timeout-factor                                
+                          - timeout-factor
+                    couchdb:
+                      description: configure couchdb limits
+                      type: object
+                      properties:
+                        resources:
+                          description: resource limits specification for the controller container
+                          type: object
+                          properties:
+                            cpu-req:
+                              description: container cpu requested resources. Defaulted to 2
+                              type: string
+                            cpu-lim:
+                              description: max container cpu allowed resources. Defaulted to 4
+                              type: string
+                            mem-req:
+                              description: container memory requested. Defaulted to 1G
+                              type: string
+                            mem-lim:
+                              description: container container max memory allowed. Defaulted to 2G
+                              type: string
+                          required:
+                          - cpu-req
+                          - cpu-lim 
+                          - mem-req 
+                          - mem-lim
+                      required:
+                      - resources                                           
                     controller:
                       description: configure the OW controller
                       type: object
@@ -474,6 +501,27 @@ spec:
                           - WARN
                           - ERROR
                           - TRACE
+                        resources:
+                          description: resource limits specification for the controller container
+                          type: object
+                          properties:
+                            cpu-req:
+                              description: container cpu requested resources. Defaulted to 2
+                              type: string
+                            cpu-lim:
+                              description: max container cpu allowed resources. Defaulted to 4
+                              type: string
+                            mem-req:
+                              description: container memory requested. Defaulted to 1G
+                              type: string
+                            mem-lim:
+                              description: container container max memory allowed. Defaulted to 2G
+                              type: string
+                          required:
+                          - cpu-req
+                          - cpu-lim 
+                          - mem-req 
+                          - mem-lim  
                       required:
                       - javaOpts                           
                     invoker:
@@ -501,6 +549,27 @@ spec:
                               type: string
                           required:
                           - userMemory
+                        resources:
+                          description: resource limits specification for the controller container
+                          type: object
+                          properties:
+                            cpu-req:
+                              description: container cpu requested resources. Defaulted to 2
+                              type: string
+                            cpu-lim:
+                              description: max container cpu allowed resources. Defaulted to 4
+                              type: string
+                            mem-req:
+                              description: container memory requested. Defaulted to 1G
+                              type: string
+                            mem-lim:
+                              description: container container max memory allowed. Defaulted to 2G
+                              type: string
+                          required:
+                          - cpu-req
+                          - cpu-lim 
+                          - mem-req 
+                          - mem-lim                           
                       required:
                       - javaOpts
                       - containerPool                                                                                                                                                                                

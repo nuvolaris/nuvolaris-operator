@@ -44,14 +44,16 @@ spec:
             drop:
             - ALL
         imagePullPolicy: "Always"
-        resources:
-          requests:
-            memory: "1G"
-          limits:
-            memory: "4G"
         {% else %}
         imagePullPolicy: "IfNotPresent"
         {% endif %}
+        resources:
+          requests:
+            memory: "{{container_mem_req}}"
+            cpu : "{{container_cpu_req}}"
+          limits:
+            memory: "{{container_mem_lim}}"
+            cpu : "{{container_cpu_lim}}"
         ports:
         - name: couchdb
           containerPort: 5984

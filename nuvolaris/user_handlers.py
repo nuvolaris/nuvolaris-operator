@@ -56,7 +56,7 @@ def whisk_user_create(spec, name, **kwargs):
         minio.create_ow_storage(state, ucfg, user_metadata, owner)
 
     if(cfg.get('components.minio') and ucfg.get('object-storage.route.enabled') and cfg.get('components.static')):
-        res = static.create_ow_static_endpoint(ucfg,owner)
+        res = static.create_ow_static_endpoint(ucfg,user_metadata, owner)
         logging.info(f"OpenWhisk static endpoint for {ucfg.get('namespace')} added = {res}")
         state['static']= res
 
