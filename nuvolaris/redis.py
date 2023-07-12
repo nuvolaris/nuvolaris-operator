@@ -40,11 +40,12 @@ def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     try:
         redis_service =  util.get_service("{.items[?(@.spec.selector.name == 'redis')]}")
         if(redis_service):
-            redis_service_name = redis_service['metadata']['name']            
+            redis_service_name = redis_service['metadata']['name']
+            redis_service_port = redis_service['spec']['ports'][0]['port']            
             username = urllib.parse.quote(ucfg.get('namespace'))
             password = urllib.parse.quote(ucfg.get('redis.password'))
             auth = f"{username}:{password}"
-            redis_url = f"redis://{auth}@{redis_service_name}"
+            redis_url = f"redis://{auth}@{redis_service_name}:{redis_service_port}"
             user_metadata.add_metadata("REDIS_URL",redis_url)            
         return None
     except Exception as e:
@@ -86,11 +87,12 @@ def create_nuvolaris_db_user(data):
             if(res):
                 redis_service =  util.get_service("{.items[?(@.spec.selector.name == 'redis')]}")
                 if(redis_service):
-                    redis_service_name = redis_service['metadata']['name']                    
+                    redis_service_name = redis_service['metadata']['name']
+                    redis_service_port = redis_service['spec']['ports'][0]['port']
                     username = urllib.parse.quote(data['namespace'])
                     password = urllib.parse.quote(data['password'])
                     auth = f"{username}:{password}"
-                    redis_url = f"redis://{auth}@{redis_service_name}"                   
+                    redis_url = f"redis://{auth}@{redis_service_name}:{redis_service_port}"
                     openwhisk.annotate(f"redis_url={redis_url}")
                     openwhisk.annotate(f"redis_prefix={data['prefix']}")
                     logging.info("*** saved annotation for redis nuvolaris user")
