@@ -73,12 +73,6 @@ tasks:
   default: 
     - task: use
 
-  origin:
-    - git fetch --all
-    - git checkout origin/main -B main
-    - cd nuv ; task origin
-    - cd olaris ; task origin
-
   setup:
     deps:
       - update-files-from-openwhisk
