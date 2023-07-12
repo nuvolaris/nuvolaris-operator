@@ -29,7 +29,7 @@ vars:
 
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "tests/{{.KUBE}}/{{.WHISK}}.yaml"
-  REDIS_URI: "redis://default:s0meP@ass3@redis"
+  REDIS_URI: "redis://default:s0meP@ass3@redis:6379"
   MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
   POSTGRES_URI: "postgresql://nuvolaris:s0meP%40ass3@nuvolaris-postgres.nuvolaris.svc.cluster.local:5432/nuvolaris"
   MINIO_HOST: "minio"
