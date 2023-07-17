@@ -258,4 +258,11 @@ def get_apihost_from_config_map(namespace="nuvolaris"):
     if(annotations):
         return annotations[0]
 
-    raise Exception("Could not find apihost annotation inside internal cm/config config Map")                              
+    raise Exception("Could not find apihost annotation inside internal cm/config config Map")  
+
+def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotations.apihost}'):
+    annotations= kube.kubectl("get", "cm/config", namespace=namespace, jsonpath=path)
+    if(annotations):
+        return annotations[0]
+
+    raise Exception("Could not find annotation inside internal cm/config config Map")                                  

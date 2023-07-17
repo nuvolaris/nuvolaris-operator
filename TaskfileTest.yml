@@ -30,7 +30,6 @@ vars:
   WHISK: '{{default "whisk" .WHISK}}'
   CONFIG: "tests/{{.KUBE}}/{{.WHISK}}.yaml"
   REDIS_URI: "redis://default:s0meP@ass3@redis:6379"
-  MONGO_URI: "mongodb://nuvolaris:s0meP%40ass3@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
   POSTGRES_URI: "postgresql://nuvolaris:s0meP%40ass3@nuvolaris-postgres.nuvolaris.svc.cluster.local:5432/nuvolaris"
   MINIO_HOST: "minio"
   MINIO_PORT: 9000
@@ -158,7 +157,9 @@ tasks:
     - wsk -i action invoke api -r | grep '"api"'
 
   mongo:
-    - wsk -i package update mongo -p dburi {{.MONGO_URI}}
+    - | 
+       MONGODB_URL=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.mongodb_url}') 
+       wsk -i package update mongo -p dburi "$MONGODB_URL"
     - wsk -i action update mongo/mongo tests/mongo.js
     - wsk -i action invoke mongo/mongo -r | grep "hello"
 
