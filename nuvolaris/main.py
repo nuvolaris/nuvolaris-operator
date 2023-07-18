@@ -25,7 +25,7 @@ import nuvolaris.couchdb as couchdb
 import nuvolaris.bucket as bucket
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.cronjob as cron
-import nuvolaris.mongodb as mongodb
+import nuvolaris.ferretdb as mongodb
 import nuvolaris.issuer as issuer
 import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
@@ -126,13 +126,6 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['cron'] = "off" 
 
-    if cfg.get('components.mongodb'):
-        msg = mongodb.create(owner)
-        logging.info(msg)
-        state['mongodb'] = "on"
-    else:
-        state['mongodb'] = "off"
-
     if cfg.get('components.minio'):
         msg = minio.create(owner)
         logging.info(msg)
@@ -147,24 +140,19 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['static'] = "off"
 
-    if cfg.get('components.postgres'):
+    if cfg.get('components.postgres') or cfg.get('components.mongodb'):
         msg = postgres.create(owner)
         logging.info(msg)
         state['postgres'] = "on"
     else:
-        state['postgres'] = "off"                 
-    
-    if cfg.get('components.kafka'):
-        logging.warn("invoker not yet implemented")
-        state['kafka'] = "n/a"
-    else:
-        state['kafka'] = "off"
+        state['postgres'] = "off"
 
-    if cfg.get('components.invoker'):
-        logging.warn("invoker not yet implemented")
-        state['invoker'] = "n/a"
+    if cfg.get('components.mongodb'):
+        msg = mongodb.create(owner)
+        logging.info(msg)
+        state['mongodb'] = "on"
     else:
-        state['invoker'] = "off"        
+        state['mongodb'] = "off"                        
 
     if cfg.get('components.openwhisk'):
         try:

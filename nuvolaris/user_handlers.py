@@ -23,7 +23,7 @@ import nuvolaris.config as cfg
 import nuvolaris.couchdb as cdb
 import nuvolaris.minio as minio
 import nuvolaris.kube as kube
-import nuvolaris.mongodb as mdb
+import nuvolaris.ferretdb as mdb
 import nuvolaris.minio_static as static
 import nuvolaris.redis as redis
 import nuvolaris.userdb_util as userdb
@@ -63,7 +63,7 @@ def whisk_user_create(spec, name, **kwargs):
     if(cfg.get('components.mongodb') and ucfg.get('mongodb.enabled')):
         res = mdb.create_db_user(ucfg,user_metadata)
         logging.info(f"Mongodb setup for {ucfg.get('namespace')} added = {res}")
-        state['mongodb']= res  
+        state['mongodb']= res
 
     if(cfg.get('components.redis') and ucfg.get('redis.enabled')):
         res = redis.create_db_user(ucfg, user_metadata)

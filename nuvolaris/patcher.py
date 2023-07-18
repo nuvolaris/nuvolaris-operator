@@ -17,7 +17,7 @@
 #
 import logging, time
 import nuvolaris.openwhisk as openwhisk
-import nuvolaris.mongodb as mongodb
+import nuvolaris.ferretdb as mongodb
 import nuvolaris.redis as redis
 import nuvolaris.cronjob as cron
 import nuvolaris.minio as minio
@@ -90,6 +90,10 @@ def patch(diff, status, owner=None):
     components_updated = False    
 
     # components 1st
+    if "postgres" in what_to_do:
+        postgres.patch(status,what_to_do['postgres'], owner)
+        components_updated = True
+
     if "mongodb" in what_to_do:
         mongodb.patch(status,what_to_do['mongodb'], owner)
         components_updated = True
@@ -108,10 +112,6 @@ def patch(diff, status, owner=None):
 
     if "static" in what_to_do:
         static.patch(status,what_to_do['static'], owner)
-        components_updated = True 
-
-    if "postgres" in what_to_do:
-        postgres.patch(status,what_to_do['postgres'], owner)
         components_updated = True
 
     # handle update action on openwhisk
@@ -125,7 +125,7 @@ def patch(diff, status, owner=None):
         endpoint.patch(status,what_to_do['endpoint'], owner)
 
     if components_updated:
-        version_util.annotate_operator_components_version()          
+        version_util.annotate_operator_components_version()         
     
         
     
