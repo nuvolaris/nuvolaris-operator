@@ -114,6 +114,23 @@ def update_system_cm_for_pdb(data):
     except Exception as e:
         logging.error(f"failed to build postgres data for nuvolaris database: {e}")
 
+def get_base_postgres_url(data):    
+    try:        
+        pdb_service = util.get_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        if(pdb_service):             
+            pdb_service_name = pdb_service['metadata']['name']
+            pdb_ns = pdb_service['metadata']['namespace']
+            pdb_host = f"{pdb_service_name}.{pdb_ns}.svc.cluster.local"            
+            pdb_port = pdb_service['spec']['ports'][0]['port']
+            username = "nuvolaris"
+            database = "nuvolaris"
+            password = urllib.parse.quote(data['postgres_nuvolaris_password'])
+            auth = f"{username}:{password}"            
+            return f"postgresql://{auth}@{pdb_service_name}.{pdb_ns}.svc.cluster.local:{pdb_port}"
+           
+    except Exception as e:
+        logging.error(f"failed to build base postgres URL: {e}")        
+
 def _add_pdb_user_metadata(ucfg, user_metadata):
     """
     adds an entry for the postgres connectivity, i.e   

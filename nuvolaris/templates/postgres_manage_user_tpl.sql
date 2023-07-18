@@ -24,6 +24,12 @@ GRANT ALL PRIVILEGES ON DATABASE {{database}} to {{username}};
 {% endif %}
 
 {% if mode == 'delete' %}
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = '{{database}}';
+
 DROP DATABASE {{database}};
+
+DROP OWNED BY {{username}};
 DROP USER {{username}};
 {% endif %}

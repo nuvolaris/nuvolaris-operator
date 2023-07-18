@@ -39,8 +39,8 @@ def create(owner=None):
     logging.info("*** creating ferretdb")
 
     data = util.get_postgres_config_data()
-    # use nuvolari spostgresdb as default user
-    data['ferretdb_postgres_url']=util.get_value_from_config_map(path='{.metadata.annotations.postgres_url}')
+    # use nuvolaris postgres db as default configuration for FERRETDB
+    data['ferretdb_postgres_url'] = postgres.get_base_postgres_url(data)
 
     mkust = kus.patchTemplates("ferretdb", ["ferretdb-sts.yaml"], data)    
     mspec = kus.kustom_list("ferretdb", mkust, templates=[], data=data)
@@ -52,7 +52,7 @@ def create(owner=None):
     
     res = kube.apply(mspec)
 
-    # dynamically detect mongodb pod and wait for readiness
+    # dynamically detect ferretdb pod and wait for readiness
     if res:
         util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-mongodb')].metadata.name}")
         update_system_cm_for_mdb(data)
@@ -80,7 +80,7 @@ def update_system_cm_for_mdb(data):
             
             mdb_url = f"mongodb://{auth}@{mdb_pod_name}.{mdb_service_name}.{mdb_ns}.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000&authMechanism=PLAIN"
             openwhisk.annotate(f"mongodb_url={mdb_url}")
-            logging.info("*** saved annotation for mongodb nuvolaris user")            
+            logging.info("*** saved annotation for ferretdb nuvolaris user")            
     except Exception as e:
         logging.error(f"failed to build mongodb_url for nuvolaris database: {e}")  
 
@@ -129,7 +129,6 @@ def _add_mdb_user_metadata(user_metadata, data):
     adds an entry for the mongodb connectivity, i.e
     something like "mongodb://{namespace}:{auth}@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"}
     """ 
-
     try:
         mdb_service = util.get_service("{.items[?(@.metadata.name == 'nuvolaris-mongodb-svc')]}")
 
@@ -147,7 +146,7 @@ def _add_mdb_user_metadata(user_metadata, data):
             user_metadata.add_metadata("MONGODB_URL",mdb_url)
         return None
     except Exception as e:
-        logging.error(f"failed to build mongodb_url for {ucfg.get('mongodb.database')}: {e}")
+        logging.error(f"failed to build mongodb_url for {data['database']}: {e}")
         return None
 
 def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
