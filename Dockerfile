@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM ubuntu:22.04
+FROM ubuntu:22.10
 ENV CONTROLLER_IMAGE=ghcr.io/nuvolaris/openwhisk-controller
 ENV CONTROLLER_TAG=0.3.0-morpheus.22122609
 ARG OPERATOR_IMAGE_DEFAULT=ghcr.io/nuvolaris/nuvolaris-operator
@@ -35,7 +35,7 @@ RUN KVER="v1.23.0" ;\
     ARCH="$(dpkg --print-architecture)" ;\
     KURL="https://dl.k8s.io/release/$KVER/bin/linux/$ARCH/kubectl" ;\
     curl -sL $KURL -o /usr/bin/kubectl && chmod +x /usr/bin/kubectl
-RUN VER="v4.5.4" ;\
+RUN VER="v4.5.7" ;\
     ARCH="$(dpkg --print-architecture)" ;\
     URL="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F$VER/kustomize_${VER}_linux_${ARCH}.tar.gz" ;\
     curl -sL "$URL" | tar xzvf - -C /usr/bin
