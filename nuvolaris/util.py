@@ -57,6 +57,7 @@ def nuv_retry(deadline_seconds=120, max_backoff=5):
 # get the default storage class defined on the configured kubernetes environment
 def get_default_storage_class():
     storage_class = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].metadata.name}")
+    storage_class += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class)].metadata.name}")
     if(storage_class):
         return storage_class[0]
 
