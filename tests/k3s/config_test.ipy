@@ -20,4 +20,4 @@ import nuvolaris.kube as kube
 
 cfg.clean()
 assert(cfg.detect_labels()['nuvolaris.kube'] == "k3s")
-assert(cfg.detect_storage()['nuvolaris.storageClass'] in ["local-path"])
+assert(cfg.detect_storage()['nuvolaris.storageclass'] in ["local-path"])

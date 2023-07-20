@@ -60,7 +60,19 @@ spec:
                       - https
                     kube:
                       description: label representing the kubernetes runtime used to implement specific logic (kind, eks, aks, lks, microk8s, k3s, openshift). Defaulted to detect which is causing the operator to autodetect the k8s runtime.
-                      type: string                     
+                      type: string
+                    storageclass:
+                      description: allow to set a defined storage class. Default to auto which will force the operator to autodetect the storage class.
+                      type: string
+                    provisioner:
+                      description: allow to set a defined storage class provisioner. Default to auto which will force the operator to autodetect the storage class provisioner.
+                      type: string                      
+                    ingressclass:
+                      description: allow to set a defined ingress class. Default to auto which will force the operator to autodetect the ingress class.
+                      type: string
+                    ingresslb:
+                      description: allow to set the location of the ingress lb in the form namespace/service-name. Default to auto which will force the operator to use default values based on the environment.
+                      type: string                                                                   
                 components:
                   description: it allows which components needs to be deployed by default. For a minimal setup openwhisk and couchdb are required to be set to true
                   type: object

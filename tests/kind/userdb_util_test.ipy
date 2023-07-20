@@ -31,7 +31,7 @@ import nuvolaris.user_metadata as user_metadata
 
 assert(cfg.configure(tu.load_sample_config()))
 assert(cfg.detect_labels()["nuvolaris.kube"] == "kind")
-assert(cfg.detect_storage()["nuvolaris.storageClass"] == "standard")
+assert(cfg.detect_storage()["nuvolaris.storageclass"] == "standard")
 assert(cfg.put("couchdb.host", "localhost"))
 
 !kubectl apply -f tests/kind/whisk.yaml

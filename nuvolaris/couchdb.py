@@ -58,7 +58,7 @@ def create(owner=None):
         "name": "couchdb", 
         "size": cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 10), 
         "dir": "/opt/couchdb/data",
-        "storageClass": cfg.get("nuvolaris.storageClass"),
+        "storageClass": cfg.get("nuvolaris.storageclass"),
         "container_cpu_req": cfg.get('configs.couchdb.resources.cpu-req') or "500m",
         "container_cpu_lim": cfg.get('configs.couchdb.resources.cpu-lim') or "1",
         "container_mem_req": cfg.get('configs.couchdb.resources.mem-req') or "1G",

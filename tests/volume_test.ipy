@@ -37,7 +37,7 @@ assert(len(kube.get("pvc")["items"]) ==0)
 data = {"name": "test-nginx", 
         "size": "1", 
         "dir": "/usr/share/nginx/html",
-        "storageClass": cfg.get("nuvolaris.storageClass")
+        "storageClass": cfg.get("nuvolaris.storageclass")
 }
 #print(data)
 patch = kus.patchTemplate("test-sts", "set-attach.yaml", data) 

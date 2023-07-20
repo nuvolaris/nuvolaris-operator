@@ -24,7 +24,7 @@ import requests as req
 #print("kind")
 cfg.clean()
 assert(cfg.detect_labels()['nuvolaris.kube'] == "kind")
-assert(cfg.detect_storage()['nuvolaris.storageClass'] == "standard")
+assert(cfg.detect_storage()['nuvolaris.storageclass'] == "standard")
 
 # check hostpath
 cfg.configure(tu.load_sample_config())

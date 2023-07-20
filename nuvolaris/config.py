@@ -136,14 +136,32 @@ def detect_storage(storages=None):
         import nuvolaris.util as util
 
         try:
-            storage_class = util.get_default_storage_class()
-            provisioner = util.get_default_storage_provisioner()
+            detect_storageclass = True
+            detect_provisioner = True
 
-            if(storage_class):
-                res['nuvolaris.storageClass'] = storage_class
-                _config['nuvolaris.storageClass'] = storage_class
-                res['nuvolaris.provisioner'] = provisioner
-                _config['nuvolaris.provisioner'] = provisioner
+            # skips autodetection if already provided
+            if exists('nuvolaris.storageclass') and get('nuvolaris.storageclass') != 'auto':
+                logging.info(f"*** configuration provided already a nuvolaris.storageclass={get('nuvolaris.storageclass')}")
+                detect_storageclass = False
+
+            if exists('nuvolaris.provisioner') and get('nuvolaris.provisioner') != 'auto':
+                logging.info(f"*** configuration provided already a nuvolaris.provisioner={get('nuvolaris.provisioner')}")
+                detect_provisioner = False
+
+            if not detect_storageclass and not detect_provisioner:
+                return res    
+
+            if detect_storageclass:
+                storage_class = util.get_default_storage_class()
+                if storage_class:
+                    res['nuvolaris.storageclass'] = storage_class
+                    _config['nuvolaris.storageclass'] = storage_class
+            
+            if detect_provisioner:
+                provisioner = util.get_default_storage_provisioner()
+                if(provisioner):
+                    res['nuvolaris.provisioner'] = provisioner
+                    _config['nuvolaris.provisioner'] = provisioner
         except:
             pass
     return res
@@ -160,22 +178,6 @@ def detect():
     detect_storage()
     detect_labels()
     detect_env()
-
-def detect_ingress_class():
-    runtime = _config['nuvolaris.kube']
-
-    # ingress class default to nginx
-    ingress_class = "nginx"
-
-    # On microk8s ingress class must be public
-    if runtime == "microk8s":
-        ingress_class = "public"
-
-    # On k3s ingress class must be traefik
-    if runtime == "k3s":
-        ingress_class = "traefik" 
-    
-    return ingress_class
 
 def dump_config():
     import nuvolaris.config as cfg

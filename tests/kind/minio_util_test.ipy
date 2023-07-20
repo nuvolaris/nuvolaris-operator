@@ -30,7 +30,7 @@ import logging, os
 
 # test
 assert(cfg.configure(tu.load_sample_config()))
-assert(cfg.detect_storage()["nuvolaris.storageClass"])
+assert(cfg.detect_storage()["nuvolaris.storageclass"])
 
 os.environ['MINIO_API_HOST']='localhost'
 assert(minio.create())

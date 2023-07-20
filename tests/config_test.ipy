@@ -29,13 +29,14 @@ assert(cfg.get("g") == 5)
 
 assert(len(cfg.getall("a")) == 4)
 assert(len(cfg.getall("a.c")) == 2)
-assert(len(cfg.keys()) == 5)
+assert(len(cfg.keys()) == 6)
 assert(len(cfg.keys("a.c")) == 2)
 
 
 assert(cfg.configure({"a":1}))
 assert(cfg.get("a") == 1 )
 labels = [{"nuvolaris.io/hello": "world", "something": "else" }, {}, {"nothing":"here"}]
+cfg.delete("nuvolaris.kube")
 cfg.detect_labels(labels)
 assert(cfg.get("nuvolaris.hello") == "world")
 assert(cfg.get("nuvolaris.kube") == "generic")

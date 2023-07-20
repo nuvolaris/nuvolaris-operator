@@ -54,8 +54,10 @@ def nuv_retry(deadline_seconds=120, max_backoff=5):
     return decorator
 
 
-# get the default storage class defined on the configured kubernetes environment
 def get_default_storage_class():
+    """
+    Get the storage class attempting to get the default storage class defined on the configured kubernetes environment
+    """
     storage_class = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].metadata.name}")
     storage_class += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class)].metadata.name}")
     if(storage_class):
@@ -63,20 +65,98 @@ def get_default_storage_class():
 
     return ""
 
-# get the default storage provisioner defined on the configured kubernetes environment
 def get_default_storage_provisioner():
+    """
+    Get the storage provisioner
+    """    
     provisioner = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].provisioner}")
+    provisioner += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class)].metadata.name}")
     if(provisioner):
         return provisioner[0]
 
     return ""
 
-# determine the ingress-nginx flavour
 def get_ingress_namespace(runtime):
+    """
+    Attempt to determine the namespace where the ingress-nginx-controller service has been deployed 
+    checking the nuvolaris.ingresslb 
+    - When set to 'auto' it will attempt to calculate it according to the kubernetes runtime
+    - When set to <> 'auto' it will return the configured value. The configured value should be in the form <namespace>/<ingress-nginx-controller-service-name>
+    >>> import nuvolaris.config as cfg
+    >>> cfg.put('nuvolaris.ingresslb','auto')
+    True
+    >>> get_ingress_namespace('microk8s')
+    'ingress'
+    >>> get_ingress_namespace('kind')
+    'ingress-nginx'
+    >>> cfg.put('nuvolaris.ingresslb','ingress-nginx-azure/ingress-nginx-controller')
+    True
+    >>> get_ingress_namespace('kind')
+    'ingress-nginx-azure'
+    """        
+    ingresslb_value = cfg.get('nuvolaris.ingresslb') or 'auto'
+
+    if 'auto' != ingresslb_value:        
+        ingress_namespace = ingresslb_value.split('/')[0]
+        logging.debug(f"skipping ingress namespace auto detection and returning {ingress_namespace}")
+        return ingress_namespace
+
     if runtime == "microk8s":
         return "ingress" 
     else:
         return  "ingress-nginx"
+
+def get_ingress_service_name(runtime):
+    """
+    Attempt to determine the namespace where the ingress-nginx-controller service has been deployed 
+    checking the nuvolaris.ingresslb 
+    - When set to 'auto' it will attempt to calculate it according to the kubernetes runtime
+    - When set to <> 'auto' it will return the configured value. The configured value should be in the form <namespace>/<ingress-nginx-controller-service-name>
+    >>> import nuvolaris.config as cfg
+    >>> cfg.put('nuvolaris.ingresslb','auto')
+    True
+    >>> get_ingress_service_name('microk8s')
+    'service/ingress-nginx-controller'
+    >>> get_ingress_service_name('kind')
+    'service/ingress-nginx-controller'
+    >>> cfg.put('nuvolaris.ingresslb','ingress-nginx-azure/ingress-nginx-controller-custom')
+    True
+    >>> get_ingress_service_name('kind')
+    'service/ingress-nginx-controller-custom'
+    """        
+    ingresslb_value = cfg.get('nuvolaris.ingresslb') or 'auto'
+
+    if 'auto' != ingresslb_value:
+        ingress_srv_name = f"service/{ingresslb_value.split('/')[1]}"
+        logging.debug(f"skipping ingress service name auto detection and returning {ingress_srv_name}")
+        return ingress_srv_name
+   
+    return "service/ingress-nginx-controller"
+
+def get_ingress_class(runtime):
+    """
+    Attempt to determine the proper ingress class
+    - When set to 'auto' it will attempt to calculate it according to the kubernetes runtime
+    - When set to <> 'auto' it will return the configured value.
+    """      
+    ingress_class = cfg.get('nuvolaris.ingressclass') or 'auto'
+
+    if 'auto' != ingress_class:
+        logging.warn(f"skipping ingress class auto detection and returning {ingress_class}")
+        return ingress_class
+
+    # ingress class default to nginx
+    ingress_class = "nginx"
+
+    # On microk8s ingress class must be public
+    if runtime == "microk8s":
+        ingress_class = "public"
+
+    # On k3s ingress class must be traefik
+    if runtime == "k3s":
+        ingress_class = "traefik" 
+    
+    return ingress_class  
 
 # determine the ingress-nginx flavour
 def get_ingress_yaml(runtime):
@@ -116,7 +196,7 @@ def get_mongodb_config_data():
         'mongo_nuvolaris_password': cfg.get('mongodb.nuvolaris.password') or "s0meP@ass3",
         'size': cfg.get('mongodb.volume-size') or 10,
         'pvcName': 'mongodb-data',
-        'storageClass':cfg.get("nuvolaris.storageClass"),
+        'storageClass':cfg.get("nuvolaris.storageclass"),
         'pvcAccessMode':'ReadWriteOnce'    
         }
     return data
@@ -202,7 +282,7 @@ def get_redis_config_data():
         "name": "redis",
         "dir": "/redis-master-data",
         "size": cfg.get("redis.volume-size", "REDIS_VOLUME_SIZE", 10),
-        "storageClass": cfg.get("nuvolaris.storageClass"),
+        "storageClass": cfg.get("nuvolaris.storageclass"),
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3",
         "namespace":"nuvolaris",
         "password":cfg.get("redis.nuvolaris.password") or "s0meP@ass3",
@@ -224,7 +304,7 @@ def get_minio_config_data():
         "minio_volume_size": cfg.get('minio.volume-size') or "5",
         "minio_root_user": cfg.get('minio.admin.user') or "minio",
         "minio_root_password": cfg.get('minio.admin.password') or "minio123",
-        "storage_class": cfg.get("nuvolaris.storageClass"),
+        "storage_class": cfg.get("nuvolaris.storageclass"),
         "minio_nuv_user": cfg.get('minio.nuvolaris.user') or "nuvolaris",
         "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
     }
