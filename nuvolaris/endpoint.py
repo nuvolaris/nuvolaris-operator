@@ -25,10 +25,10 @@ import nuvolaris.apihost_util as apihost_util
 import urllib.parse
 import nuvolaris.time_util as tutil
 
-def get_ingress_data(apihost, tls):
+def get_ingress_data(runtime, apihost, tls):
     url = urllib.parse.urlparse(apihost)
     hostname = url.hostname    
-    ingress_class = cfg.detect_ingress_class()
+    ingress_class = util.get_ingress_class(runtime)
 
     data = {
         "hostname":hostname,
@@ -43,10 +43,10 @@ def get_ingress_data(apihost, tls):
 
     return data
 
-def get_osh_data(apihost, tls):
+def get_osh_data(runtime, apihost, tls):
     url = urllib.parse.urlparse(apihost)
     hostname = url.hostname    
-    ingress_class = cfg.detect_ingress_class()
+    ingress_class = util.get_ingress_class(runtime)
 
     data = {
         "hostname":hostname,
@@ -85,7 +85,7 @@ def create(owner=None):
     openwhisk.annotate(f"apihost={apihost}")
     cfg.put("config.apihost", apihost)
 
-    data = runtime=='openshift' and get_osh_data(apihost, tls) or get_ingress_data(apihost, tls)    
+    data = runtime=='openshift' and get_osh_data(runtime, apihost, tls) or get_ingress_data(runtime, apihost, tls)    
     assign_route_timeout(data)
 
     spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)

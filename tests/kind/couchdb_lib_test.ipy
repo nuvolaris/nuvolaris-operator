@@ -29,7 +29,7 @@ import requests as req
 assert(cfg.configure(tu.load_sample_config()))
 cfg.put("couchdb.host", "localhost")
 assert(cfg.detect_labels()["nuvolaris.kube"] == "kind")
-assert(cfg.detect_storage()["nuvolaris.storageClass"] == "standard")
+assert(cfg.detect_storage()["nuvolaris.storageclass"] == "standard")
 assert(cfg.get("couchdb.host") == "localhost")
 
 !kubectl apply -f tests/kind/whisk.yaml

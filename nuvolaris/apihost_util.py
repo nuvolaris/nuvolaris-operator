@@ -68,8 +68,8 @@ def to_ingress_ip(machine_ip_str):
     """
     return [{"ip":machine_ip_str}]
 
-def get_ingress(namespace="ingress-nginx"):
-    ingress = kube.kubectl("get", "service/ingress-nginx-controller", namespace=namespace,jsonpath="{.status.loadBalancer.ingress[0]}")
+def get_ingress(namespace="ingress-nginx",ingress_srv_name="service/ingress-nginx-controller"):
+    ingress = kube.kubectl("get", ingress_srv_name, namespace=namespace,jsonpath="{.status.loadBalancer.ingress[0]}")
     if ingress:
         return ingress
     
@@ -119,7 +119,9 @@ def get_apihost(runtime_str):
             apihost = calculate_apihost(runtime_str,None)
     else:
         namespace = util.get_ingress_namespace(runtime_str)
-        apihost = calculate_apihost(runtime_str,get_ingress(namespace))
+        ingress_srv_name = util.get_ingress_service_name(runtime_str)
+        
+        apihost = calculate_apihost(runtime_str,get_ingress(namespace, ingress_srv_name))
 
     return apihost
 

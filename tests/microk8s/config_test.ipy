@@ -20,4 +20,4 @@ import nuvolaris.kube as kube
 
 cfg.clean()
 assert(cfg.detect_labels()['nuvolaris.kube'] == "microk8s")
-assert(cfg.detect_storage()['nuvolaris.storageClass'] in ["microk8s-hostpath", "mayastor", "mayastor-3"])
+assert(cfg.detect_storage()['nuvolaris.storageclass'] in ["microk8s-hostpath", "mayastor", "mayastor-3"])
