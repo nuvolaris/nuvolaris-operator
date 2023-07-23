@@ -21,10 +21,9 @@ metadata:
   name: controller
   namespace: nuvolaris
 spec:
-  #nuvolaris:
-      #apihost: apidev.nuvolaris.io
-      #apiport: 80
-      #protocol: http 
+  nuvolaris:
+      apihost: auto
+      kube: auto
   components:
     # start openwhisk controller
     openwhisk: true
@@ -35,19 +34,19 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: true
+    mongodb: false
     # start redis
-    redis: true
+    redis: false
     # start cron based action parser
-    cron: true
+    cron: false
     # tls enabled or not
     tls: false   
     # minio enabled or not
-    minio: true
+    minio: false
     # minio static enabled or not
-    static: true
+    static: false
     # postgres enabled or not
-    postgres: true         
+    postgres: false         
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -72,7 +71,7 @@ spec:
     schedule: "* * * * *"
   tls:
     acme-registered-email: francesco@nuvolaris.io
-    acme-server-url: https://acme-staging-v02.api.letsencrypt.org/directory
+    acme-server-url: https://acme-v02.api.letsencrypt.org/directory
   configs:
     limits:
       actions:

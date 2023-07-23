@@ -31,7 +31,7 @@ def configure(spec: dict):
 
     #forces autodetect of kube if not provided
     if not exists('nuvolaris.kube'):
-        put('nuvolaris.kube','detect')
+        put('nuvolaris.kube','auto')
 
     return True
 
@@ -78,15 +78,15 @@ def keys(prefix=""):
     return res
 
 def detect_labels(labels=None):    
+    # skip autodetection of nuvolaris.kube if already available in _config
+    if exists('nuvolaris.kube') and get('nuvolaris.kube') != 'auto':
+        logging.info(f"*** configuration provided already a nuvolaris.kube={get('nuvolaris.kube')}")
+        return {}
+
     # read labels if not available
     if not labels:
         import nuvolaris.kube as kube
-        labels = kube.kubectl("get", "nodes", jsonpath='{.items[].metadata.labels}')
-    
-    # skip autodetection of nuvolaris.kube if already available in _config
-    if exists('nuvolaris.kube') and get('nuvolaris.kube') != 'detect':
-        logging.info(f"*** configuration provided already a nuvolaris.kube={get('nuvolaris.kube')}")
-        return {}
+        labels = kube.kubectl("get", "nodes", jsonpath='{.items[].metadata.labels}')        
     
     res = {}
     kube = None
@@ -123,8 +123,10 @@ def detect_labels(labels=None):
     if kube:
         res["nuvolaris.kube"] = kube 
         _config["nuvolaris.kube"] = kube
+        return res
 
-    if not "nuvolaris.kube" in _config:
+    # defaults to generic if it is not yet detected
+    if exists('nuvolaris.kube') and get('nuvolaris.kube') == 'auto':
         _config["nuvolaris.kube"] = "generic"
         res["nuvolaris.kube"] = "generic"
 
