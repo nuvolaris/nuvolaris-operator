@@ -59,7 +59,7 @@ spec:
                       - http
                       - https
                     kube:
-                      description: label representing the kubernetes runtime used to implement specific logic (kind, eks, aks, lks, microk8s, k3s, openshift). Defaulted to detect which is causing the operator to autodetect the k8s runtime.
+                      description: label representing the kubernetes runtime used to implement specific logic (kind, eks, aks, lks, microk8s, k3s, openshift). Defaulted to auto which is causing the operator to autodetect the k8s runtime.
                       type: string
                     storageclass:
                       description: allow to set a defined storage class. Default to auto which will force the operator to autodetect the storage class.

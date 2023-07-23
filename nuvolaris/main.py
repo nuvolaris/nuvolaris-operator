@@ -294,7 +294,7 @@ def runtimes_filter(name, type, **kwargs):
 
 @kopf.on.event("configmap", when=runtimes_filter)
 def runtimes_cm_event_watcher(event, **kwargs):    
-    logging.info("*** deteched a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
+    logging.info("*** detected a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
     owner = kube.get(f"wsk/controller")
 
     if cfg.get('components.openwhisk'):

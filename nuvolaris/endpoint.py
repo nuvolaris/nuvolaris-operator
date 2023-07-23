@@ -134,7 +134,7 @@ def patch(status, action, owner=None):
             status['whisk_create']['endpoint']='updated'
 
         logging.info(msg)        
-        logging.info(f"*** hanlded request to {action} endpoint") 
+        logging.info(f"*** handled request to {action} endpoint") 
     except Exception as e:
         logging.error('*** failed to update endpoint: %s' % e)
         status['whisk_create']['endpoint']='error'                       
