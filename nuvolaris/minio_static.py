@@ -82,7 +82,7 @@ def prepare_static_ingress_data(ucfg, hostname):
     runtime = cfg.get('nuvolaris.kube')    
     bucket = ucfg.get('object-storage.route.bucket')
     tls = cfg.get('components.tls') and not runtime=='kind'
-    ingress_class = cfg.detect_ingress_class()
+    ingress_class = util.get_ingress_class(runtime)
     context_path = tls and "/" or f"/{bucket}"
     apply_traefik_prefix_middleware = ingress_class == 'traefik'
     apply_nginx_rewrite_rule = not apply_traefik_prefix_middleware
@@ -173,8 +173,8 @@ def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
 def delete_ow_static_endpoint(ucfg):
     namespace = ucfg.get("namespace")
     logging.info(f"*** removing static endpoint for {namespace}")
-    ingress_class = cfg.detect_ingress_class()
     runtime = cfg.get('nuvolaris.kube')
+    ingress_class = util.get_ingress_class(runtime)
     
     try:
         if(ingress_class == 'traefik'):            

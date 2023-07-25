@@ -31,6 +31,7 @@ import nuvolaris.postgres_operator as postgres
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
+from datetime import datetime
 
 def get_ucfg(spec):
     ucfg = UserConfig(spec)
@@ -38,10 +39,16 @@ def get_ucfg(spec):
     return ucfg
 
 @kopf.on.create('nuvolaris.org', 'v1', 'whisksusers')
-def whisk_user_create(spec, name, **kwargs):
+def whisk_user_create(spec, name, patch, **kwargs):
     logging.info(f"*** whisk_user_create {name}")
+    conditions = []
     state = {
     }
+
+    conditions.append({        
+        "lastTransitionTime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "True",
+        "type": "Initialized"})
 
     ucfg = get_ucfg(spec)
     user_metadata = UserMetadata(ucfg)
@@ -78,8 +85,14 @@ def whisk_user_create(spec, name, **kwargs):
     # finally persists user metadata into the internal couchdb database
     user_metadata.dump()
     res = userdb.save_user_metadata(user_metadata)
-    state['user_metadata']= res          
+    state['user_metadata']= res
 
+    conditions.append({        
+        "lastTransitionTime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "True",
+        "type": "Ready"})
+
+    patch.status['conditions']=conditions
     return state
 
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisksusers')
