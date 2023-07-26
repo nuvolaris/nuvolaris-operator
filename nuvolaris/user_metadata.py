@@ -37,7 +37,7 @@ class UserMetadata:
         """
         append an entry to the metadata with this structure {"key":key, "value":value}
         """
-        logging.debug(f"adding {key,value}={key},{value}")
+        logging.debug(f"adding ({key}={value})")
         self._data['metadata'].append({"key":key, "value":value})
 
     def get_metadata(self):

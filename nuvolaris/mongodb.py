@@ -142,9 +142,7 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
 
         if(pod_name):
             res = exec_mongosh_command(pod_name,path_to_mdb_script)
-
-            if(res):
-                _add_mdb_user_metadata(ucfg, user_metadata)
+            _add_mdb_user_metadata(ucfg, user_metadata)
             return res
 
         return None
