@@ -40,7 +40,7 @@ spec:
     # start cron based action parser
     cron: false
     # tls enabled or not
-    tls: false   
+    tls: true   
     # minio enabled or not
     minio: false
     # minio static enabled or not
