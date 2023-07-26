@@ -130,7 +130,7 @@ def _add_mdb_user_metadata(user_metadata, data):
     something like "mongodb://{namespace}:{auth}@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/{database}?connectTimeoutMS=60000"}
     """ 
     try:
-        mdb_service = util.get_service("{.items[?(@.metadata.name == 'nuvolaris-mongodb-svc')]}")
+        mdb_service = util.get_service("{.items[?(@.metadata.name == 'nuvolaris-mongodb-svc')]}")        
 
         if(mdb_service):
             mdb_service_name = mdb_service['metadata']['name']            
@@ -168,9 +168,7 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
 
         if(pod_name):
             res = postgres.exec_psql_command(pod_name,path_to_mdb_script,path_to_pgpass)
-
-            if(res):
-                _add_mdb_user_metadata(user_metadata, data)
+            _add_mdb_user_metadata(user_metadata, data)
             return res
 
         return None

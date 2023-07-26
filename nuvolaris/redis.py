@@ -158,11 +158,8 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
 
         if(pod_name):
             res = exec_redis_command(pod_name,path_to_script)
-
-            if(res):
-                user_metadata.add_metadata("REDIS_PREFIX",prefix)
-                _add_redis_user_metadata(ucfg, user_metadata)                
-
+            user_metadata.add_metadata("REDIS_PREFIX",prefix)
+            _add_redis_user_metadata(ucfg, user_metadata)
             return res
 
         return None

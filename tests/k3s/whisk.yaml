@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: auto
+      apihost: nuvolaris.k3s.n9s.cc #auto
   components:
     # start openwhisk controller
     openwhisk: true
