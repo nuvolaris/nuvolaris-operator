@@ -168,8 +168,12 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
 
         if(pod_name):
             res = postgres.exec_psql_command(pod_name,path_to_mdb_script,path_to_pgpass)
-            _add_mdb_user_metadata(user_metadata, data)
-            return res
+
+            if res:
+                _add_mdb_user_metadata(user_metadata, data)
+                return res
+            else:
+                logging.error("failed to execute SQL script on Postgres DB to enable MongoDB (FerretDB) user")
 
         return None
     except Exception as e:
