@@ -28,16 +28,6 @@ import urllib.parse
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
 
-def get_operator_pod_name():
-    pods = kube.get_pods("control-plane=controller-manager")
-    items = list(pods['items'])    
-
-    if(len(items)):
-        item = items[0]
-        return item['metadata']['name']
-    
-    return None
-
 def create(owner=None):
     """
     Deploys the postgres using kubegres operator and wait for the operator to be ready.
@@ -54,39 +44,33 @@ def create(owner=None):
 
     res = kube.apply(spec)
     logging.info("*** created postgres operator")
-
-    pod_name = get_operator_pod_name()
-    #wait for postgres_operator to be ready
     
-    if(pod_name):
-        logging.info(f"checking for {pod_name}")
-        while not kube.wait(f"pod/{pod_name}", "condition=ready"):
-            logging.info(f"waiting for {pod_name} to be ready...")
-            time.sleep(1)
-        
-        logging.info("*** creating a postgres instance")
-        
-        mkust = kus.patchTemplates("postgres-operator-deploy",templates=["postgres.yaml"], data=data)
-        mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/superUserPassword",data['postgres_root_password'])
-        mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/replicationUserPassword",data['postgres_root_replica_password'])        
-        mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/nuvolarisUserPassword",data['postgres_nuvolaris_password'])     
-        mspec = kus.kustom_list("postgres-operator-deploy", mkust, templates=[],data={})
+    #wait for postgres_operator to be ready
+    util.wait_for_pod_ready("{.items[?(@.metadata.labels.control-plane == 'controller-manager')].metadata.name}")
+    
+    logging.info("*** creating a postgres instance")
+    
+    mkust = kus.patchTemplates("postgres-operator-deploy",templates=["postgres.yaml"], data=data)
+    mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/superUserPassword",data['postgres_root_password'])
+    mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/replicationUserPassword",data['postgres_root_replica_password'])        
+    mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/nuvolarisUserPassword",data['postgres_nuvolaris_password'])     
+    mspec = kus.kustom_list("postgres-operator-deploy", mkust, templates=[],data={})
 
-        if owner:
-            kopf.append_owner_reference(mspec['items'], owner)
-        else:
-            cfg.put("state.postgres.spec", mspec)
-        
-        res = kube.apply(mspec)
-        # dynamically detect postgres pod and wait for readiness
-        util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-postgres')].metadata.name}")
-
-        if(res):
-           util.wait_for_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
-           update_system_cm_for_pdb(data); 
+    if owner:
+        kopf.append_owner_reference(mspec['items'], owner)
     else:
-        logging.info("*** something went wrong deploying postgres operator")    
+        cfg.put("state.postgres.spec", mspec)
+    
+    res = kube.apply(mspec)
+    # dynamically detect postgres pod and wait for readiness
+    util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-postgres')].metadata.name}")
+
+    if(res):
+        util.wait_for_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        update_system_cm_for_pdb(data)
+
     return res
+
 
 def update_system_cm_for_pdb(data):
     logging.info("*** annotating configuration for postgres nuvolaris user")
