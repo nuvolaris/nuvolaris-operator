@@ -171,10 +171,19 @@ def detect_storage(storages=None):
 def detect_env():
     _config['operator.image'] = os.environ.get("OPERATOR_IMAGE", "missing-OPERATOR_IMAGE")
     _config['operator.tag'] = os.environ.get("OPERATOR_TAG", "missing-OPERATOR_TAG")
-    _config['controller.image'] = os.environ.get("CONTROLLER_IMAGE", "missing-CONTROLLER_IMAGE")
-    _config['controller.tag'] = os.environ.get("CONTROLLER_TAG", "missing-CONTROLLER_TAG")
-    _config['invoker.image'] = os.environ.get("INVOKER_IMAGE", "missing-INVOKER_IMAGE")
-    _config['invoker.tag'] = os.environ.get("INVOKER_TAG", "missing-INVOKER_TAG")
+
+    # skip autodetection of controller.image if already configure into whisk.yaml
+    if not exists('controller.image'):
+        _config['controller.image'] = os.environ.get("CONTROLLER_IMAGE", "missing-CONTROLLER_IMAGE")
+        _config['controller.tag'] = os.environ.get("CONTROLLER_TAG", "missing-CONTROLLER_TAG")
+    else:
+        logging.warn(f"OW controller image detection skipped. Using {get('controller.image')}")
+
+    if not exists('invoker.image'):
+        _config['invoker.image'] = os.environ.get("INVOKER_IMAGE", "missing-INVOKER_IMAGE")
+        _config['invoker.tag'] = os.environ.get("INVOKER_TAG", "missing-INVOKER_TAG")
+    else:
+        logging.warn(f"OW invoker image detection skipped. Using {get('invoker.image')}")
 
 def detect():
     detect_storage()
