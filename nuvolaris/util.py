@@ -201,11 +201,42 @@ def get_mongodb_config_data():
         }
     return data
 
-# return configuration parameters for the standalone controller
-def get_standalone_config_data():
+def parse_image(img):
+    """
+    Parse a string representing a pod image in the form <image>:<tag> and return
+    a dictionary containing {"image":<img>, "tag":<tag>}
+    >>> img_data = parse_image("ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609")
+    >>> "ghcr.io/nuvolaris/openwhisk-controller" == img_data["image"]
+    True
+    >>> "0.3.0-morpheus.22122609" == img_data["tag"]
+    True
+    """
+    tmp_img_items = img.split(":")
+
+    if len(tmp_img_items) != 2:
+        raise Exception(f"wrong image name format {img}. Image and tag must be separated by a :")
+
     data = {
-        "controller_image": cfg.get("controller.image") or  "ghcr.io/nuvolaris/openwhisk-controller",
-        "controller_tag": cfg.get("controller.tag") or "0.3.0-morpheus.22122609",
+        "image": tmp_img_items[0],
+        "tag": tmp_img_items[1],
+    }
+
+    return data
+
+def get_controller_image_data(data):
+    controller_image = cfg.get("controller.image")
+
+    if ":" in controller_image:
+        img_data = parse_image(controller_image)
+        data['controller_image'] = img_data["image"]
+        data['controller_tag'] = img_data["tag"]
+    else:        
+        data['controller_image'] = cfg.get("controller.image") or "ghcr.io/nuvolaris/openwhisk-controller"
+        data['controller_tag'] = cfg.get("controller.tag") or "0.3.0-morpheus.22122609"
+
+# return configuration parameters for the standalone controller
+def get_standalone_config_data():        
+    data = {
         "couchdb_host": cfg.get("couchdb.host") or "couchdb",
         "couchdb_port": cfg.get("couchdb.port") or "5984",
         "couchdb_admin_user": cfg.get("couchdb.admin.user"),
@@ -232,6 +263,8 @@ def get_standalone_config_data():
         "container_mem_lim": cfg.get('configs.controller.resources.mem-lim') or "2G",
         "container_manage_resources": cfg.exists('configs.controller.resources.cpu-req')
     }
+
+    get_controller_image_data(data)
     return data
 
 def validate_ow_auth(auth):
