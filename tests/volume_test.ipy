@@ -35,6 +35,7 @@ assert(not kube.get("po/test-nginx-0"))
 assert(len(kube.get("pvc")["items"]) ==0)
 
 data = {"name": "test-nginx", 
+        "container": "test-nginx",
         "size": "1", 
         "dir": "/usr/share/nginx/html",
         "storageClass": cfg.get("nuvolaris.storageclass")

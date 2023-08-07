@@ -56,6 +56,7 @@ def create(owner=None):
         "image": image,
         "config": config,
         "name": "couchdb", 
+        "container": "couchdb", 
         "size": cfg.get("couchdb.volume-size", "COUCHDB_VOLUME_SIZE", 10), 
         "dir": "/opt/couchdb/data",
         "storageClass": cfg.get("nuvolaris.storageclass"),
