@@ -58,9 +58,16 @@ def find_content_path(filename):
 
 def create(owner=None):
     logging.info(f"*** configuring minio standalone")
+    runtime = cfg.get('nuvolaris.kube')
 
-    data = util.get_minio_config_data()    
-    kust = kus.patchTemplates("minio", ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"], data)    
+    data = util.get_minio_config_data()  
+
+    tplp = ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"]
+
+    if runtime == "openshift":
+        tplp.append("security-set-attach.yaml")
+
+    kust = kus.patchTemplates("minio", tplp, data)
     spec = kus.kustom_list("minio", kust, templates=[], data=data)
 
     if owner:

@@ -54,8 +54,16 @@ def _add_redis_user_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
 
 def create(owner=None):
     logging.info("create redis")
+    runtime = cfg.get('nuvolaris.kube')
     data = util.get_redis_config_data()
-    kust = kus.patchTemplate("redis", "set-attach.yaml", data)
+    
+    tplp = ["set-attach.yaml"]
+
+    if runtime == "openshift":
+        tplp.append("security-set-attach.yaml")
+
+    kust = kus.patchTemplates("redis",tplp , data)
+    
     spec = kus.kustom_list("redis", kust, templates=["redis-conf.yaml"], data=data)
 
     if owner:

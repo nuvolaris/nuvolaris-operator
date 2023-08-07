@@ -313,6 +313,7 @@ def get_redis_config_data():
 
     data = {
         "name": "redis",
+        "container": "redis",
         "dir": "/redis-master-data",
         "size": cfg.get("redis.volume-size", "REDIS_VOLUME_SIZE", 10),
         "storageClass": cfg.get("nuvolaris.storageclass"),
@@ -333,6 +334,8 @@ def get_service(jsonpath,namespace="nuvolaris"):
 # return minio configuration parameters with default values if not configured
 def get_minio_config_data():
     data = {
+        "name":"minio-deployment",
+        "container":"minio",
         "minio_host": cfg.get('minio.host') or "minio",
         "minio_volume_size": cfg.get('minio.volume-size') or "5",
         "minio_root_user": cfg.get('minio.admin.user') or "minio",

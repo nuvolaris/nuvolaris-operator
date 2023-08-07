@@ -37,16 +37,13 @@ spec:
       restartPolicy: Always  
       containers:
       - name: redis
-        image: redis:7.0.10
+        image: bitnami/redis:7.0.10
         command: ["/bin/sh","-c","redis-server /redis-master/redis.conf"]
         env:
         - name: MASTER
           value: "true"
         ports:
         - containerPort: 6379
-        #resources:
-        #  limits:
-        #    cpu: "0.1"
         volumeMounts:
         - mountPath: /redis-master
           name: config

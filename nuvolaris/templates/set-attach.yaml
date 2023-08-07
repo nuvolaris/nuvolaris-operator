@@ -24,7 +24,7 @@ spec:
   template:
     spec:
       containers:
-        - name: {{name}}
+        - name: {{container}}
           volumeMounts:
             - name: {{name}}-pvc
               mountPath: {{dir}}

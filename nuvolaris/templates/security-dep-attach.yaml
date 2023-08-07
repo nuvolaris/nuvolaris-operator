@@ -14,31 +14,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: nuvolaris-mongodb
-  labels:
-    app: mongodb
+  name: {{name}}
   namespace: nuvolaris
 spec:
-  serviceName: nuvolaris-mongodb-svc
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nuvolaris-mongodb
   template:
-    metadata:
-      annotations:
-        whisks.nuvolaris.org/annotate-version: "true" 
-      labels:
-        app: nuvolaris-mongodb
-        name: nuvolaris-mongodb         
     spec:
       containers:
-      - image: ghcr.io/nuvolaris/ferretdb:1.6.0
-        name: ferretdb
-        env:
-        - name: FERRETDB_POSTGRESQL_URL
-          value: {{ferretdb_postgres_url}}          
+      - name: {{container}}
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true

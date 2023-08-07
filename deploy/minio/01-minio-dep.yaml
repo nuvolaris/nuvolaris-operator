@@ -41,7 +41,7 @@ spec:
           claimName: minio-pv-claim
       containers:
       - name: minio
-        image: quay.io/minio/minio:RELEASE.2023-03-24T21-41-23Z
+        image: bitnami/minio:2023.3.24
         command:
         - /bin/bash
         - -c

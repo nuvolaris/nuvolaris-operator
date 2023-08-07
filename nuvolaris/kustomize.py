@@ -179,7 +179,7 @@ def patchTemplate(where, template, data):
     """   
     >>> import nuvolaris.testutil as tu
     >>> import os.path
-    >>> data = {"name":"test-pod", "dir":"/usr/share/nginx/html"}
+    >>> data = {"name":"test-pod", "container":"test-pod", "dir":"/usr/share/nginx/html"}
     >>> print(patchTemplate("test",  "set-attach.yaml", data), end='')
     patches:
     - path: __set-attach.yaml
@@ -197,7 +197,7 @@ def patchTemplates(where, templates=[], data={}):
     """   
     >>> import nuvolaris.testutil as tu
     >>> import os.path
-    >>> data = {"name":"test-pod", "dir":"/usr/share/nginx/html"}
+    >>> data = {"name":"test-pod", "container":"test-pod","dir":"/usr/share/nginx/html"}
     >>> print(patchTemplates("test",  ["set-attach.yaml","cron-init.yaml"], data), end='')
     patches:
     - path: __set-attach.yaml

@@ -32,17 +32,32 @@ import urllib.parse
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
 
+def enrich_ferretdb_data(data):
+     data['size']= 1
+     data['dir']= "/state"            
+     data['storageClass']=cfg.get("nuvolaris.storageclass")
+     data['name']="nuvolaris-mongodb"
+     data['container']="ferretdb"
+     
+     # use nuvolaris postgres db as default configuration for FERRETDB
+     data['ferretdb_postgres_url'] = postgres.get_base_postgres_url(data)
+
 def create(owner=None):
     """
     Deploys ferret db and wait for the pod to be ready.
     """
     logging.info("*** creating ferretdb")
-
+    runtime = cfg.get('nuvolaris.kube')
+    
     data = util.get_postgres_config_data()
-    # use nuvolaris postgres db as default configuration for FERRETDB
-    data['ferretdb_postgres_url'] = postgres.get_base_postgres_url(data)
+    enrich_ferretdb_data(data)
 
-    mkust = kus.patchTemplates("ferretdb", ["ferretdb-sts.yaml"], data)    
+    tplp = ["set-attach.yaml","ferretdb-sts.yaml"]
+
+    if runtime == "openshift":
+        tplp.append("security-set-attach.yaml")
+
+    mkust = kus.patchTemplates("ferretdb", tplp, data)    
     mspec = kus.kustom_list("ferretdb", mkust, templates=[], data=data)
 
     if owner:
