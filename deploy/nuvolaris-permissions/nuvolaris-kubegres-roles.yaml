@@ -149,27 +149,19 @@ rules:
   resources:
   - kubegres
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
+  - "*"
 - apiGroups:
   - kubegres.reactive-tech.io
   resources:
   - kubegres/finalizers
   verbs:
-  - update
+  - "*"
 - apiGroups:
   - kubegres.reactive-tech.io
   resources:
   - kubegres/status
   verbs:
-  - get
-  - patch
-  - update
+  - "*"
 - apiGroups:
   - storage.k8s.io
   resources:

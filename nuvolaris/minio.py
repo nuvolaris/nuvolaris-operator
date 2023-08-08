@@ -65,7 +65,7 @@ def create(owner=None):
     tplp = ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"]
 
     if runtime == "openshift":
-        tplp.append("security-set-attach.yaml")
+        tplp.append("security-dep-attach.yaml")
 
     kust = kus.patchTemplates("minio", tplp, data)
     spec = kus.kustom_list("minio", kust, templates=[], data=data)
