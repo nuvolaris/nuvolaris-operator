@@ -50,10 +50,10 @@ spec:
         - name: MINIO_ROOT_PASSWORD
           value: {{minio_root_password}}
         ports:
-        - containerPort: 9000
-          hostPort: 9000
-        - containerPort: 9090
-          hostPort: 9090          
+        - name: api
+          containerPort: 9000
+        - name: content
+          containerPort: 9090         
         volumeMounts:
         - name: storage # must match the volume name, above
           mountPath: "/storage"

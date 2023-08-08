@@ -82,9 +82,9 @@ rules:
   resources: ["middlewares"]
   verbs: ["get","patch","list","update","watch","create","delete"]
 
-# required for kubegres
-- apiGroups: ["kubegres.reactive-tech.io"]
-  resources: ["kubegres","kubegres/finalizers","kubegres/status"]
+# required for kubegres #resources: 
+- apiGroups: ["kubegres.reactive-tech.io"]  
+  resources: ["kubegres","kubegres/status","kubegres/finalizers"]
   verbs: ["get","patch","list","update","watch","create","delete"]
 
 ---
