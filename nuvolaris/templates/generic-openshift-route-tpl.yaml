@@ -24,9 +24,12 @@ metadata:
     app: {{route_name}}
   annotations:
     haproxy.router.openshift.io/timeout: {{route_timeout_seconds}}s   
-  {% if is_static_ingress and apply_route_rewrite_rule %}
+    {% if tls %}
+    kubernetes.io/tls-acme: "true"
+    {% endif %}    
+    {% if is_static_ingress and apply_route_rewrite_rule %}
     haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/      
-  {% endif %}  
+    {% endif %}  
 spec:
   host: {{hostname}}
   to:
@@ -36,5 +39,5 @@ spec:
     targetPort: {{service_port}}
 {% if tls %}
   tls:
-    termination: edge
+    termination: edge    
 {% endif %}
