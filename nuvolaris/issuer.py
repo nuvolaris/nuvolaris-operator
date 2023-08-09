@@ -44,7 +44,8 @@ def create(owner=None):
         "acme_registered_email": acme_registered_email,
         "acme_server_url": acme_server_url,
         "issuer_class":issuer_class,
-        "name": "tls"
+        "name": "tls",
+        "runtime": runtime
     }
     
     kust = kus.patchTemplate("issuer", "cluster-issuer.yaml", data)

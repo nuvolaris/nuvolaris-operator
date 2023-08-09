@@ -99,7 +99,7 @@ def whisk_create(spec, name, **kwargs):
     else:
         state['redis'] = "off"
 
-    if cfg.get('components.tls') and not runtime in [ "kind", "openshift"]:
+    if cfg.get('components.tls') and not runtime in ["kind","openshift"]:
         try:
             msg = issuer.create(owner)
             state['issuer'] = "on"

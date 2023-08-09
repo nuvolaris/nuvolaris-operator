@@ -31,6 +31,10 @@ spec:
       name: nuvolaris-letsencrypt-secret
     # Enable the HTTP-01 challenge provider
     solvers:
-    - http01:
+    - http01:        
+        {% if runtime != 'openwhisk' %}
         ingress:
           class: {{issuer_class}}
+        {% else %}
+        ingress: {}
+        {% endif %}

@@ -86,7 +86,7 @@ tasks:
       
   env: env
   
-  watch: watch kubectl -n {{.NS}} get nodes,pod,svc,pvc,ingress
+  watch: watch kubectl -n {{.NS}} get nodes,pod,svc,pvc,ingress,route
   watch-osh: watch kubectl -n {{.NS}} get nodes,pod,svc,pvc
   watch-cert: watch kubectl -n {{.NS}} get ingress,ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges 
   watch-pod: watch kubectl -n {{.NS}} get po,job --no-headers
