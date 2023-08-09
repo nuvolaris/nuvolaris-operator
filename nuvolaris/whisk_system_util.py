@@ -24,6 +24,8 @@ import nuvolaris.template as ntp
 import nuvolaris.util as util
 import os
 
+from nuvolaris.util import nuv_retry
+
 class WhiskSystemClient:
     def __init__(self, auth):
         self.controller_host   = cfg.get("controller.host","CONTROLLER_HOST","controller")
@@ -34,6 +36,7 @@ class WhiskSystemClient:
         logging.info(f"Created a WhiskSystemClient instance pointing to {self.ow_host_url}")
 
     # wraps a wsk --apihost <> -u <auth> *kwargs
+    @nuv_retry()
     def wsk(self, *kwargs):        
         cmd = ["wsk","--apihost",self.ow_host_url,"--auth",self.admin_auth]
         cmd += list(kwargs)
@@ -55,4 +58,4 @@ class WhiskSystemClient:
             return returncode == 0
         except Exception as e:
             logging.error(e)
-            return e           
+            raise e
