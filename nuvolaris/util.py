@@ -46,6 +46,7 @@ def nuv_retry(deadline_seconds=120, max_backoff=5):
                     if current_t + backoff_delay < deadline:
                         time.sleep(backoff_delay)
                         retry_number += 1
+                        logging.warn(f"#{retry_number} nuv_retry detected a failure...")
                         continue  # retry again
                     else:
                         raise
