@@ -22,18 +22,28 @@ import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.template as ntp
 import nuvolaris.apihost_util as apihost_util
+import nuvolaris.endpoint as endpoint
 
 from nuvolaris.user_metadata import UserMetadata
 
 def create(owner=None):
     logging.info(f"*** configuring nuvolaris nginx static provider")
-
+    runtime = cfg.get('nuvolaris.kube')
     data = {
+        "name":"nuvolaris-static",
+        "container":"nuvolaris-static",
+        "size":1,
+        "dir":"/var/cache/nginx",
         "minio_host": cfg.get('minio.host') or "minio",
-        "minio_post": cfg.get('minio.port') or "9000",
+        "minio_port": cfg.get('minio.port') or "9000",
     }
-    
-    kust = kus.patchTemplates("nginx-static", ["nginx-static-cm.yaml","nginx-static-sts.yaml"], data)    
+    tplp = ["nginx-static-cm.yaml","nginx-static-sts.yaml"]
+
+    if runtime == "openshift":
+        tplp.append("security-set-attach.yaml")
+        tplp.append("set-attach.yaml")
+
+    kust = kus.patchTemplates("nginx-static", tplp, data)    
     spec = kus.kustom_list("nginx-static", kust, templates=[], data=data)
 
     if owner:
@@ -98,7 +108,7 @@ def prepare_static_ingress_data(ucfg, hostname):
         "hostname": hostname,        
         "rewrite_target":f"/{bucket}",
         "service_name": "nuvolaris-static-svc",
-        "service_port": 80,
+        "service_port": 8080,
         "context_path":context_path,
         "apply_traefik_prefix_middleware": apply_traefik_prefix_middleware,
         "apply_nginx_rewrite_rule": apply_nginx_rewrite_rule,
@@ -121,13 +131,14 @@ def prepare_static_osh_data(ucfg, hostname):
         "hostname": hostname,        
         "rewrite_target":f"/{bucket}",
         "service_name": "nuvolaris-static-svc",
-        "service_port": 80,
+        "service_port": 8080,
         "service_kind": "Service",
         "context_path":context_path,
         "is_static_ingress":True,
         "apply_route_rewrite_rule":True
     }
 
+    endpoint.assign_route_timeout(data)
     return data
 
 def create_static_ingress(namespace,data):
