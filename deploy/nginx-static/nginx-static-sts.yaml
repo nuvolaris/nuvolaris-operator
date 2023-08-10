@@ -39,18 +39,18 @@ spec:
         command: ['sh', '-c', "until nslookup minio.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for minio; sleep 2; done"]     
       containers:
       - name: nuvolaris-static
-        image: bitnami/nginx:1.25.1
+        image: nginxinc/nginx-unprivileged
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         volumeMounts:
           - name: nginx-default-conf
             mountPath: /etc/nginx/conf.d/default.conf
             subPath: default.conf
-            readOnly: false
+            readOnly: false          
       volumes:
         - name: nginx-default-conf
           configMap:
             name: nginx-static-conf-cm
             items:
               - key: default.conf
-                path: default.conf            
+                path: default.conf                           

@@ -14,31 +14,34 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-apiVersion: route.openshift.io/v1
-kind: Route
+#
+apiVersion: nuvolaris.org/v1
+kind: WhiskUser
 metadata:
-  name: {{route_name}}
+  name: franztt
   namespace: nuvolaris
-  labels:
-    app: {{route_name}}
-  annotations:
-    haproxy.router.openshift.io/timeout: {{route_timeout_seconds}}s   
-    {% if tls %}
-    kubernetes.io/tls-acme: "true"   
-    {% endif %}    
-    {% if is_static_ingress and apply_route_rewrite_rule %}
-    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/
-    http.exposer.acme.openshift.io/filter-out-annotations: "rewrite-target"    
-    {% endif %}  
-spec:
-  host: {{hostname}}
-  to:
-    kind: {{service_kind}}
-    name: {{service_name}}
-  port:
-    targetPort: {{service_port}}
-{% if tls %}
-  tls:
-    termination: edge    
-{% endif %}
+spec: 
+  email: francesco@nuvolaris.io
+  password: apassw0rd
+  namespace: franztt
+  auth: 51b64cd0-d765-419e-990d-d7dd30d7b68f:vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+  redis:
+    enabled: true
+    prefix: franztt
+    password: fttredispwd
+  object-storage:        
+    password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
+    data:
+      enabled: true
+      bucket: franztt-data
+    route:
+      enabled: true
+      bucket: franztt-web
+  mongodb:
+    enabled: true
+    database: franztt
+    password: ahfdajsfdafdasffdasdja
+  postgres:
+    enabled: true
+    database: franztt
+    password: urghgdghhggkjdgksdjh     

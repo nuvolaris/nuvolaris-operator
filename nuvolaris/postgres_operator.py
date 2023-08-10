@@ -155,9 +155,9 @@ def render_postgres_script(namespace,template,data):
 def exec_psql_command(pod_name,path_to_psql_script,path_to_pgpass):
     logging.info(f"passing script {path_to_psql_script} to pod {pod_name}")
     res = kube.kubectl("cp",path_to_psql_script,f"{pod_name}:{path_to_psql_script}")
-    res = kube.kubectl("cp",path_to_pgpass,f"{pod_name}:/root/.pgpass")
-    res = kube.kubectl("exec","-it",pod_name,"--","/bin/bash","-c",f"chmod 600 /root/.pgpass")
-    res = kube.kubectl("exec","-it",pod_name,"--","/bin/bash","-c",f"psql --username postgres --dbname postgres -f {path_to_psql_script}")
+    res = kube.kubectl("cp",path_to_pgpass,f"{pod_name}:/tmp/.pgpass")
+    res = kube.kubectl("exec","-it",pod_name,"--","/bin/bash","-c",f"chmod 600 /tmp/.pgpass")
+    res = kube.kubectl("exec","-it",pod_name,"--","/bin/bash","-c",f"PGPASSFILE='/tmp/.pgpass' psql --username postgres --dbname postgres -f {path_to_psql_script}")
     os.remove(path_to_psql_script)
     os.remove(path_to_pgpass)
     return res

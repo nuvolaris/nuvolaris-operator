@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-    apihost: api.apps.nuvolaris.osh.n9s.cc #$APIHOST_OSH
+    apihost: fttapi.apps.nuvolaris.osh.n9s.cc #$APIHOST_OSH
   components:
     # start openwhisk controller
     openwhisk: true
