@@ -315,13 +315,15 @@ def get_redis_config_data():
     data = {
         "name": "redis",
         "container": "redis",
-        "dir": "/redis-master-data",
+        "dir": "/bitnami/redis/data",
         "size": cfg.get("redis.volume-size", "REDIS_VOLUME_SIZE", 10),
         "storageClass": cfg.get("nuvolaris.storageclass"),
         "redis_password":cfg.get("redis.default.password") or "s0meP@ass3",
         "namespace":"nuvolaris",
         "password":cfg.get("redis.nuvolaris.password") or "s0meP@ass3",
-        "prefix": prefix
+        "prefix": prefix,
+        "persistence": cfg.get("redis.persistence-enabled") or False,
+        "maxmemory": cfg.get("redis.maxmemory") or "1000mb"
     }
     return data
 

@@ -21,7 +21,35 @@ metadata:
   namespace: nuvolaris
 data:
     redis-conf: |
-                requirepass {{redis_password}}           
+                requirepass {{redis_password}}
+
+                # bitnami:redis common setup
+                maxmemory {{maxmemory}}
+                maxmemory-policy volatile-lru
+
+                {% if not persistence %}
+                # Disable AOF
+                appendonly no
+                #Disable RDB
+                save ""
+                {% endif %}
+
+                {% if persistence %}
+                # This section can be used to configure RDB based persistence
+                # Unless specified otherwise, by default Redis will save the DB:
+                #   * After 3600 seconds (an hour) if at least 1 change was performed
+                #   * After 300 seconds (5 minutes) if at least 100 changes were performed
+                #   * After 60 seconds if at least 10000 changes were performed
+                #
+                # You can set these explicitly by uncommenting the following line.
+                save 3600 1 300 100 60 10000
+
+                # The filename where to dump the DB (uncomment the line)
+                dbfilename dump.rdb
+
+                # the direcotry where redis will store data.
+                dir /bitnami/redis/data 
+                {% endif %}      
 
 
 

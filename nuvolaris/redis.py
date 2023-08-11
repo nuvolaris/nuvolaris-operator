@@ -57,7 +57,10 @@ def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     data = util.get_redis_config_data()
     
-    tplp = ["set-attach.yaml"]
+    tplp = []
+
+    if data['persistence']:
+       tplp.append("set-attach.yaml")
 
     if runtime == "openshift":
         tplp.append("security-set-attach.yaml")
