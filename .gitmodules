@@ -17,7 +17,7 @@
 #
 [submodule "olaris"]
 	path = olaris
-	url = https://github.com/nuvolaris/olaris
+	url = git@github.com:nuvolaris/olaris
 [submodule "nuv"]
 	path = nuv
-	url = https://github.com/nuvolaris/nuv
+	url = git@github.com:nuvolaris/nuv
