@@ -348,8 +348,14 @@ spec:
                   description: used to configure redis default credentials
                   type: object
                   properties:
+                    max-memory:
+                      description: specify redis max memory setting. Default to 1000mb
+                      type: string                  
+                    persistence-enabled:
+                      description: specify whether to enable or not REDIS persistence. Default to false
+                      type: boolean
                     volume-size:
-                      description: redis volume size in GB 
+                      description: redis volume size in GB to be assigned if persistence is enabled
                       type: integer
                     default:
                       description: used to configure REDIS default admin credentials

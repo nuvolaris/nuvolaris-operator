@@ -25,7 +25,10 @@ import nuvolaris.template as ntp
 import nuvolaris.util as util
 import nuvolaris.kustomize as kust
 import os
+
 from nuvolaris.whisk_system_util import WhiskSystemClient
+from nuvolaris.util import nuv_retry
+from subprocess import CompletedProcess
 
 def prepare_system_actions_data():
     data = {}
@@ -44,15 +47,50 @@ def prepare_system_actions_data():
 
     return data
 
+def process_wsk_result(result: CompletedProcess, expected_success_msg: str):
+    """
+    Parses a subprocess.CompletedProcess object and raises an exception if the
+    returncode != 0 or the stdout response does not contains the expected message.
+    Raising an Exception forces a retry if the @nuv_retry decorator is used.
+    """
+    has_error = False
+    logging.debug(f"expected message for success {expected_success_msg}")
+
+    returncode = result.returncode
+    output = result.stdout.decode()
+    error = result.stderr.decode()
+
+    if returncode != 0:
+        logging.warn(f"error {error} detected when deploying system action")
+        has_error = True
+
+    if not expected_success_msg in output:
+        logging.warn(f"response {output} does not contains the expected result {expected_success_msg}")
+        has_error = True
+
+    if has_error:
+        logging.warn(f"could not validate wsk response {result}")
+        raise Exception("whisk system action deployement failure. Forcing a retry")
+
+    logging.info(f"successfully validated wsk response {result}")
+
+@nuv_retry()
+def safe_deploy(wskClient):
+    logging.info("*** deploying deploy/whisk-system project")
+
+    deployProjectResponse = wskClient.wsk("project","deploy","--project","deploy/whisk-system")
+    process_wsk_result(deployProjectResponse, "Success")
+
+    actionListResult = wskClient.wsk("action","list") 
+    process_wsk_result(actionListResult, "whisk-system/nuv/login")
+
+    return True
+
 def deploy_whisk_system_action():
     auth = cfg.get('openwhisk.namespaces.whisk-system')
-    try:
-        wskClient = WhiskSystemClient(auth)
+    data = prepare_system_actions_data()
+    tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
 
-        data = prepare_system_actions_data()
-        tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
-        res = util.check(wskClient.wsk("project","deploy","--project","deploy/whisk-system"),"deploy_whisk_system_action",True)
-        return res
-    except Exception as e:
-        logging.error(e)
-        return False 
+    wskClient = WhiskSystemClient(auth)
+    result = safe_deploy(wskClient)
+    return result

@@ -34,7 +34,7 @@ spec:
       annotations:
         whisks.nuvolaris.org/annotate-version: "true"         
     spec:
-      restartPolicy: Always  
+      restartPolicy: Always    
       containers:
       - name: redis
         image: bitnami/redis:7.0.10

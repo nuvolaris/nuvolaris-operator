@@ -33,17 +33,31 @@ spec:
         app: minio
     spec:
       volumes:
-      - name: storage
+      - name: data
         persistentVolumeClaim:
           claimName: minio-pv-claim
+      {% if applypodsecurity %}
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001 
+      {% endif %}      
       containers:
       - name: minio
-        image: bitnami/minio:2023.3.24  
+        image: bitnami/minio:2023.3.24
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true                  
         command:
         - /bin/bash
         - -c
         args: 
-        - minio server /storage --console-address :9090
+        - minio server /data --console-address :9090
         env:
         - name: MINIO_ROOT_USER
           value: {{minio_root_user}}
@@ -55,5 +69,5 @@ spec:
         - name: content
           containerPort: 9090         
         volumeMounts:
-        - name: storage # must match the volume name, above
-          mountPath: "/storage"
+        - name: data # must match the volume name, above
+          mountPath: "/data"          

@@ -33,17 +33,17 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: false
+    mongodb: true
     # start redis
-    redis: false
+    redis: true
     # start cron based action parser
-    cron: false
+    cron: true
     # tls enabled or not
     tls: true
     # minio enabled or not
-    minio: false
+    minio: true
     # minio static enabled or not
-    static: false
+    static: true
     # postgres enabled or not
     postgres: true                      
   openwhisk:
@@ -82,6 +82,7 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    persistence-enabled: true
     volume-size: 10
     default:
       password: s0meP@ass3

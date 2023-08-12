@@ -98,6 +98,7 @@ spec:
         #mem-req: "512M"
         #mem-lim: "1G"        
   redis:
+    persistence-enabled: true
     volume-size: 10
     default:
       password: s0meP@ass3

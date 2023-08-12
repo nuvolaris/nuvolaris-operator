@@ -23,7 +23,7 @@ tasks:
     - eksctl create cluster -f eks-cluster.yml 
 
   destroy:
-    - eksctl delete cluster -f eks-cluster.yml
+    - eksctl delete cluster -f eks-cluster.yml --disable-nodegroup-eviction
   
   #--name nuvolaris-cluster --region=us-east-1
 

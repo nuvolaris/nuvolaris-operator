@@ -181,7 +181,7 @@ def whisk_post_create(name, state):
     if(sysres):
         state['whisk-system']="on"
     else:                   
-        state['whisk-system']="on"
+        state['whisk-system']="error"
     
     version_util.annotate_operator_components_version()  
 
