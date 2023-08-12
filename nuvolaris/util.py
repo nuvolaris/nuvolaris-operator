@@ -313,6 +313,7 @@ def get_redis_config_data():
         prefix = f"{prefix}:"
 
     data = {
+        "applypodsecurity":get_enable_pod_security(),
         "name": "redis",
         "container": "redis",
         "dir": "/bitnami/redis/data",
@@ -337,6 +338,7 @@ def get_service(jsonpath,namespace="nuvolaris"):
 # return minio configuration parameters with default values if not configured
 def get_minio_config_data():
     data = {
+        "applypodsecurity":get_enable_pod_security(),
         "name":"minio-deployment",
         "container":"minio",
         "minio_host": cfg.get('minio.host') or "minio",
@@ -385,4 +387,12 @@ def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotation
     if(annotations):
         return annotations[0]
 
-    raise Exception("Could not find annotation inside internal cm/config config Map")                                  
+    raise Exception("Could not find annotation inside internal cm/config config Map")
+
+def get_enable_pod_security():
+    """
+    Return true if there is the need to enable pod security context
+    for some specific pod. This is currently used for EKS bitnami based images.
+    """
+    runtime = cfg.get('nuvolaris.kube')
+    return runtime in ["eks"]

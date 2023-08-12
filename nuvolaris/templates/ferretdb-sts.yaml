@@ -36,6 +36,11 @@ spec:
         app: nuvolaris-mongodb
         name: nuvolaris-mongodb         
     spec:
+      {% if applypodsecurity %}
+      securityContext:
+        fsGroup: 65534
+        runAsUser: 65534      
+      {% endif %}  
       containers:
       - image: ghcr.io/nuvolaris/ferretdb:1.6.0
         name: ferretdb

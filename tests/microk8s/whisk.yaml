@@ -82,6 +82,7 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    persistence-enabled: true
     volume-size: 10
     default:
       password: s0meP@ass3

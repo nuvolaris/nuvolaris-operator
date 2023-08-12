@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-    apihost: fttapi.apps.nuvolaris.osh.n9s.cc #$APIHOST_OSH
+    apihost: api.apps.nuvtest.osh.n9s.cc #$APIHOST_OSH
   components:
     # start openwhisk controller
     openwhisk: true
@@ -39,7 +39,7 @@ spec:
     # start cron based action parser
     cron: true 
     # tls enabled or not
-    tls: true
+    tls: false
     # minio enabled or not
     minio: true 
     # minio static enabled or not
@@ -82,6 +82,7 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    persistence-enabled: true
     volume-size: 10
     default:
       password: s0meP@ass3
