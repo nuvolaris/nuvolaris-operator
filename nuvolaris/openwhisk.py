@@ -19,11 +19,15 @@ import logging
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk_standalone as standalone
 import nuvolaris.kube as kube
+import nuvolaris.util as util
 
 def annotate(keyval):
     kube.kubectl("annotate", "cm/config",  keyval, "--overwrite")
 
 def create(owner=None):
+    # openwhisk controller relies on couchdb therefore we wait for pod readiness
+    util.wait_for_pod_ready("{.items[?(@.metadata.labels.name == 'couchdb')].metadata.name}")
+
     useInvoker = cfg.get('components.invoker') or False
     
     if not useInvoker:
