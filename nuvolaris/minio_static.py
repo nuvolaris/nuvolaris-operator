@@ -36,12 +36,10 @@ def create(owner=None):
         "dir":"/var/cache/nginx",
         "minio_host": cfg.get('minio.host') or "minio",
         "minio_port": cfg.get('minio.port') or "9000",
+        "applypodsecurity": util.get_enable_pod_security(),
     }
-    tplp = ["nginx-static-cm.yaml","nginx-static-sts.yaml"]
-
-    if runtime == "openshift":
-        tplp.append("security-set-attach.yaml")
-        tplp.append("set-attach.yaml")
+    
+    tplp = ["nginx-static-cm.yaml","nginx-static-sts.yaml","security-set-attach.yaml","set-attach.yaml"]
 
     kust = kus.patchTemplates("nginx-static", tplp, data)    
     spec = kus.kustom_list("nginx-static", kust, templates=[], data=data)
@@ -93,8 +91,9 @@ def prepare_static_ingress_data(ucfg, hostname):
     bucket = ucfg.get('object-storage.route.bucket')
     tls = cfg.get('components.tls') and not runtime=='kind'
     ingress_class = util.get_ingress_class(runtime)
-    ingress_class = util.get_ingress_class(runtime)
-    context_path = tls and "/" or f"/{bucket}"
+    
+    context_path = runtime == 'kind' and f"/{bucket}" or "/"
+    
     apply_traefik_prefix_middleware = ingress_class == 'traefik'
     apply_nginx_rewrite_rule = not apply_traefik_prefix_middleware
 
@@ -115,6 +114,7 @@ def prepare_static_ingress_data(ucfg, hostname):
         "is_static_ingress":True
     }
 
+    endpoint.assign_route_timeout(data)
     return data
 
 def prepare_static_osh_data(ucfg, hostname):
@@ -173,6 +173,7 @@ def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     try:     
         user_metadata.add_metadata("STATIC_CONTENT_URL",apihost_util.get_user_static_url(runtime, hostname, bucket_name))
         data = runtime=='openshift' and prepare_static_osh_data(ucfg, hostname) or prepare_static_ingress_data(ucfg, hostname)
+        
         
         if(runtime=='openshift'):
             return create_static_route(namespace, data)
