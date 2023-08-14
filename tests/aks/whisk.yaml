@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: provaaks.prova.n9s.cc
+      apihost: auto
   components:
     # start openwhisk controller
     openwhisk: true
@@ -39,7 +39,7 @@ spec:
     # start cron based action parser
     cron: true
     # tls enabled or not
-    tls: true
+    tls: false
     # minio enabled or not
     minio: true
     # minio static enabled or not

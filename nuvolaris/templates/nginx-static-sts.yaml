@@ -39,7 +39,7 @@ spec:
         command: ['sh', '-c', "until nslookup {{minio_host}}.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for minio; sleep 2; done"]     
       containers:
       - name: nuvolaris-static
-        image: nginxinc/nginx-unprivileged
+        image: nginxinc/nginx-unprivileged:1.24
         ports:
         - containerPort: 8080
         volumeMounts:

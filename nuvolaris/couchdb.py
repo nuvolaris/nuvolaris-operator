@@ -78,6 +78,11 @@ def create(owner=None):
     else:
         cfg.put("state.couchdb.spec", spec)
     res = kube.apply(spec)
+
+    if res:
+        # dynamically detect couchdb pod and wait for readiness
+        util.wait_for_pod_ready("{.items[?(@.metadata.labels.name == 'couchdb')].metadata.name}")
+
     return res
 
 def delete():
