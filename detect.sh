@@ -34,6 +34,8 @@ elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
 then echo "microk8s"
 elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
 then echo "lks"
+elif echo "$LABELS" | jq . | grep cloud.google.com/gke >/dev/null
+then echo "gke"
 elif echo "$LABELS" | jq . | grep openshift.io >/dev/null
 then echo "openshift"
 elif echo "$LABELS" | jq . | grep 'instance-type.*k3s' >/dev/null

@@ -395,4 +395,4 @@ def get_enable_pod_security():
     for some specific pod. This is currently used for EKS bitnami based images.
     """
     runtime = cfg.get('nuvolaris.kube')
-    return runtime in ["eks"]
+    return runtime in ["eks","gke","aks","generic"]

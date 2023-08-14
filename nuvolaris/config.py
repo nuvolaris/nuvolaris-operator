@@ -118,6 +118,9 @@ def detect_labels(labels=None):
             elif j.endswith("kubernetes.io/instance-type") and i[j] == "k3s":
                 kube = "k3s"
                 break
+            elif j.find("cloud.google.com/gke") >=0:
+                kube = "gke"
+                break            
             # assign all the 'nuvolaris.io' labels
         
     if kube:
