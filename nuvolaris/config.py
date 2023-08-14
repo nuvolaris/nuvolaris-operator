@@ -120,7 +120,10 @@ def detect_labels(labels=None):
                 break
             elif j.find("cloud.google.com/gke") >=0:
                 kube = "gke"
-                break            
+                break 
+            elif j.find("kubernetes.azure.com") >=0:
+                kube = "aks"
+                break                        
             # assign all the 'nuvolaris.io' labels
         
     if kube:
