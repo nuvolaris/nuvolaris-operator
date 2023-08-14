@@ -35,6 +35,10 @@ import nuvolaris.whisk_actions_deployer as system
 import nuvolaris.version_util as version_util
 import nuvolaris.postgres_operator as postgres
 
+@kopf.on.startup()
+def configure(settings: kopf.OperatorSettings, **_):
+  settings.watching.server_timeout = 210
+
 # tested by an integration test
 @kopf.on.login()
 def login(**kwargs):
@@ -298,4 +302,4 @@ def runtimes_cm_event_watcher(event, **kwargs):
     owner = kube.get(f"wsk/controller")
 
     if cfg.get('components.openwhisk'):
-        patcher.restart_whisk(owner)
+        patcher.restart_whisk(owner)     
