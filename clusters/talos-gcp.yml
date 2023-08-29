@@ -1,0 +1,107 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+version: '3'
+
+vars:
+  STORAGE_BUCKET: nuvolaris-testing-5lqrl-image-registry-us-east4-kfwmgrldgwapgb
+  REGION: us-central1
+  PROJECT_ID: nuvolaris-testing
+
+tasks:
+
+  load-img:
+    ignore_error: true
+    cmds:
+    - rm -Rf /tmp/gcp-amd64.raw.tar.gz
+    - curl -sL -o /tmp/gcp-amd64.raw.tar.gz https://github.com/siderolabs/talos/releases/download/v1.5.1/gcp-amd64.raw.tar.gz
+    - gsutil cp /tmp/gcp-amd64.raw.tar.gz gs://{{.STORAGE_BUCKET}}    
+    - gcloud compute images create talos --source-uri=gs://{{.STORAGE_BUCKET}}/gcp-amd64.raw.tar.gz --guest-os-features=VIRTIO_SCSI_MULTIQUEUE
+    - rm -Rf /tmp/gcp-amd64.raw.tar.gz
+    
+  network:
+    cmds: 
+    - |
+      gcloud compute instance-groups unmanaged create talos-ig --zone {{.REGION}}-b
+      gcloud compute instance-groups set-named-ports talos-ig --named-ports tcp6443:6443 --zone {{.REGION}}-b
+      gcloud compute health-checks create tcp talos-health-check --port 6443
+      gcloud compute backend-services create talos-be \
+        --global \
+        --protocol TCP \
+        --health-checks talos-health-check \
+        --timeout 5m \
+        --port-name tcp6443
+      gcloud compute backend-services add-backend talos-be \
+        --global \
+        --instance-group talos-ig \
+        --instance-group-zone {{.REGION}}-b
+      gcloud compute target-tcp-proxies create talos-tcp-proxy \
+        --backend-service talos-be \
+        --proxy-header NONE
+      gcloud compute addresses create talos-lb-ip --global
+      gcloud compute forwarding-rules create talos-fwd-rule \
+        --global \
+        --ports 443 \
+        --address talos-lb-ip \
+        --target-tcp-proxy talos-tcp-proxy
+      gcloud compute firewall-rules create talos-controlplane-firewall \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
+        --target-tags talos-controlplane \
+        --allow tcp:6443
+      gcloud compute firewall-rules create talos-controlplane-talosctl \
+        --source-ranges 0.0.0.0/0 \
+        --target-tags talos-controlplane \
+        --allow tcp:50000
+
+  talos-config:
+    cmds:       
+      - talosctl gen config talos-k8s-gcp-tutorial https://{{.LB_PUBLIC_IP}}:443
+    vars:
+      LB_PUBLIC_IP: $(gcloud compute forwarding-rules describe talos-fwd-rule --global --format json | jq -r .IPAddress)
+
+  create:
+    cmds:
+    - gcloud compute instances create nuv-talos-controlplane-1 --machine-type=n2-standard-2 --image=talos --zone={{.REGION}}-b --tags=talos-controlplane --boot-disk-size=128GB --metadata-from-file=user-data=./controlplane.yaml --tags=talos-controlplane
+    - gcloud compute disks create nuv-talos-controlplane-1-disk --size=200GB --type=pd-balanced --zone={{.REGION}}-b
+    - gcloud compute instances attach-disk nuv-talos-controlplane-1 --disk=nuv-talos-controlplane-1-disk --zone={{.REGION}}-b
+    - gcloud compute instance-groups unmanaged add-instances talos-ig --zone={{.REGION}}-b --instances=nuv-talos-controlplane-1
+    - for i in $( seq 1 3 ); do
+        gcloud compute instances create nuv-talos-worker-$i --machine-type=n2-standard-2 --image=talos --zone={{.REGION}}-b --boot-disk-size=128GB --metadata-from-file=user-data=./worker.yaml --tags=talos-worker-$i;
+        gcloud compute disks create nuv-talos-worker-$i-disk --size=200GB --type=pd-balanced --zone={{.REGION}}-b;
+        gcloud compute instances attach-disk nuv-talos-worker-$i --disk=nuv-talos-worker-$i-disk --zone={{.REGION}}-b;
+      done         
+
+  bootstrap:
+    cmds:
+    - talosctl --talosconfig talosconfig config endpoint {{.CONTROL_PLANE_0_IP}}
+    - talosctl --talosconfig talosconfig config node {{.CONTROL_PLANE_0_IP}}
+    - talosctl --talosconfig talosconfig bootstrap
+    vars:
+     CONTROL_PLANE_0_IP: $(gcloud compute instances describe nuv-talos-controlplane-1 --zone {{.REGION}}-b --format json | jq -r '.networkInterfaces[0].accessConfigs[0].natIP')
+
+  config: |-
+    talosctl --talosconfig talosconfig kubeconfig ./talos.kubeconfig
+    cp talos.kubeconfig ~/.kube/config
+    kubectl get nodes 
+
+  reset:
+    - kubectl delete -f ../deploy/cert-manager/cert-manager.yaml
+    - kubectl delete -f ../deploy/ingress-nginx/cloud-nginx-ingress.yaml   
+
+  setup:
+    - kubectl apply -f ../deploy/cert-manager/cert-manager.yaml
+    - kubectl apply -f ../deploy/ingress-nginx/cloud-nginx-ingress.yaml

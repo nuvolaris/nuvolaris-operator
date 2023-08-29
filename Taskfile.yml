@@ -67,6 +67,9 @@ includes:
   sys:
     taskfile: actions/system.yml
     dir: actions
+  talos:
+    taskfile: clusters/talos-gcp.yml
+    dir: clusters    
 
 tasks:
 
