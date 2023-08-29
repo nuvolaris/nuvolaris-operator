@@ -34,6 +34,9 @@ node_modules/
 .env
 __*
 clusters/id_rsa*
+clusters/controlplane.yaml
+clusters/talosconfig
+clusters/worker.yaml
 *.kubeconfig
 run.pid
 *.off
