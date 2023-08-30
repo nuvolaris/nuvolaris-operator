@@ -17,10 +17,12 @@
 #
 import json
 import logging
+import os
 import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.kustomize as kus
 import nuvolaris.time_util as tutil
+import nuvolaris.template as ntp
 import urllib.parse
 
 class RouteData:
@@ -28,7 +30,7 @@ class RouteData:
 
     def __init__(self, apihost):
         runtime = cfg.get('nuvolaris.kube')
-        tls = cfg.get('components.tls')
+        tls = cfg.get('components.tls') and not runtime=='kind'
 
         url = urllib.parse.urlparse(apihost)
         hostname = url.hostname
@@ -67,5 +69,14 @@ class RouteData:
         self._data['needs_rewrite']=value                                                      
 
     def build_route_spec(self, where: str, out_template : str, tpl = "generic-openshift-route-tpl.yaml"):        
-        logging.info(f"*** Building route template using host {self._data['hostname']} endpoint for ingress {self._data['ingress_name']} using {tpl}")
-        return kus.processTemplate(where, tpl, self._data, out_template)         
+        logging.info(f"*** Building route template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        return kus.processTemplate(where, tpl, self._data, out_template)
+
+    def render_template(self,namespace,tpl= "generic-openshift-route-tpl.yaml"):
+        logging.info(f"*** Rendering route template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        """
+        uses the given template to render a final route template and returns the path to the template
+        """  
+        out = f"/tmp/__{namespace}_{tpl}"
+        file = ntp.spool_template(tpl, out, self._data)
+        return os.path.abspath(file)                  

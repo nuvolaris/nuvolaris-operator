@@ -17,10 +17,12 @@
 #
 import json
 import logging
+import os
 import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.kustomize as kus
 import nuvolaris.time_util as tutil
+import nuvolaris.template as ntp
 import urllib.parse
 
 class IngressData:
@@ -28,7 +30,7 @@ class IngressData:
 
     def __init__(self, apihost):
         runtime = cfg.get('nuvolaris.kube')
-        tls = cfg.get('components.tls')
+        tls = cfg.get('components.tls') and not runtime=='kind'
 
         url = urllib.parse.urlparse(apihost)
         hostname = url.hostname
@@ -68,11 +70,35 @@ class IngressData:
         self._data['path_type']=value 
 
     def with_rewrite_target(self,value: str):
-        self._data['rewrite_target']=value 
+        self._data['rewrite_target']=value
+
+    def with_middleware_ingress_name(self, value: str):
+        self._data['middleware_ingress_name']=value
 
     def with_needs_rewrite(self,value: bool):
         self._data['needs_rewrite']=value                                                      
 
     def build_ingress_spec(self, where: str, out_template, tpl = "generic-ingress-tpl.yaml"):        
-        logging.info(f"*** Building ingress template using host {self._data['hostname']} endpoint for ingress {self._data['ingress_name']} using {tpl}")
-        return kus.processTemplate(where, tpl, self._data, out_template)     
+        logging.info(f"*** Building ingress template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        return kus.processTemplate(where, tpl, self._data, out_template)
+
+    def requires_traefik_middleware(self):
+        return self._data["ingress_class"] in ["traefik"]
+
+    def render_template(self,namespace,tpl= "generic-ingress-tpl.yaml"):
+        """
+        uses the given template to render a final ingress template and returns the path to the template
+        """
+        logging.info(f"*** Rendering ingress template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")  
+        out = f"/tmp/__{namespace}_{tpl}"
+        file = ntp.spool_template(tpl, out, self._data)
+        return os.path.abspath(file)
+
+    def render_traefik_middleware_template(self, namespace,tpl="traefik-prefix-middleware-tpl.yaml"):
+        logging.info(f"*** Rendering traefik middleware template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        """
+        uses the given template policy to render a final ingress template.
+        """  
+        out = f"/tmp/__{namespace}_{tpl}"
+        file = ntp.spool_template(tpl, out, self._data)
+        return os.path.abspath(file)                     

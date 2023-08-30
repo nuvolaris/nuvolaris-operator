@@ -28,7 +28,7 @@ metadata:
     kubernetes.io/tls-acme: "true"   
     {% endif %}    
     {% if needs_rewrite %}
-    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/
+    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}
     http.exposer.acme.openshift.io/filter-out-annotations: "rewrite-target"    
     {% endif %}  
 spec:

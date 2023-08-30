@@ -137,14 +137,17 @@ def extract_hostname(url):
     return parsed_url.hostname
 
 
-def get_user_static_hostname(runtime_str, username):
+def get_user_static_hostname(runtime, username, apihost):
     """
-    Determine the api host to be associated to a user namespace. It is normally derived by reading the apihost annotated
+    Determine the api host to be associated to a user namespace. In auto mode (input apihost=auto) it is derived by reading the apihost annotated
     inside the cm/config configMap prepending the user_namespace when needed.
     """
     
-    if runtime_str == 'kind':
-        return 'localhost'
+    if runtime == 'kind':
+        return f"{username}.localhost"
+
+    if apihost not in ["auto"]:
+        return apihost
 
     apihost_url = util.get_apihost_from_config_map()
 
@@ -154,20 +157,31 @@ def get_user_static_hostname(runtime_str, username):
 
     raise Exception(f"Could not determine hostname for static bucket for username {username}")
 
-def get_user_static_url(runtime_str, hostname, bucket_name):
+def get_user_static_url(runtime, hostname):
     """
     Build the full URL that will give access to the user web bucket via the static endpoint
     """
-    if runtime_str=="kind":
-        hostname = f"{hostname}/{bucket_name}"
-
     url = urllib.parse.urlparse(f"http://{hostname}")
 
-    if cfg.get('components.tls') and not runtime_str=="kind":
+    if cfg.get('components.tls') and not runtime=="kind":
         url = url._replace(scheme = "https")
     else:
         url = url._replace(scheme = "http")
 
     return url.geturl()
+
+def get_user_api_url(runtime, hostname, api_context):
+    """
+    Build the full URL that will give access to the user web bucket via the static endpoint
+    """
+
+    url = urllib.parse.urlparse(f"http://{hostname}/{api_context}")
+
+    if cfg.get('components.tls') and not runtime=="kind":
+        url = url._replace(scheme = "https")
+    else:
+        url = url._replace(scheme = "http")
+
+    return url.geturl()    
 
   
