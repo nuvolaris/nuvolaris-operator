@@ -20,96 +20,107 @@ import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk as openwhisk
-import nuvolaris.util as util
 import nuvolaris.apihost_util as apihost_util
-import urllib.parse
-import nuvolaris.time_util as tutil
 
-def get_ingress_data(runtime, apihost, tls):
-    url = urllib.parse.urlparse(apihost)
-    hostname = url.hostname    
-    ingress_class = util.get_ingress_class(runtime)
+from nuvolaris.ingress_data import IngressData
+from nuvolaris.route_data import RouteData
 
-    data = {
-        "hostname":hostname,
-        "ingress_class":ingress_class,
-        "tls":tls,
-        "secret_name":"nuvolaris-letsencrypt-secret",
-        "ingress_name":"apihost",
-        "service_name":"controller",
-        "service_port":"3233",
-        "context_path":"/"
-    }
+def create_endpoint_routes(owner, apihost):
+    logging.info(f"**** configuring openshift route based endpoint for apihost {apihost}")
 
-    return data
+    api = RouteData(apihost)
+    api.with_route_name("openwhisk-route")
+    api.with_needs_rewrite(False)
+    api.with_service_name("controller-ip")
+    api.with_service_kind("Service")
+    api.with_service_port("8080")
+    api.with_context_path("/")
 
-def get_osh_data(runtime, apihost, tls):
-    url = urllib.parse.urlparse(apihost)
-    hostname = url.hostname    
-    ingress_class = util.get_ingress_class(runtime)
+    api_spec = api.build_route_spec("openwhisk-endpoint","_nuv_route_template.yaml")
 
-    data = {
-        "hostname":hostname,
-        "route_name":"openwhisk-route",
-        "tls":tls,
-        "ingress_name":"openwhisk-route",
-        "service_name":"controller-ip",
-        "service_kind":"Service",
-        "service_port":"8080",
-        "context_path":"/",
-        "static_ingress": False
-    }
+    if owner:
+        kopf.append_owner_reference(api_spec['items'], owner)
+    else:
+        cfg.put("state.endpoint.api.spec", api_spec)
 
-    return data
+    return kube.apply(api_spec)
 
-def assign_route_timeout(data):
-    data["route_timeout_seconds"]= tutil.duration_in_second(util.get_controller_http_timeout())
-    logging.info(f"setting controller http/s timeout to {data['route_timeout_seconds']} seconds")
 
-def create_osh_route_spec(data):
-    tpl = "generic-openshift-route-tpl.yaml"
-    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
-    return kus.processTemplate("openwhisk-endpoint", tpl, data)
+def create_endpoint_ingresses(owner, apihost):
+    logging.info(f"**** configuring ingresses based endpoint for apihost {apihost}")
 
-def create_ingress_route_spec(data):
-    tpl = "generic-ingress-tpl.yaml"
-    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
-    return kus.processTemplate("openwhisk-endpoint", tpl, data)    
+    api = IngressData(apihost)
+    api.with_ingress_name("apihost")
+    api.with_secret_name("nuvolaris-letsencrypt-secret")
+    api.with_path_type("ImplementationSpecific")
+    api.with_context_path("/api/v1(/|$)(.*)")
+    api.with_rewrite_target("/api/v1/$2")
+    api.with_service_name("controller")
+    api.with_service_port("3233")
+    api.with_needs_rewrite(True)
+
+    my = IngressData(apihost)
+    my.with_ingress_name("apihost-my")
+    my.with_secret_name("nuvolaris-letsencrypt-secret")
+    my.with_path_type("ImplementationSpecific")
+    my.with_context_path("/api/my(/|$)(.*)")
+    my.with_rewrite_target("/api/v1/web/namespace/nuvolaris/$2")
+    my.with_service_name("controller")
+    my.with_service_port("3233")
+    my.with_needs_rewrite(True)
+
+    api_spec = api.build_ingress_spec("openwhisk-endpoint","_nuv_api_ingress.yaml")
+    my_spec = my.build_ingress_spec("openwhisk-endpoint","_nuv_my_ingress.yaml")
+
+    if owner:
+        kopf.append_owner_reference(api_spec['items'], owner)
+        kopf.append_owner_reference(my_spec['items'], owner)
+    else:
+        cfg.put("state.endpoint.api.spec", api_spec)
+        cfg.put("state.endpoint.my.spec", my_spec)
+
+    res = kube.apply(api_spec)
+    res += kube.apply(my_spec)    
+
+    return res
+
 
 def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
-    tls = cfg.get('components.tls')
-    
     apihost = apihost_util.get_apihost(runtime)
+
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
     cfg.put("config.apihost", apihost)
 
-    data = runtime=='openshift' and get_osh_data(runtime, apihost, tls) or get_ingress_data(runtime, apihost, tls)    
-    assign_route_timeout(data)
-
-    spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)
-
-    if owner:
-        kopf.append_owner_reference(spec['items'], owner)
+    if runtime == 'openshift':
+        return create_endpoint_routes(owner, apihost)
     else:
-        cfg.put("state.endpoint.spec", spec)
-        
-    return kube.apply(spec)
+        return create_endpoint_ingresses(owner, apihost)
     
 def delete_by_owner():
     runtime = cfg.get('nuvolaris.kube')
-    tpl = runtime=='openshift' and "_generic-openshift-route-tpl.yaml" or "_generic-ingress-tpl.yaml"
-    res = kube.kubectl("delete", "-f", f"deploy/openwhisk-endpoint/{tpl}")
-    logging.info(f"delete endpoint: {res}")
+    tpls = runtime=='openshift' and["_nuv_route_template.yaml"] or ["_nuv_api_ingress.yaml","_nuv_my_ingress.yaml"]
+
+    res = False
+
+    for tpl in tpls:
+        res = kube.kubectl("delete", "-f", f"deploy/openwhisk-endpoint/{tpl}")
+        logging.info(f"delete template {tpl}: {res}")
+
     return res
 
 def delete_by_spec():
-    spec = cfg.get("state.endpoint.spec")
+    api_spec = cfg.get("state.endpoint.api.spec")
+    my_spec = cfg.get("state.endpoint.my.spec")
     res = False
-    if spec:
-        res = kube.delete(spec)
-        return res
+    if api_spec:
+        res = kube.delete(api_spec)
+    
+    if my_spec:
+        res = kube.delete(my_spec)
+
+    return res
 
 def delete(owner=None):
     if owner:        

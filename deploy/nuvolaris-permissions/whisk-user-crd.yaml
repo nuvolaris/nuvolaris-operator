@@ -72,7 +72,10 @@ spec:
                   type: string 
                 auth:
                   description: ow auth used to authenticate the user
-                  type: string                                 
+                  type: string
+                apihost:
+                  description: hostname to be used to give access to ow api and eventually static content for the created user. Defaulted to auto if omitted. In such case it will be <user>.<apihost from global config>
+                  type: string                                   
                 redis:
                   description: used to configure a user ACL to allow access to prefixed keys into the internal REDIS instance
                   type: object
@@ -123,7 +126,7 @@ spec:
                           type: boolean
                         bucket:
                           description: name of the bucket
-                          type: string
+                          type: string                                                    
                       required:
                       - enabled 
                       - bucket                   

@@ -168,4 +168,6 @@ def get_user_static_url(runtime_str, hostname, bucket_name):
     else:
         url = url._replace(scheme = "http")
 
-    return url.geturl() 
+    return url.geturl()
+
+  

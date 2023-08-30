@@ -152,7 +152,7 @@ def create_static_ingress(namespace,data):
     path_to_template_yaml = render_static_template(namespace,"generic-ingress-tpl.yaml",data)
     res = kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)
-    return res 
+    return res
 
 def create_static_route(namespace,data):
     logging.info(f"*** configuring static ingress route for {namespace}")
@@ -164,8 +164,8 @@ def create_static_route(namespace,data):
                   
 def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     namespace = ucfg.get("namespace")
+    bucket_name = ucfg.get("object-storage.route.bucket")
     runtime = cfg.get('nuvolaris.kube')
-    bucket_name = ucfg.get("object-storage.route.bucket") 
     
     hostname = apihost_util.get_user_static_hostname(runtime, namespace)    
     logging.debug(f"using hostname {hostname} to configure access to user web static space")
@@ -173,8 +173,7 @@ def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     try:     
         user_metadata.add_metadata("STATIC_CONTENT_URL",apihost_util.get_user_static_url(runtime, hostname, bucket_name))
         data = runtime=='openshift' and prepare_static_osh_data(ucfg, hostname) or prepare_static_ingress_data(ucfg, hostname)
-        
-        
+                
         if(runtime=='openshift'):
             return create_static_route(namespace, data)
         

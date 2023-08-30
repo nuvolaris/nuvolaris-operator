@@ -46,8 +46,7 @@ def create(owner=None):
     img = cfg.get('operator.image') or "missing-operator-image"
     tag = cfg.get('operator.tag') or "missing-operator-tag"
     image = f"{img}:{tag}"
-    container_image = runtime=='openshift' and "ghcr.io/nuvolaris/couchdb:2.3.1-morpheus.22090618" or "apache/couchdb:2.3"
-
+    container_image = runtime in ['openshift'] and "ghcr.io/nuvolaris/couchdb:2.3.1-morpheus.22090618" or "apache/couchdb:2.3"
 
     config = json.dumps(cfg.getall())
     data = {

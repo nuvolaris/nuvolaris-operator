@@ -27,7 +27,7 @@ metadata:
     {% if tls %}
     kubernetes.io/tls-acme: "true"   
     {% endif %}    
-    {% if is_static_ingress and apply_route_rewrite_rule %}
+    {% if needs_rewrite %}
     haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/
     http.exposer.acme.openshift.io/filter-out-annotations: "rewrite-target"    
     {% endif %}  
