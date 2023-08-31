@@ -63,17 +63,18 @@ class RouteData:
         self._data['path_type']=value 
 
     def with_rewrite_target(self,value: str):
-        self._data['rewrite_target']=value 
+        self._data['rewrite_target']=value
+        self._data['needs_rewrite']=True 
 
     def with_needs_rewrite(self,value: bool):
         self._data['needs_rewrite']=value                                                      
 
     def build_route_spec(self, where: str, out_template : str, tpl = "generic-openshift-route-tpl.yaml"):        
-        logging.info(f"*** Building route template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        logging.info(f"*** Building route template using host {self._data['hostname']} endpoint for {self._data['route_name']} via template {tpl}")
         return kus.processTemplate(where, tpl, self._data, out_template)
 
     def render_template(self,namespace,tpl= "generic-openshift-route-tpl.yaml"):
-        logging.info(f"*** Rendering route template using host {self._data['hostname']} endpoint for {self._data['ingress_name']} via template {tpl}")
+        logging.info(f"*** Rendering route template using host {self._data['hostname']} endpoint for {self._data['route_name']} via template {tpl}")
         """
         uses the given template to render a final route template and returns the path to the template
         """  

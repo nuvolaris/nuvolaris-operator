@@ -33,6 +33,7 @@ metadata:
     {% endif %}  
 spec:
   host: {{hostname}}
+  path: {{context_path}}
   to:
     kind: {{service_kind}}
     name: {{service_name}}

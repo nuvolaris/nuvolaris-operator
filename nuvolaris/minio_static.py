@@ -60,8 +60,8 @@ def create(owner=None):
 
 def create_nuv_static_ingress(runtime, owner=None):
     apihost_url = apihost_util.get_apihost(runtime)
-    
-    if runtime == 'openshift':
+
+    if runtime == 'openshift':           
         return deploy_content_route_template("nuvolaris","nuvolaris-web", apihost_url)
     else:
         return deploy_content_ingress_template("nuvolaris","nuvolaris-web",apihost_url)

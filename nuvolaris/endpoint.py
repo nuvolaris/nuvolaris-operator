@@ -31,8 +31,8 @@ from nuvolaris.user_metadata import UserMetadata
 def api_ingress_name(namespace, ingress="apishost"):
     return namespace == "nuvolaris" and ingress or f"{namespace}-{ingress}-api-ingress"
 
-def api_route_name(namespace):
-    return f"{namespace}-api-route"    
+def api_route_name(namespace,route="apishost"):
+    return namespace == "nuvolaris" and route or f"{namespace}-{route}-api-route"
 
 def api_secret_name(namespace):
     return f"{namespace}-crt"
@@ -44,16 +44,28 @@ def deploy_endpoint_routes(apihost,namespace):
     logging.info(f"**** configuring openshift route based endpoint for apihost {apihost}")
 
     api = RouteData(apihost)
-    api.with_route_name(api_route_name(namespace))
-    api.with_needs_rewrite(False)
+    api.with_route_name(api_route_name(namespace,"apihost"))
     api.with_service_name("controller-ip")
     api.with_service_kind("Service")
     api.with_service_port("8080")
-    api.with_context_path("/")
+    api.with_context_path("/api/v1")
+    api.with_rewrite_target("/api/v1")
 
-    path_to_template_yaml =  api.render_template("nuvolaris")
+    my = RouteData(apihost)
+    my.with_route_name(api_route_name(namespace,"apihost-my"))
+    my.with_service_name("controller-ip")
+    my.with_service_kind("Service")
+    my.with_service_port("8080")
+    my.with_context_path("/api/my")
+    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}")   
+
+    path_to_template_yaml =  api.render_template(namespace)
     res = kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)
+
+    path_to_template_yaml =  my.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)    
     return res
     
 
@@ -128,7 +140,8 @@ def delete(owner=None):
     try:
         res = ""
         if(runtime=='openshift'):
-            res = kube.kubectl("delete", "route",api_route_name(namespace))
+            res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
             return res
 
         if(ingress_class == 'traefik'):            
@@ -166,7 +179,8 @@ def patch(status, action, owner=None):
 
 def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     """
-    deploy ingresses to access a generic user api and ow api in a CORS firendly way
+    deploy ingresses to access a generic user api and ow api in a CORS friendly way
+    currently this is not supported for openshift
     """
     runtime = cfg.get('nuvolaris.kube')
     namespace = ucfg.get("namespace")
@@ -176,10 +190,9 @@ def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
 
     try:
         apihost_url = apihost_util.get_user_static_url(runtime, hostname)
-        
-        my_url = apihost_util.get_user_api_url(runtime, hostname,"/api/my")
-        api_url = apihost_util.get_user_api_url(runtime, hostname,"/api/v1")
-        user_metadata.add_metadata("WEB_API__URL",my_url)
+        my_url = apihost_util.get_user_api_url(runtime, hostname,"api/my")
+        api_url = apihost_util.get_user_api_url(runtime, hostname,"api/v1")
+        user_metadata.add_metadata("WEB_API_URL",my_url)
         user_metadata.add_metadata("OW_API_URL",api_url)
 
         if runtime == 'openshift':
@@ -202,9 +215,9 @@ def delete_ow_api_endpoint(ucfg):
     
     try:
         res = ""
-        if(runtime=='openshift'):
-            route_name = api_route_name(namespace)
-            res = kube.kubectl("delete", "route",route_name)
+        if(runtime=='openshift'):            
+            res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
             return res
 
         if(ingress_class == 'traefik'):                        
