@@ -22,7 +22,6 @@ import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.template as ntp
 import nuvolaris.apihost_util as apihost_util
-import nuvolaris.endpoint as endpoint
 
 from nuvolaris.user_metadata import UserMetadata
 from nuvolaris.ingress_data import IngressData
@@ -82,9 +81,6 @@ def static_middleware_ingress_name(namespace):
 def deploy_content_route_template(namespace, bucket, url):
     logging.info(f"**** configuring static openshift route for url {url}")
 
-    #runtime = cfg.get('nuvolaris.kube') 
-    #context_path = runtime == 'kind' and f"/{bucket}" or "/"
-
     content = RouteData(url)
     content.with_route_name(static_route_name(namespace))
     content.with_needs_rewrite(True)
@@ -102,19 +98,14 @@ def deploy_content_route_template(namespace, bucket, url):
 
 def deploy_content_ingress_template(namespace, bucket, url):
     logging.info(f"**** configuring static ingress for url {url}")
-    
-    #runtime = cfg.get('nuvolaris.kube') 
-    #context_path = runtime == 'kind' and f"/{bucket}" or "/"
 
     content = IngressData(url)
     content.with_ingress_name(static_ingress_name(namespace))
     content.with_secret_name(static_secret_name(namespace))
-    content.with_path_type("ImplementationSpecific")
     content.with_context_path("/")
-    content.with_rewrite_target(f"/{bucket}/$1")
+    content.with_prefix_target(f"/{bucket}")
     content.with_service_name("nuvolaris-static-svc")
     content.with_service_port("8080")
-    content.with_needs_rewrite(True)
     content.with_middleware_ingress_name(static_middleware_ingress_name(namespace))
 
     res = ""

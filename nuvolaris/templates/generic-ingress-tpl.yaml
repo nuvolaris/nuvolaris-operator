@@ -35,14 +35,18 @@ metadata:
       nginx.ingress.kubernetes.io/proxy-connect-timeout: "{{route_timeout_seconds}}"
       nginx.ingress.kubernetes.io/proxy-send-timeout: "{{route_timeout_seconds}}"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "{{route_timeout_seconds}}"      
+      {% endif %}
+      {% if needs_prefix and apply_nginx_rewrite_rule %}
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}/$1
       {% endif %}       
       {% if needs_rewrite and apply_nginx_rewrite_rule %}
       nginx.ingress.kubernetes.io/use-regex: "true"
       nginx.ingress.kubernetes.io/rewrite-target: {{rewrite_target}}
       {% endif %}     
-      {% if needs_rewrite and apply_traefik_prefix_middleware %}
+      {% if (needs_rewrite or needs_prefix) and apply_traefik_prefix_middleware %}
       traefik.ingress.kubernetes.io/router.middlewares: nuvolaris-{{middleware_ingress_name}}@kubernetescrd
-      {% endif %}      
+      {% endif %}
 spec:
   {% if tls %}
   tls:
@@ -54,7 +58,11 @@ spec:
     - host: "{{hostname}}"
       http:
         paths:
-          - path: {{context_path}}
+          - {% if ingress_class == 'traefik' %}
+            path: {{context_path}}
+            {% else %}
+            path: {{context_path}}{{context_regexp}}
+            {% endif %}
             pathType: {{path_type}}
             backend:
               service:
