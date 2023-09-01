@@ -174,8 +174,8 @@ def get_user_api_url(runtime, hostname, api_context):
     """
     Build the full URL that will give access to the user web bucket via the static endpoint
     """
-
-    url = urllib.parse.urlparse(f"http://{hostname}/{api_context}")
+    full_hostname = hostname.endswith("/") and f"{hostname}{api_context}" or f"{hostname}/{api_context}"
+    url = urllib.parse.urlparse(f"http://{full_hostname}")
 
     if cfg.get('components.tls') and not runtime=="kind":
         url = url._replace(scheme = "https")

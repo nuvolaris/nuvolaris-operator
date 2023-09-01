@@ -86,7 +86,7 @@ def deploy_endpoint_ingresses(apihost, namespace):
     my.with_secret_name(api_secret_name(namespace))
     my.with_context_path("/api/my")
     my.with_context_regexp("(/|$)(.*)")
-    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}/$2")
+    my.with_rewrite_target(f"/api/v1/web/{namespace}/$2")
     my.with_service_name("controller")
     my.with_service_port("3233")
     my.with_middleware_ingress_name(api_middleware_ingress_name(namespace,"apihost-my"))
@@ -191,9 +191,8 @@ def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     try:
         apihost_url = apihost_util.get_user_static_url(runtime, hostname)
         my_url = apihost_util.get_user_api_url(runtime, hostname,"api/my")
-        api_url = apihost_util.get_user_api_url(runtime, hostname,"api/v1")
-        user_metadata.add_metadata("WEB_API_URL",my_url)
-        user_metadata.add_metadata("OW_API_URL",api_url)
+        user_metadata.add_metadata("USER_REST_API_URL",my_url)
+        user_metadata.add_metadata("USER_V1_API_URL",apihost_url)
 
         if runtime == 'openshift':
             return deploy_endpoint_routes(apihost_url, namespace)
