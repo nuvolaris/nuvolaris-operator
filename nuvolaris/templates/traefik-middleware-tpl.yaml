@@ -22,5 +22,12 @@ metadata:
   namespace: nuvolaris
   name: {{middleware_ingress_name}}
 spec:
+  {% if needs_prefix  %}
   addPrefix:
     prefix: {{rewrite_target}}
+  {% endif %}
+  {% if needs_rewrite %}
+  replacePathRegex:
+    regex: {{context_path}}{{context_regexp}}
+    replacement: {{rewrite_target}}
+  {% endif %}        

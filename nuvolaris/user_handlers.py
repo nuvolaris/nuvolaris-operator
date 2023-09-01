@@ -28,6 +28,7 @@ import nuvolaris.minio_static as static
 import nuvolaris.redis as redis
 import nuvolaris.userdb_util as userdb
 import nuvolaris.postgres_operator as postgres
+import nuvolaris.endpoint as endpoint
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
@@ -55,9 +56,14 @@ def whisk_user_create(spec, name, patch, **kwargs):
     owner = kube.get(f"wsku/{name}")
     
     if(ucfg.get("namespace") and ucfg.get("auth")):
-        res = cdb.create_ow_user(ucfg,user_metadata)
+        res = cdb.create_ow_user(ucfg,user_metadata)       
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} added = {res}")
         state['couchdb']= res
+
+        res = endpoint.create_ow_api_endpoint(ucfg,user_metadata)
+        logging.info(f"OpenWhisk api endpoints {ucfg.get('namespace')} added = {res}")
+        state['api']= res
+
 
     if(cfg.get('components.minio') and (ucfg.get('object-storage.data.enabled') or ucfg.get('object-storage.route.enabled'))):        
         minio.create_ow_storage(state, ucfg, user_metadata, owner)
@@ -102,6 +108,9 @@ def whisk_user_delete(spec, name, **kwargs):
     ucfg = get_ucfg(spec)
 
     if(ucfg.get("namespace")):
+        res = endpoint.delete_ow_api_endpoint(ucfg)
+        logging.info(f"OpenWhisk subject {ucfg.get('namespace')} api removed = {res}")
+
         res = cdb.delete_ow_user(ucfg.get("namespace"))
         logging.info(f"OpenWhisk subject {ucfg.get('namespace')} removed = {res}")
 

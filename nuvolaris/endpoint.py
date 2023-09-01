@@ -16,106 +16,144 @@
 # under the License.
 #
 import kopf, logging, json, time
+import os
 import nuvolaris.kube as kube
 import nuvolaris.kustomize as kus
 import nuvolaris.config as cfg
 import nuvolaris.openwhisk as openwhisk
-import nuvolaris.util as util
 import nuvolaris.apihost_util as apihost_util
-import urllib.parse
-import nuvolaris.time_util as tutil
+import nuvolaris.util as util
 
-def get_ingress_data(runtime, apihost, tls):
-    url = urllib.parse.urlparse(apihost)
-    hostname = url.hostname    
-    ingress_class = util.get_ingress_class(runtime)
+from nuvolaris.ingress_data import IngressData
+from nuvolaris.route_data import RouteData
+from nuvolaris.user_metadata import UserMetadata
 
-    data = {
-        "hostname":hostname,
-        "ingress_class":ingress_class,
-        "tls":tls,
-        "secret_name":"nuvolaris-letsencrypt-secret",
-        "ingress_name":"apihost",
-        "service_name":"controller",
-        "service_port":"3233",
-        "context_path":"/"
-    }
+def api_ingress_name(namespace, ingress="apishost"):
+    return namespace == "nuvolaris" and ingress or f"{namespace}-{ingress}-api-ingress"
 
-    return data
+def api_route_name(namespace,route="apishost"):
+    return namespace == "nuvolaris" and route or f"{namespace}-{route}-api-route"
 
-def get_osh_data(runtime, apihost, tls):
-    url = urllib.parse.urlparse(apihost)
-    hostname = url.hostname    
-    ingress_class = util.get_ingress_class(runtime)
+def api_secret_name(namespace):
+    return f"{namespace}-crt"
 
-    data = {
-        "hostname":hostname,
-        "route_name":"openwhisk-route",
-        "tls":tls,
-        "ingress_name":"openwhisk-route",
-        "service_name":"controller-ip",
-        "service_kind":"Service",
-        "service_port":"8080",
-        "context_path":"/",
-        "static_ingress": False
-    }
+def api_middleware_ingress_name(namespace,ingress):
+    return f"{namespace}-{ingress}-api-ingress-add-prefix"
 
-    return data
+def deploy_endpoint_routes(apihost,namespace):
+    logging.info(f"**** configuring openshift route based endpoint for apihost {apihost}")
 
-def assign_route_timeout(data):
-    data["route_timeout_seconds"]= tutil.duration_in_second(util.get_controller_http_timeout())
-    logging.info(f"setting controller http/s timeout to {data['route_timeout_seconds']} seconds")
+    api = RouteData(apihost)
+    api.with_route_name(api_route_name(namespace,"apihost"))
+    api.with_service_name("controller-ip")
+    api.with_service_kind("Service")
+    api.with_service_port("8080")
+    api.with_context_path("/api/v1")
+    api.with_rewrite_target("/api/v1")
 
-def create_osh_route_spec(data):
-    tpl = "generic-openshift-route-tpl.yaml"
-    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
-    return kus.processTemplate("openwhisk-endpoint", tpl, data)
+    my = RouteData(apihost)
+    my.with_route_name(api_route_name(namespace,"apihost-my"))
+    my.with_service_name("controller-ip")
+    my.with_service_kind("Service")
+    my.with_service_port("8080")
+    my.with_context_path("/api/my")
+    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}")   
 
-def create_ingress_route_spec(data):
-    tpl = "generic-ingress-tpl.yaml"
-    logging.info(f"*** Configuring host {data['hostname']} endpoint for openwhisk controller using {tpl}")
-    return kus.processTemplate("openwhisk-endpoint", tpl, data)    
+    path_to_template_yaml =  api.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+
+    path_to_template_yaml =  my.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)    
+    return res
+    
+
+def deploy_endpoint_ingresses(apihost, namespace):
+    logging.info(f"**** configuring ingresses based endpoint for apihost {apihost}")   
+    api = IngressData(apihost)
+    api.with_ingress_name(api_ingress_name(namespace,"apihost"))
+    api.with_secret_name(api_secret_name(namespace))
+    api.with_context_path("/api/v1")
+    api.with_context_regexp("(/|$)(.*)")
+    api.with_rewrite_target("/api/v1/$2")
+    api.with_service_name("controller")
+    api.with_service_port("3233")
+    api.with_middleware_ingress_name(api_middleware_ingress_name(namespace,"apihost"))
+
+    my = IngressData(apihost)
+    my.with_ingress_name(api_ingress_name(namespace,"apihost-my"))
+    my.with_secret_name(api_secret_name(namespace))
+    my.with_context_path("/api/my")
+    my.with_context_regexp("(/|$)(.*)")
+    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}/$2")
+    my.with_service_name("controller")
+    my.with_service_port("3233")
+    my.with_middleware_ingress_name(api_middleware_ingress_name(namespace,"apihost-my"))
+
+    if api.requires_traefik_middleware():
+        logging.info("*** configuring traefik middleware for apihost ingress")
+        path_to_template_yaml = api.render_traefik_middleware_template(namespace)
+        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        os.remove(path_to_template_yaml)
+
+    if my.requires_traefik_middleware():
+        logging.info("*** configuring traefik middleware for apihost-my ingress")
+        path_to_template_yaml = my.render_traefik_middleware_template(namespace)
+        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        os.remove(path_to_template_yaml)        
+
+    logging.info(f"*** configuring static ingress for apihost")
+    path_to_template_yaml = api.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+
+    logging.info(f"*** configuring static ingress for apihost-my")
+    path_to_template_yaml = my.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)    
+    return res 
+
 
 def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
-    tls = cfg.get('components.tls')
-    
     apihost = apihost_util.get_apihost(runtime)
+
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
     cfg.put("config.apihost", apihost)
-
-    data = runtime=='openshift' and get_osh_data(runtime, apihost, tls) or get_ingress_data(runtime, apihost, tls)    
-    assign_route_timeout(data)
-
-    spec = runtime=='openshift' and create_osh_route_spec(data) or create_ingress_route_spec(data)
-
-    if owner:
-        kopf.append_owner_reference(spec['items'], owner)
-    else:
-        cfg.put("state.endpoint.spec", spec)
-        
-    return kube.apply(spec)
     
-def delete_by_owner():
-    runtime = cfg.get('nuvolaris.kube')
-    tpl = runtime=='openshift' and "_generic-openshift-route-tpl.yaml" or "_generic-ingress-tpl.yaml"
-    res = kube.kubectl("delete", "-f", f"deploy/openwhisk-endpoint/{tpl}")
-    logging.info(f"delete endpoint: {res}")
-    return res
-
-def delete_by_spec():
-    spec = cfg.get("state.endpoint.spec")
-    res = False
-    if spec:
-        res = kube.delete(spec)
-        return res
+    if runtime == 'openshift':
+        return deploy_endpoint_routes(apihost,"nuvolaris")
+    else:
+        return deploy_endpoint_ingresses(apihost,"nuvolaris")
 
 def delete(owner=None):
-    if owner:        
-        return delete_by_owner()
-    else:
-        return delete_by_spec()
+    """
+    undeploys  ingresses for the nuvolaris apihost
+    """    
+    logging.info(f"*** removing ingresses for nuvolaris apihost")
+    namespace = "nuvolaris"
+    runtime = cfg.get('nuvolaris.kube')        
+    ingress_class = util.get_ingress_class(runtime)
+    
+    try:
+        res = ""
+        if(runtime=='openshift'):
+            res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
+            return res
+
+        if(ingress_class == 'traefik'):            
+            res = kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-my"))          
+
+        res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost"))
+        res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-my"))
+        return res
+    except Exception as e:
+        logging.warn(e)       
+        return False
 
 def patch(status, action, owner=None):
     """
@@ -137,4 +175,58 @@ def patch(status, action, owner=None):
         logging.info(f"*** handled request to {action} endpoint") 
     except Exception as e:
         logging.error('*** failed to update endpoint: %s' % e)
-        status['whisk_create']['endpoint']='error'                       
+        status['whisk_create']['endpoint']='error'
+
+def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
+    """
+    deploy ingresses to access a generic user api and ow api in a CORS friendly way
+    currently this is not supported for openshift
+    """
+    runtime = cfg.get('nuvolaris.kube')
+    namespace = ucfg.get("namespace")
+    apihost = ucfg.get("apihost") or "auto"
+    hostname = apihost_util.get_user_static_hostname(runtime, namespace, apihost)
+    logging.debug(f"using hostname {hostname} to configure access to user openwhisk api")
+
+    try:
+        apihost_url = apihost_util.get_user_static_url(runtime, hostname)
+        my_url = apihost_util.get_user_api_url(runtime, hostname,"api/my")
+        api_url = apihost_util.get_user_api_url(runtime, hostname,"api/v1")
+        user_metadata.add_metadata("WEB_API_URL",my_url)
+        user_metadata.add_metadata("OW_API_URL",api_url)
+
+        if runtime == 'openshift':
+            return deploy_endpoint_routes(apihost_url, namespace)
+        else:
+            return deploy_endpoint_ingresses(apihost_url, namespace)                
+    except Exception as e:
+        logging.warn(e)       
+        return False
+
+def delete_ow_api_endpoint(ucfg):
+    """
+    undeploy the ingresses
+    """    
+    namespace = ucfg.get("namespace")
+    runtime = cfg.get('nuvolaris.kube')
+    logging.info(f"*** removing api endpoint for {namespace}")
+    runtime = cfg.get('nuvolaris.kube')
+    ingress_class = util.get_ingress_class(runtime)
+    
+    try:
+        res = ""
+        if(runtime=='openshift'):            
+            res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
+            return res
+
+        if(ingress_class == 'traefik'):                        
+            res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost"))
+            res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-my"))             
+
+        res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost"))
+        res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-my"))
+        return res
+    except Exception as e:
+        logging.warn(e)       
+        return False                               

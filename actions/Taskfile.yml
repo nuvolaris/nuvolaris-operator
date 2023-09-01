@@ -76,6 +76,10 @@ tasks:
     - >
       curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
 
+  login:webproxy:
+    - >
+      curl -X POST http://localhost/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
+
   login:all:
     - task: login:prepare
     - task: login:deploy

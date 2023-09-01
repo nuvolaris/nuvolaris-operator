@@ -27,12 +27,13 @@ metadata:
     {% if tls %}
     kubernetes.io/tls-acme: "true"   
     {% endif %}    
-    {% if is_static_ingress and apply_route_rewrite_rule %}
-    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}/
+    {% if needs_rewrite %}
+    haproxy.router.openshift.io/rewrite-target: {{rewrite_target}}
     http.exposer.acme.openshift.io/filter-out-annotations: "rewrite-target"    
     {% endif %}  
 spec:
   host: {{hostname}}
+  path: {{context_path}}
   to:
     kind: {{service_kind}}
     name: {{service_name}}

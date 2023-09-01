@@ -204,6 +204,8 @@ tasks:
 
   clean:
     cmds:
+      - cmd: kubectl -n nuvolaris delete wsku --all
+        ignore_error: true    
       - cmd: kubectl -n nuvolaris delete wsk/controller --grace-period=0 --timeout=5s
         ignore_error: true
       - cmd: task defin

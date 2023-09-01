@@ -124,8 +124,8 @@ def create_nuv_storage(data):
         if(res):
             openwhisk.annotate(f"minio_bucket_data=nuvolaris-data")
 
-        logging.info(f"*** adding nuvolaris MINIO static bucket")
-        res = minioClient.make_bucket("nuvolaris-web")                
+        logging.info(f"*** adding nuvolaris MINIO static public bucket")
+        res = minioClient.make_public_bucket("nuvolaris-web")             
         bucket_policy_names.append("nuvolaris-web/*")
 
         if(res):
