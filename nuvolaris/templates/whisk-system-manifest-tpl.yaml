@@ -26,3 +26,7 @@ packages:
         function: login.zip
         runtime: python:3        
         web: true
+      upload:
+        function: upload.zip
+        runtime: python:3        
+        web: true        

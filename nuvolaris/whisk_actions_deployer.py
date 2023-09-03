@@ -35,12 +35,17 @@ def prepare_system_actions_data():
     
     couchdb_host = cfg.get("couchdb.host") or "couchdb"
     couchdb_port = cfg.get("couchdb.port") or "5984"
+    minio_host= cfg.get("minio.host") or "minio"
+    minio_port= cfg.get("minio.port") or "9000"
+    minio_full_host = f"{minio_host}.nuvolaris.svc.cluster.local"
 
     globals=[]
     globals.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
     globals.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
     globals.append({"key":"couchdb_host", "value":couchdb_host})
     globals.append({"key":"couchdb_port", "value":couchdb_port})
+    globals.append({"key":"minio_host", "value":minio_full_host})
+    globals.append({"key":"minio_port", "value":minio_port})
     data = {
         "globals":globals
     }

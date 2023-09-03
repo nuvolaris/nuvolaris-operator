@@ -17,6 +17,9 @@
 #
 version: '3'
 
+vars:
+  DEPLOY: "../deploy/whisk-system"
+  
 tasks:
 
   login:prepare:
@@ -28,7 +31,14 @@ tasks:
       rm  -f ../{{.DEPLOY}}/login.zip
       zip -r ../{{.DEPLOY}}/login.zip *
 
+  upload:prepare:
+    - |-
+      cd upload
+      rm  -f ../{{.DEPLOY}}/upload.zip
+      zip -r ../{{.DEPLOY}}/upload.zip *      
+
   # prepares all the system related actions
   prepare:
     - task: login:prepare   
+    - task: upload:prepare
                     

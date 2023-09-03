@@ -22,6 +22,7 @@ metadata:
   name: {{ingress_name}}
   namespace: nuvolaris
   annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 0
       kubernetes.io/ingress.class: "{{ingress_class}}"
       {% if tls %}
       cert-manager.io/cluster-issuer: "letsencrypt-issuer"

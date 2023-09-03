@@ -26,3 +26,6 @@ cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions
 cd ${HOME}/actions/login
 rm  -f ${HOME}/deploy/whisk-system/login.zip
 zip -r ${HOME}/deploy/whisk-system/login.zip *
+cd ${HOME}/actions/upload
+rm  -f ${HOME}/deploy/whisk-system/upload.zip
+zip -r ${HOME}/deploy/whisk-system/upload.zip *
