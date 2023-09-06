@@ -17,12 +17,15 @@
 #
 packages:
   nuv:
-    inputs:
-      {% for param in globals -%}
-        {{param.key}} : "{{param.value}}"
-      {% endfor %}
     actions:
-      login:
-        function: login.zip
-        runtime: python:3        
-        web: true
+      {% for action in actions -%}
+      # setting up {{action.name}} system action   
+      {{action.name}}:
+        function: {{action.function}}
+        runtime: {{action.runtime}}    
+        web: {{action.web}}        
+        inputs:
+          {% for param in action.inputs -%}
+          {{param.key}} : "{{param.value}}"
+          {% endfor %}
+      {% endfor %}     

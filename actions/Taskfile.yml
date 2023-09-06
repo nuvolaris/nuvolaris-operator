@@ -34,6 +34,8 @@ vars:
     sh: yq .spec.couchdb.admin.password {{.CONFIG}}
   CDB_HOST:
     sh: yq .spec.couchdb.host {{.CONFIG}}
+  MINIO_HOST: minio.nuvolaris.svc.cluster.local   
+  MINIO_PORT: 9000    
 
 tasks:
 
@@ -72,6 +74,23 @@ tasks:
     - > 
       {{.WSKSYS}} action get nuv/login --url
 
+  upload:prepare:
+    - |-
+      cd upload
+      rm  -f ../{{.DEPLOY}}/upload.zip
+      zip -r ../{{.DEPLOY}}/upload.zip *
+
+  upload:deploy:
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p minio_host {{.MINIO_HOST}}
+      -p minio_port {{.MINIO_PORT}}  
+    - > 
+      {{.WSKSYS}} action update nuv/upload 
+      {{.DEPLOY}}/upload.zip --kind python:3 --web true
+    - > 
+      {{.WSKSYS}} action get nuv/upload --url             
+
   login:webtest:
     - >
       curl -X POST {{.APIHOST}}/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
@@ -82,14 +101,36 @@ tasks:
 
   login:k3sproxy:
     - >
-      curl -X POST https://gptuser.api.k3s.nuvtest.net/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'      
+      curl -X POST https://gptuser.api.k3s.nuvtest.net/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
+
+  upload:webtest:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/index2.html
+
+  upload:webtest2:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/.well-known/index2.html
+
 
   login:all:
     - task: login:prepare
     - task: login:deploy
     - task: login:webtest
 
+  upload:all:
+    - task: upload:prepare
+    - task: upload:deploy   
+
   # prepares all the system related actions
   prepare:
     - task: login:prepare
+    - task: upload:prepare
+
+  deploy:
+    - task: login:deploy
+    - task: upload:deploy
+
+  all:
+    - task: prepare
+    - task: deploy        
                     

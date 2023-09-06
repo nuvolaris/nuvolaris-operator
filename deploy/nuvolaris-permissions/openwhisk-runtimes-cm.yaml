@@ -87,7 +87,7 @@ data:
                     "image": {
                         "prefix": "ghcr.io/nuvolaris",
                         "name": "action-python-v311",
-                        "tag": "3.0.0-beta.2308150939"
+                        "tag": "3.0.0-beta.2309031758"
                     },
                     "deprecated": false,
                     "attached": {
@@ -114,7 +114,7 @@ data:
                     "image": {
                         "prefix": "ghcr.io/nuvolaris",
                         "name": "action-python-v310",
-                        "tag": "3.0.0-beta.2308150939"
+                        "tag": "3.0.0-beta.2309031758"
                     },
                     "deprecated": false,
                     "attached": {

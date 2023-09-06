@@ -30,22 +30,53 @@ from nuvolaris.whisk_system_util import WhiskSystemClient
 from nuvolaris.util import nuv_retry
 from subprocess import CompletedProcess
 
-def prepare_system_actions_data():
-    data = {}
-    
+
+def prepare_login_action():
     couchdb_host = cfg.get("couchdb.host") or "couchdb"
     couchdb_port = cfg.get("couchdb.port") or "5984"
 
-    globals=[]
-    globals.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    globals.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    globals.append({"key":"couchdb_host", "value":couchdb_host})
-    globals.append({"key":"couchdb_port", "value":couchdb_port})
-    data = {
-        "globals":globals
+    login_inputs=[]
+    login_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    login_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    login_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+
+    login = {
+        "name":"login",
+        "function":"login.zip",
+        "runtime":"python:3",
+        "web":"true",
+        "inputs":login_inputs
     }
 
-    return data
+    return login
+
+def prepare_upload_action():
+    minio_host= cfg.get("minio.host") or "minio"
+    minio_port= cfg.get("minio.port") or "9000"
+    minio_full_host = f"{minio_host}.nuvolaris.svc.cluster.local"
+
+    upload_inputs=[]
+    upload_inputs.append({"key":"minio_host", "value":minio_full_host})
+    upload_inputs.append({"key":"minio_port", "value":minio_port})
+
+    upload = {
+        "name":"upload",
+        "function":"upload.zip",
+        "runtime":"python:3",
+        "web":"true",
+        "inputs":upload_inputs
+    }
+
+    return upload    
+
+
+def prepare_system_actions():
+    """ Builds a suitable structure to generate a deployment manifest using a template
+    """
+    actions = []
+    actions.append(prepare_login_action())
+    actions.append(prepare_upload_action())
+    return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):
     """
@@ -88,7 +119,7 @@ def safe_deploy(wskClient):
 
 def deploy_whisk_system_action():
     auth = cfg.get('openwhisk.namespaces.whisk-system')
-    data = prepare_system_actions_data()
+    data = prepare_system_actions()
     tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
 
     wskClient = WhiskSystemClient(auth)
