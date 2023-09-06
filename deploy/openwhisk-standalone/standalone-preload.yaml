@@ -32,10 +32,10 @@ spec:
     spec:
       containers:
       - name: nodejs
-        image: "ghcr.io/nuvolaris/action-nodejs-v16:0.3.0-morpheus.22111407"
+        image: "ghcr.io/nuvolaris/action-nodejs-v16:3.0.0-beta.2308141606"
         command: ["/bin/true"]
       - name: python
-        image: "ghcr.io/nuvolaris/action-python-v310:0.3.0-morpheus.23012319"
+        image: "ghcr.io/nuvolaris/action-python-v311:3.0.0-beta.2308150939"
         command: ["/bin/true"]
       - name: java
         image: "ghcr.io/nuvolaris/action-java-v8:0.3.0-morpheus.22110809"
