@@ -15,32 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 #
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: preload-runtimes
-  namespace: nuvolaris
-  labels:
-    app: preload-runtimes
-spec:
-  template:
-    metadata:
-      name: preload-runtimes
-      labels:
-        app: preload-runtimes
-    spec:
-      containers:
-      - name: nodejs
-        image: "ghcr.io/nuvolaris/action-nodejs-v16:3.0.0-beta.2308141606"
-        command: ["/bin/true"]
-      - name: python
-        image: "ghcr.io/nuvolaris/action-python-v311:3.0.0-beta.2308150939"
-        command: ["/bin/true"]
-      - name: java
-        image: "ghcr.io/nuvolaris/action-java-v8:0.3.0-morpheus.22110809"
-        command: ["/bin/true"]
-      - name: go
-        image: "openwhisk/action-golang-v1.17:nightly"
-        command: ["/bin/true"]
-      restartPolicy: Never
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all
+
+import nuvolaris.config as cfg
+import nuvolaris.testutil as tu
+import nuvolaris.kube as kube
+import nuvolaris.runtimes_preloader as preloader
+
+!kubectl -n nuvolaris apply -f deploy/nuvolaris-permissions/openwhisk-runtimes-cm.yaml
+
+# test
+assert(preloader.create())
+assert(kube.kubectl("get", "pod", jsonpath="{.items[?(@.metadata.labels.app == 'preload-runtimes')].metadata.name}"))
+assert(preloader.delete())
+
+#!kubectl -n nuvolaris delete cm/openwhisk-runtimes
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

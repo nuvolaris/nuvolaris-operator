@@ -296,4 +296,8 @@ def generate_ow_auth():
 def load_sample_user_config(name="whisk-user"):
     with open(f"tests/{name}.yaml") as f: 
         c = yaml.safe_load(f)
-        return c['spec']    
+        return c['spec']
+
+def load_sample_runtimes(name="runtimes"):
+    with open(f"tests/{name}.json") as f: 
+        return json.load(f)

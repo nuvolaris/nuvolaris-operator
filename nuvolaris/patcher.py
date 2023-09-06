@@ -30,6 +30,16 @@ import nuvolaris.postgres_operator as postgres
 import nuvolaris.endpoint as endpoint
 import nuvolaris.issuer as issuer
 import nuvolaris.version_util as version_util
+import nuvolaris.runtimes_preloader as preloader
+
+def patch_preloader(owner: None):
+    try:
+        logging.info("*** handling request to patch openwhisk runtime preloader")
+        preloader.delete(owner)
+        preloader.create(owner)
+        logging.info("*** handled request to patch openwhisk runtime preloader")
+    except Exception as e:
+        logging.error("*** failed to patch openwhisk runtime preloader",e)
 
 def rollout(kube_name):
     try:
