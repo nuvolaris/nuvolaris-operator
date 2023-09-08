@@ -396,3 +396,12 @@ def get_enable_pod_security():
     """
     runtime = cfg.get('nuvolaris.kube')
     return runtime in ["eks","gke","aks","generic"]
+
+def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtimes\.json}'):
+    """ Return the configured runtimes.json from the config map cm/openwhisk-runtimes
+    """
+    runtimes= kube.kubectl("get", "cm/openwhisk-runtimes", namespace=namespace, jsonpath=path)
+    if(runtimes):
+        return runtimes[0]
+
+    raise Exception("Could not find runtimes.json inside cm/openwhisk-runtimes config Map")  

@@ -34,6 +34,7 @@ import nuvolaris.minio_static as static
 import nuvolaris.whisk_actions_deployer as system
 import nuvolaris.version_util as version_util
 import nuvolaris.postgres_operator as postgres
+import nuvolaris.runtimes_preloader as preloader
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):
@@ -80,6 +81,17 @@ def whisk_create(spec, name, **kwargs):
 
     runtime = cfg.get('nuvolaris.kube')
     logging.info(f"kubernetes engine in use={runtime}")
+
+    if cfg.get('components.openwhisk'):
+        try:
+            preloader.create(owner)
+            state['preloader']= "on"
+            logging.info(msg)
+        except:
+            logging.exception("could not create runtime preloader batach")
+            state['preloader']= "error"
+    else:
+        state['preloader']= "off"   
 
     if cfg.get('components.couchdb'):
         try:
@@ -194,12 +206,14 @@ def whisk_post_create(name, state):
 def whisk_delete(spec, **kwargs):
     runtime = cfg.get('nuvolaris.kube')
     logging.info("whisk_delete")
+   
 
     if cfg.get("components.openwhisk"):
+        msge = preloader.delete()
         msg = openwhisk.delete()
         logging.info(msg)
         msg = endpoint.delete()
-        logging.info(msg)    
+        logging.info(msg)
 
     if cfg.get('components.tls') and not runtime == "kind":
         msg = issuer.delete()
@@ -299,7 +313,9 @@ def runtimes_filter(name, type, **kwargs):
 @kopf.on.event("configmap", when=runtimes_filter)
 def runtimes_cm_event_watcher(event, **kwargs):    
     logging.info("*** detected a change in cm/openwhisk-runtimes config map, restarting openwhisk related PODs")
-    owner = kube.get(f"wsk/controller")
+    owner = kube.get(f"wsk/controller") 
+    patcher.patch_preloader(owner)
 
     if cfg.get('components.openwhisk'):
-        patcher.restart_whisk(owner)     
+        patcher.restart_whisk(owner)
+
