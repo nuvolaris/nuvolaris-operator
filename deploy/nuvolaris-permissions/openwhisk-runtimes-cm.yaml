@@ -214,7 +214,21 @@ data:
                         "name": "action-golang-v1.17",
                         "tag": "nightly"
                     }
-                }
+                },
+                {
+                    "kind": "gomflow:1.17",
+                    "default": false,
+                    "deprecated": false,
+                    "attached": {
+                        "attachmentName": "codefile",
+                        "attachmentType": "text/plain"
+                    },
+                    "image": {
+                        "prefix": "ghcr.io/nuvolaris",
+                        "name": "go-nuvolaris-metaflow",
+                        "tag": "fdaa3f0"
+                    }
+                }                
             ],
             "dotnet": [
                 {

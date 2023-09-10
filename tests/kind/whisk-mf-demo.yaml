@@ -1,0 +1,138 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+apiVersion: nuvolaris.org/v1
+kind: Whisk
+metadata:
+  name: controller
+  namespace: nuvolaris
+spec: 
+  components:
+    # start openwhisk controller
+    openwhisk: true
+    # start openwhisk invoker
+    invoker: false    
+    # start couchdb
+    couchdb: true
+    # start kafka
+    kafka: false
+    # start mongodb
+    mongodb: false
+    # start redis
+    redis: false      
+    # start cron based action parser
+    cron: false 
+    # tls enabled or not
+    tls: false
+    # minio enabled or not
+    minio: false 
+    # minio static enabled or not
+    static: false
+    # postgres enabled or not
+    postgres: false          
+  openwhisk:
+    namespaces:
+      whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+      nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+#  controller:
+#    image: "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"    
+  nuvolaris:
+    storageclass: auto #standard
+    provisioner: auto #rancher.io/local-path
+    ingressclass: auto #nginx
+    ingresslb: auto #ingress-nginx/ingress-nginx-controller
+  couchdb:
+    host: couchdb
+    port: 5984
+    volume-size: 10
+    admin:
+      user: whisk_admin
+      password: some_passw0rd
+    controller:
+      user: invoker_admin
+      password: s0meP@ass1
+    invoker:
+      user: controller_admin
+      password: s0meP@ass2
+  kafka:
+    host: kafka
+    volume-size: 10
+  scheduler:
+    schedule: "* * * * *"
+  tls:
+    acme-registered-email: francesco@nuvolaris.io
+    acme-server-url: https://acme-staging-v02.api.letsencrypt.org/directory
+  configs:
+    limits:
+      actions:
+        sequence-maxLength: 50
+        invokes-perMinute: 999
+        invokes-concurrent: 250
+      triggers: 
+        fires-perMinute: 999
+      memory:
+        limit-min: "128m"
+        limit-std: "256m"
+        limit-max: "2048m"        
+    controller:
+      javaOpts: "-Xmx8192M"
+      resources:
+        cpu-req: "500m"
+        cpu-lim: "1"
+        mem-req: "4G"
+        mem-lim: "8G"
+    #couchdb:
+      #resources:
+        #cpu-req: "500m"
+        #cpu-lim: "1"
+        #mem-req: "512M"
+        #mem-lim: "1G"        
+  redis:
+    persistence-enabled: true
+    volume-size: 10
+    default:
+      password: s0meP@ass3
+    nuvolaris:
+      #prefix: nuvolaris      
+      password: s0meP@ass3
+  mongodb:
+    host: mongodb
+    volume-size: 10
+    admin: 
+      user: whisk_admin
+      password: 0therPa55
+    nuvolaris:
+      user: nuvolaris
+      password: s0meP@ass3
+    exposedExternally: False
+    useOperator: False
+  minio:
+    volume-size: 2
+    admin:
+      user: minioadmin
+      password: minioadmin    
+    nuvolaris:
+      user: nuvolaris
+      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+  postgres:    
+    volume-size: 5
+    replicas: 2
+    admin:      
+      password: 0therPa55
+      replica-password: 0therPa55RR
+    nuvolaris:
+      password: s0meP@ass3                   
