@@ -93,8 +93,8 @@ spec:
       resources:
         cpu-req: "500m"
         cpu-lim: "1"
-        mem-req: "4G"
-        mem-lim: "8G"
+        mem-req: "8G"
+        mem-lim: "10G"
     #couchdb:
       #resources:
         #cpu-req: "500m"

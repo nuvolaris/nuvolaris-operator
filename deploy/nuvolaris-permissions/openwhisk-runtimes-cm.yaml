@@ -216,7 +216,7 @@ data:
                     }
                 },
                 {
-                    "kind": "gomflow:1.17",
+                    "kind": "go:1.20mf",
                     "default": false,
                     "deprecated": false,
                     "attached": {
@@ -226,7 +226,7 @@ data:
                     "image": {
                         "prefix": "ghcr.io/nuvolaris",
                         "name": "go-nuvolaris-metaflow",
-                        "tag": "fdaa3f0"
+                        "tag": "bc86ab6"
                     }
                 }                
             ],
