@@ -589,7 +589,6 @@ spec:
                           - mem-req 
                           - mem-lim                           
                       required:
-                      - javaOpts
                       - containerPool                                                                                                                                                                                
             status:
               x-kubernetes-preserve-unknown-fields: true
