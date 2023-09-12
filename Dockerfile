@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM ubuntu:22.10
+FROM ubuntu:22.04
 ENV CONTROLLER_IMAGE=ghcr.io/nuvolaris/openwhisk-controller
 ENV CONTROLLER_TAG=0.3.0-morpheus.22122609
 ARG OPERATOR_IMAGE_DEFAULT=ghcr.io/nuvolaris/nuvolaris-operator
