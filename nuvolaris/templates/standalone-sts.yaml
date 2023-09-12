@@ -116,6 +116,9 @@ spec:
         - name: "CONFIG_whisk_info_buildNo"
           value: "development-morpheus"
 
+        - name: "CONFIG_whisk_containerPool_userMemory"
+          value: "{{invoker_containerpool_usermemory}}"          
+
         # Action limits
         # Required properties from Entitlement Provider used by the controller
         - name: "LIMITS_ACTIONS_INVOKES_PERMINUTE"
