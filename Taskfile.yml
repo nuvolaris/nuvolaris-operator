@@ -22,7 +22,7 @@ vars:
   N: ""
   T: ""
   P: ""
-  BASETAG: 0.3.0-dev
+  BASETAG: 3.0.0-beta
   KUBE:
     sh: ./detect.sh
   NS: "nuvolaris"
