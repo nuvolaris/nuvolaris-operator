@@ -40,7 +40,21 @@ def api_secret_name(namespace):
 def api_middleware_ingress_name(namespace,ingress):
     return f"{namespace}-{ingress}-api-ingress-add-prefix"
 
-def deploy_endpoint_routes(apihost,namespace):
+def deploy_runtime_route(apihost,namespace):
+    rt = RouteData(apihost)
+    rt.with_route_name(api_route_name(namespace,"apihost-rt"))
+    rt.with_service_name("controller-ip")
+    rt.with_service_kind("Service")
+    rt.with_service_port("8080")
+    rt.with_context_path("/api/runtimes")
+    rt.with_rewrite_target("/")
+
+    path_to_template_yaml =  rt.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)        
+    return res 
+
+def deploy_api_routes(apihost,namespace):
     logging.info(f"**** configuring openshift route based endpoint for apihost {apihost}")
 
     api = RouteData(apihost)
@@ -57,7 +71,7 @@ def deploy_endpoint_routes(apihost,namespace):
     my.with_service_kind("Service")
     my.with_service_port("8080")
     my.with_context_path("/api/my")
-    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}")   
+    my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}")  
 
     path_to_template_yaml =  api.render_template(namespace)
     res = kube.kubectl("apply", "-f",path_to_template_yaml)
@@ -65,11 +79,35 @@ def deploy_endpoint_routes(apihost,namespace):
 
     path_to_template_yaml =  my.render_template(namespace)
     res = kube.kubectl("apply", "-f",path_to_template_yaml)
-    os.remove(path_to_template_yaml)    
+    os.remove(path_to_template_yaml)       
     return res
+
+def deploy_runtime_ingress(apihost, namespace):
+    rt = IngressData(apihost)
+    rt.with_ingress_name(api_ingress_name(namespace,"apihost-rt"))
+    rt.with_secret_name(api_secret_name(namespace))
+    rt.with_context_path("/api/runtimes")
+    rt.with_context_regexp("(/|$)(.*)")
+    rt.with_rewrite_target("/$2")    
+    rt.with_service_name("controller")
+    rt.with_service_port("3233")
+    rt.with_middleware_ingress_name(api_middleware_ingress_name(namespace,"apihost-rt"))
+
+    if rt.requires_traefik_middleware():
+        logging.info("*** configuring traefik middleware for apihost-runtimes ingress")
+        path_to_template_yaml = rt.render_traefik_middleware_template(namespace)
+        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        os.remove(path_to_template_yaml)
+
+    logging.info(f"*** configuring static ingress for apihost-runtimes")
+    path_to_template_yaml = rt.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+
+    return res     
     
 
-def deploy_endpoint_ingresses(apihost, namespace):
+def deploy_api_ingresses(apihost, namespace):
     logging.info(f"**** configuring ingresses based endpoint for apihost {apihost}")   
     api = IngressData(apihost)
     api.with_ingress_name(api_ingress_name(namespace,"apihost"))
@@ -112,6 +150,7 @@ def deploy_endpoint_ingresses(apihost, namespace):
     path_to_template_yaml = my.render_template(namespace)
     res = kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)    
+
     return res 
 
 
@@ -124,13 +163,15 @@ def create(owner=None):
     cfg.put("config.apihost", apihost)
     
     if runtime == 'openshift':
-        return deploy_endpoint_routes(apihost,"nuvolaris")
+        res = deploy_runtime_route(apihost,"nuvolaris")
+        return deploy_api_routes(apihost,"nuvolaris")
     else:
-        return deploy_endpoint_ingresses(apihost,"nuvolaris")
+        res = deploy_runtime_ingress(apihost,"nuvolaris")
+        return deploy_api_ingresses(apihost,"nuvolaris")
 
 def delete(owner=None):
     """
-    undeploys  ingresses for the nuvolaris apihost
+    undeploys ingresses for nuvolaris apihost
     """    
     logging.info(f"*** removing ingresses for nuvolaris apihost")
     namespace = "nuvolaris"
@@ -142,6 +183,7 @@ def delete(owner=None):
         if(runtime=='openshift'):
             res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
             res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
+            res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-rt"))
             return res
 
         if(ingress_class == 'traefik'):            
@@ -150,6 +192,7 @@ def delete(owner=None):
 
         res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost"))
         res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-my"))
+        res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-rt"))
         return res
     except Exception as e:
         logging.warn(e)       
@@ -195,9 +238,9 @@ def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
         user_metadata.add_metadata("USER_V1_API_URL",apihost_url)
 
         if runtime == 'openshift':
-            return deploy_endpoint_routes(apihost_url, namespace)
+            return deploy_api_routes(apihost_url, namespace)
         else:
-            return deploy_endpoint_ingresses(apihost_url, namespace)                
+            return deploy_api_ingresses(apihost_url, namespace)                
     except Exception as e:
         logging.warn(e)       
         return False
