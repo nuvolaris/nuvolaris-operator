@@ -84,7 +84,7 @@ def whisk_create(spec, name, **kwargs):
 
     if cfg.get('components.openwhisk'):
         try:
-            preloader.create(owner)
+            msg = preloader.create(owner)
             state['preloader']= "on"
             logging.info(msg)
         except:
