@@ -1,8 +1,8 @@
-import logging, json
 import os
 import base64
 import random
 import string
+import mimetypes
 
 from minio import Minio
 from minio.error import S3Error
@@ -36,6 +36,13 @@ def build_mo_client(host, port, access_key, secret_key):
     """
     mo_client = Minio(f"{host}:{port}",access_key=access_key,secret_key=secret_key,secure=False)    
     return mo_client
+
+def extract_mimetype(file):
+    mimetype, _ = mimetypes.guess_type(file)
+    if mimetype is None:
+        raise Exception(f"Failed to guess mimetype for {file}")
+    else:
+        return mimetype    
             
 def upload_file(mo_client, file, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -54,11 +61,12 @@ def upload_file(mo_client, file, bucket, object_name=None):
 
     # Upload the file
     try:
-        response = mo_client.fput_object(bucket_name=bucket,object_name=object_name,file_path=file)
+        mimetype = extract_mimetype(object_name)
+        response = mo_client.fput_object(bucket_name=bucket,object_name=object_name,file_path=file,content_type=mimetype)
         if response._object_name:
             return True
     except Exception as e:
-        logging.error(e)
+        print(e)
         return False
     return False
 
@@ -90,7 +98,13 @@ def delete_files_in_directory_and_subdirectories(directory_path):
          os.remove(file_path)
      print("All files and subdirectories deleted successfully.")
    except OSError:
-     print("Error occurred while deleting files and subdirectories.")    
+     print("Error occurred while deleting files and subdirectories.")
+
+def get_random_string(length):
+    # choose from all lowercase letter
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(length))
+  
 
 def prepare_file_upload(username, filename, file_content_as_b64):
     """ Creates a tmp area for the given user where the uploaded file will be stored under a random generated name
@@ -100,14 +114,15 @@ def prepare_file_upload(username, filename, file_content_as_b64):
     param: file_content_as_b64
     return: a file object pointing to the tmp file
     """
-    try:
+    try:        
         user_tmp_folder = f"/tmp/{username}"
         if not os.path.exists(user_tmp_folder):
             os.makedirs(user_tmp_folder)
             print(f"added tmp folder {user_tmp_folder}")
 
         delete_files_in_directory_and_subdirectories(user_tmp_folder)
-        tmp_file = f"{user_tmp_folder}/{random.choices(string.ascii_lowercase, k=10)}"
+        rnd_filename = get_random_string(20)
+        tmp_file = f"{user_tmp_folder}/{rnd_filename}"
         
         with open(tmp_file, "wb") as f:
             file_content=base64.b64decode(file_content_as_b64)          
@@ -120,7 +135,7 @@ def prepare_file_upload(username, filename, file_content_as_b64):
             return None
     except Exception as e:
         print("error preparing tmp_files",e)
-        return None    
+        return None
 
 def main(args):
     """
@@ -153,7 +168,7 @@ def main(args):
     mo_client = build_mo_client(minio_host, minio_port,upload_data['user'], auth)
     tmp_file = prepare_file_upload(upload_data['user'],upload_data['filename'],content_as_b64)
 
-    if tmp_file:
+    if tmp_file:        
         upload_result = upload_file(mo_client,tmp_file,f"{upload_data['user']}-web",upload_data['filename'])
         return build_response(upload_data['user'],upload_data['filename'],f"{upload_data['user']}-web",upload_result)
     else:
