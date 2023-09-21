@@ -360,7 +360,8 @@ def get_postgres_config_data():
         'postgres_nuvolaris_user': "nuvolaris",
         'postgres_nuvolaris_password': cfg.get('postgres.nuvolaris.password') or "s0meP@ass3",
         'size': cfg.get('postgres.volume-size') or 10,
-        'replicas': cfg.get('postgres.admin.replicas') or 2
+        'replicas': cfg.get('postgres.admin.replicas') or 2,
+        'storageClass': cfg.get('nuvolaris.storageclass')
         }
     return data
 
@@ -393,11 +394,14 @@ def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotation
 def get_enable_pod_security():
     """
     Return true if there is the need to enable pod security context
-    for some specific pod. This is currently used for bitnami based images.
+    for some specific pod. This is currently used for bitnami based images
+    when using storage classes block based
     """
-    runtime = cfg.get('nuvolaris.kube')
-    storage_provisioner = cfg.get('nuvolaris.provisioner')    
-    return runtime in ["eks","gke","aks","generic"] or "rook" in storage_provisioner
+    #runtime = cfg.get('nuvolaris.kube')
+    #return runtime in ["eks","gke","aks","generic"]
+    storage_class = cfg.get('nuvolaris.storageclass')    
+    return storage_class not in ['standard','local-path','microk8s-hostpath']
+    
 
 def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtimes\.json}'):
     """ Return the configured runtimes.json from the config map cm/openwhisk-runtimes
