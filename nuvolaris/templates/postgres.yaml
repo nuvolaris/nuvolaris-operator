@@ -26,6 +26,7 @@ spec:
    image: postgres:14.1
    database:
       size: {{size}}Gi
+      storageClassName: {{storageClass}}
    customConfig: nuvolaris-postgres-conf 
    env:
       - name: POSTGRES_PASSWORD
