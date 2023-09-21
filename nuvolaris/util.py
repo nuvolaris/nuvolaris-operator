@@ -393,10 +393,11 @@ def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotation
 def get_enable_pod_security():
     """
     Return true if there is the need to enable pod security context
-    for some specific pod. This is currently used for EKS bitnami based images.
+    for some specific pod. This is currently used for bitnami based images.
     """
     runtime = cfg.get('nuvolaris.kube')
-    return runtime in ["eks","gke","aks","generic"]
+    storage_provisioner = cfg.get('nuvolaris.provisioner')    
+    return runtime in ["eks","gke","aks","generic"] or "rook" in storage_provisioner
 
 def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtimes\.json}'):
     """ Return the configured runtimes.json from the config map cm/openwhisk-runtimes
