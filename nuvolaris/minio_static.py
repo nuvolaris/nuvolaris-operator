@@ -34,10 +34,11 @@ def create(owner=None):
         "name":"nuvolaris-static",
         "container":"nuvolaris-static",
         "size":1,
+        "storageClass": cfg.get('nuvolaris.storageclass'),
         "dir":"/var/cache/nginx",
         "minio_host": cfg.get('minio.host') or "minio",
         "minio_port": cfg.get('minio.port') or "9000",
-        "applypodsecurity": util.get_enable_pod_security(),
+        "applypodsecurity": util.get_enable_pod_security()
     }
     
     tplp = ["nginx-static-cm.yaml","nginx-static-sts.yaml","security-set-attach.yaml","set-attach.yaml"]
@@ -103,6 +104,7 @@ def deploy_content_ingress_template(namespace, bucket, url):
     content.with_ingress_name(static_ingress_name(namespace))
     content.with_secret_name(static_secret_name(namespace))
     content.with_context_path("/")
+    content.with_context_regexp("(.*)")
     content.with_prefix_target(f"/{bucket}")
     content.with_service_name("nuvolaris-static-svc")
     content.with_service_port("8080")
