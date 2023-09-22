@@ -394,13 +394,13 @@ def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotation
 def get_enable_pod_security():
     """
     Return true if there is the need to enable pod security context
-    for some specific pod. This is currently used for bitnami based images
-    when using storage classes block based
+    for some specific pod. This is a test based on some empiric assumption on runtime 
+    basis and/or storage class.
+    @TODO: find a better way to determine when this function should return true.
     """
-    #runtime = cfg.get('nuvolaris.kube')
-    #return runtime in ["eks","gke","aks","generic"]
+    runtime = cfg.get('nuvolaris.kube')    
     storage_class = cfg.get('nuvolaris.storageclass')    
-    return storage_class not in ['standard','local-path','microk8s-hostpath']
+    return runtime in ["eks","gke","aks","generic"] or (runtime in ["k3s"] and "rook" in storage_class)
     
 
 def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtimes\.json}'):
