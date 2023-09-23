@@ -162,7 +162,7 @@ spec:
           value: "10m"
 
         - name: "CONFIG_whisk_activation_payload_max"
-          value: "1048576"
+          value: "{{activation_payload_max}}"
 
         - name: "CONFIG_whisk_loadbalancer_blackboxFraction"
           value: "10%"

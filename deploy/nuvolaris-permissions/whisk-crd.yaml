@@ -387,6 +387,15 @@ spec:
                     limits:
                       type: object
                       properties:
+                        activations:
+                          description: control ow activations limits
+                          type: object
+                          properties:
+                            max_allowed_payload:
+                              description: activation max allowed payload size in bytes. Defaults to 1048576 (1MB)
+                              type: integer
+                          required:
+                          - max_allowed_payload  
                         actions:
                           description: control ow actions execution limits
                           type: object
