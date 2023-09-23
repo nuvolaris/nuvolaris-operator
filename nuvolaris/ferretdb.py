@@ -33,7 +33,7 @@ from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
 
 def enrich_ferretdb_data(data):
-     data['size']= 1
+     data['size']= cfg.get('mongodb.volume-size') or 10
      data['dir']= "/state"            
      data['storageClass']=cfg.get("nuvolaris.storageclass")
      data['name']="nuvolaris-mongodb"

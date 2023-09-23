@@ -248,6 +248,7 @@ def get_standalone_config_data():
         "actions_sequence_maxLength": cfg.get("configs.limits.actions.sequence-maxLength") or 50,
         "actions_invokes_perMinute": cfg.get("configs.limits.actions.invokes-perMinute") or 60,
         "actions_invokes_concurrent": cfg.get("configs.limits.actions.invokes-concurrent") or 30,
+        "activation_payload_max": cfg.get('configs.limits.activations.max_allowed_payload') or "1048576",
         "time_limit_min": cfg.get("configs.limits.time.limit-min") or "100ms", 
         "time_limit_std": cfg.get("configs.limits.time.limit-std") or "1min", 
         "time_limit_max": cfg.get("configs.limits.time.limit-max") or "5min", 
