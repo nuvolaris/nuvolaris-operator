@@ -59,8 +59,8 @@ def get_default_storage_class():
     """
     Get the storage class attempting to get the default storage class defined on the configured kubernetes environment
     """
-    storage_class = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].metadata.name}")
-    storage_class += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class)].metadata.name}")
+    storage_class = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class=='true')].metadata.name}")
+    storage_class += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class=='true')].metadata.name}")
     if(storage_class):
         return storage_class[0]
 
@@ -70,8 +70,8 @@ def get_default_storage_provisioner():
     """
     Get the storage provisioner
     """    
-    provisioner = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class)].provisioner}")
-    provisioner += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class)].metadata.name}")
+    provisioner = kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class=='true')].provisioner}")
+    provisioner += kube.kubectl("get", "storageclass", jsonpath="{.items[?(@.metadata.annotations.storageclass\.beta\.kubernetes\.io\/is-default-class=='true')].metadata.name}")
     if(provisioner):
         return provisioner[0]
 
