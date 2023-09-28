@@ -305,7 +305,8 @@ def whisk_resume(spec, name, **kwargs):
     cfg.detect()
 
     logging.debug("*** dumping resumed configuration parameters")
-    cfg.dump_config()          
+    cfg.dump_config()
+    version_util.annotate_operator_components_version()         
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  
