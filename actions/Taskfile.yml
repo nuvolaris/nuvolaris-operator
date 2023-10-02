@@ -111,6 +111,10 @@ tasks:
     - >
       curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/content.html
 
+  upload:chess:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
+
 
   login:all:
     - task: login:prepare
