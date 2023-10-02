@@ -33,15 +33,11 @@ data:
       #    index  index.html index.htm;
       #}
 
-      #rewrite ^/$ ${request_uri}index.html break;
-      #rewrite (.*)/$ /$1/index.html;
-      #rewrite ^([^.]*[^/])$ /$1/ permanent;
+      location / {          
+          rewrite ^/$ ${request_uri}index.html break;          
+          rewrite ^([^.]*[^/])$ $1/;
+          rewrite (.*)/$ $1/index.html;                    
 
-      location / {
-          rewrite ^/$ ${request_uri}index.html break;
-          rewrite (.*)/$ $1/index.html;        
-          rewrite ^([^.]*[^/])$ $1/ permanent;
-          
           proxy_hide_header     x-amz-id-2;
           proxy_hide_header     x-amz-meta-etag;
           proxy_hide_header     x-amz-request-id;
@@ -50,10 +46,17 @@ data:
           proxy_set_header Host $http_host;
 
           proxy_pass http://{{minio_host}}.nuvolaris.svc.cluster.local:{{minio_port}}/;
+          
+          error_page 404 @not_found;
+          proxy_intercept_errors on;
           proxy_redirect     off;
-      }      
+      }  
 
-      #error_page  404              /404.html;
+      location @not_found {
+        root   /usr/share/nginx/html;
+      }            
+
+      error_page  404              /404.html;
 
       # redirect server error pages to the static page /50x.html
       #

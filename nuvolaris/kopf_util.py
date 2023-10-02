@@ -16,6 +16,7 @@
 # under the License.
 #
 import json, logging
+import nuvolaris.config as cfg
 
 def normalize(item:tuple):
     """
@@ -42,6 +43,9 @@ def endpoint(response: dict, item: dict):
     """
     if(item['path']=='spec.components.tls' or item['path']=='spec.nuvolaris.apihost'):
         response["endpoint"]="update"
+        # if we update the endpoint we need to be sure that we update also the static if still active
+        if cfg.get('components.static'):
+            response["static"]="update"            
 
 def openwhisk(response: dict, item: dict):
     """
