@@ -49,7 +49,7 @@ def create(owner=None):
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
     else:
-        cfg.put("state.ngix-static.spec", spec)
+        cfg.put("state.nginx-static.spec", spec)
 
     res = kube.apply(spec)
 
@@ -182,7 +182,7 @@ def delete_by_owner():
     return res
 
 def delete_by_spec():
-    spec = cfg.get("state.ngix-static.spec")
+    spec = cfg.get("state.nginx-static.spec")
     res = False
     if spec:
         res = kube.delete(spec)

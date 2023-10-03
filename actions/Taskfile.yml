@@ -89,7 +89,28 @@ tasks:
       {{.WSKSYS}} action update nuv/upload 
       {{.DEPLOY}}/upload.zip --kind python:3 --web true
     - > 
-      {{.WSKSYS}} action get nuv/upload --url             
+      {{.WSKSYS}} action get nuv/upload --url
+
+  devel:prepare:
+    - |- 
+      mkdir -p devel/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/nuvolaris
+    - |-
+      cd devel
+      rm  -f ../{{.DEPLOY}}/devel.zip
+      zip -r ../{{.DEPLOY}}/devel.zip *
+
+  devel:deploy:
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"  
+    - > 
+      {{.WSKSYS}} action update nuv/devel 
+      {{.DEPLOY}}/devel.zip --kind python:3 --web true
+    - > 
+      {{.WSKSYS}} action get nuv/devel --url                  
 
   login:webtest:
     - >

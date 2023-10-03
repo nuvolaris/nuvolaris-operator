@@ -15,10 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
 import nuvolaris.config as cfg
 import nuvolaris.couchdb_util as cu
 import logging, json
+
+from authorize import Authorize
 
 USER_META_DBN = "users_metadata"
 
@@ -58,23 +59,32 @@ def build_response(user_data):
     }
 
 def main(args):
-    cfg.clean()
-    cfg.put("couchdb.host", args['couchdb_host'])
-    cfg.put("couchdb.admin.user", args['couchdb_user'])
-    cfg.put("couchdb.admin.password", args['couchdb_password'])
-    
-    if('login' in args and 'password' in args):
-        db = cu.CouchDB()
-        login = args['login']
-        password = args['password']
-        user_data = fetch_user_data(db,login)
+    """
+    Action implementing a generic command wrapper for the nuv devel plugin. The action must be called with a POST request receiving a JSON
+    payload similar to this one
+    {
+        "provider":"redis",
+        "type":"execute",
+        "command":"<something to execute>",
+        "args":[
+            "arg0",
+            "arg1"
+        ]
+    }
 
-        if(user_data):
-            if(password == user_data['password']):
-                return build_response(user_data)
-            else:
-                return build_error(f"password mismatch for user {login}")
-        else:
-           return build_error(f"no user {login} found")
-    else:
-        return build_error("please provide login and password parameters")
+    the invoker must provide a x-impersonate-auth header which contains the BASIC authentication of the nuvolaris user to be used to submit the command to
+    the provider.
+    Every specific provider will support specific request type and command.
+    """
+    headers = args['__ow_headers']
+    if('x-impersonate-auth' not in headers):
+        return build_error("invalid request, missing mandatory header: x-impersonate-auth")
+
+    if(len(args['__ow_body']) == 0):
+        return build_error("invalid request, no command payload received")
+    
+    try:
+        user_data = Authorize().login(headers['x-impersonate-auth'])
+
+    except Exception as e:        
+        return build_error(f"failed to execute nuv devel command. Reason: {e}")
