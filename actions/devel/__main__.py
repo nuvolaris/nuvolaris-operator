@@ -21,6 +21,7 @@ import logging, json
 
 from auth.authorize import Authorize
 from command.redis import Redis
+from command.psql import Psql
 from command.command_data import CommandData
 from base64 import b64decode
 
@@ -77,6 +78,9 @@ def main(args):
         cmd = CommandData(json.loads(parse_body(args)))
         if 'redis' in cmd.provider():            
             return build_response(Redis(user_data).execute(cmd))
+        
+        if 'psql' in cmd.provider():            
+            return build_response(Psql(user_data).execute(cmd))      
 
         return build_error("no matching devel command found")
     except Exception as e:        

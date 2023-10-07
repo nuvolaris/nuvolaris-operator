@@ -52,4 +52,4 @@ class Redis():
             input.result(f"could not execute redis command {e}")
             input.status(400)
 
-        return input    
+        return input

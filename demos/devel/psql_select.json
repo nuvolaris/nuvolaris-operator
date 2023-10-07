@@ -1,0 +1,5 @@
+{
+    "provider": "psql", 
+    "type": "execute", 
+    "command":"select message from nuvolaris_table"
+}

@@ -1,0 +1,5 @@
+{
+    "provider": "psql", 
+    "type": "execute", 
+    "command":"INSERT INTO nuvolaris_table(message) VALUES ('Hello, World!');"
+}

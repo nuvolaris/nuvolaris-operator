@@ -1,0 +1,5 @@
+{
+    "provider": "psql", 
+    "type": "execute", 
+    "command":"CREATE EXTENSION IF NOT EXISTS 'pgcrypto';"
+}
