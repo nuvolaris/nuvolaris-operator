@@ -1,0 +1,5 @@
+{
+    "provider": "redis", 
+    "type": "execute", 
+    "command":"SET nuvolaris:key1 giggino"
+}

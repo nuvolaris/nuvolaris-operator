@@ -1,4 +1,3 @@
-#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,21 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-echo CONTROLLER: "$CONTROLLER_IMAGE:$CONTROLLER_TAG"
-echo OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
 
-echo preparing nuvolaris system actions....
+def get_env_value(user_data, key):
+    """
+    Check if inside the given user_data object there is an env item with the
+    given name and returns the value if any.
+    :param user_data
+    :param key
+    :return None if the given key it is not prese
+    """    
+    envs = list(user_data['env'])
 
-mkdir -p ${HOME}/actions/login/nuvolaris
-cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/login/nuvolaris
-cd ${HOME}/actions/login
-rm  -f ${HOME}/deploy/whisk-system/login.zip
-zip -r ${HOME}/deploy/whisk-system/login.zip *
-cd ${HOME}/actions/upload
-rm  -f ${HOME}/deploy/whisk-system/upload.zip
-zip -r ${HOME}/deploy/whisk-system/upload.zip *
-mkdir -p ${HOME}/actions/devel/nuvolaris
-cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/nuvolaris
-cd ${HOME}/actions/devel
-rm  -f ${HOME}/deploy/whisk-system/devel.zip
-zip -r ${HOME}/deploy/whisk-system/devel.zip *
+    for env in envs:
+        if env['key'] == key:
+            return env['value']
+
+    return None

@@ -101,6 +101,7 @@ tasks:
       zip -r ../{{.DEPLOY}}/devel.zip *
 
   devel:deploy:
+    - task: devel:prepare
     - > 
       {{.WSKSYS}} package update nuv
       -p couchdb_user "{{.CDB_USER}}"
@@ -108,7 +109,7 @@ tasks:
       -p couchdb_host "{{.CDB_HOST}}"  
     - > 
       {{.WSKSYS}} action update nuv/devel 
-      {{.DEPLOY}}/devel.zip --kind python:3 --web true
+      {{.DEPLOY}}/devel.zip --kind python:3 --web raw
     - > 
       {{.WSKSYS}} action get nuv/devel --url                  
 
@@ -135,6 +136,14 @@ tasks:
   upload:chess:
     - >
       curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
+
+  devel:redis:set:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
+
+  devel:redis:get:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json      
 
 
   login:all:

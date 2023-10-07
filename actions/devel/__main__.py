@@ -19,26 +19,13 @@ import nuvolaris.config as cfg
 import nuvolaris.couchdb_util as cu
 import logging, json
 
-from authorize import Authorize
+from auth.authorize import Authorize
+from command.redis import Redis
+from command.command_data import CommandData
+from base64 import b64decode
 
-USER_META_DBN = "users_metadata"
-
-def fetch_user_data(db, login: str):
-    logging.info(f"searching for user {login} data")
-    try:
-        selector = {"selector":{"login": {"$eq": login }}}
-        response = db.find_doc(USER_META_DBN, json.dumps(selector))
-
-        if(response['docs']):
-                docs = list(response['docs'])
-                if(len(docs) > 0):
-                    return docs[0]
-        
-        logging.warn(f"Nuvolaris metadata for user {login} not found!")
-        return None
-    except Exception as e:
-        logging.error(f"failed to query Nuvolaris metadata for user {login}. Reason: {e}")
-        return None
+class ApiError(Exception):
+    pass
 
 def build_error(message: str):
     return {
@@ -46,17 +33,19 @@ def build_error(message: str):
         "body": message
     }
 
-def build_response(user_data):
-    body = {}
-    envs = list(user_data['env'])
-
-    for env in envs:
-        body[env['key']]=env['value']
-
+def build_response(data:CommandData):
+    meta_data = data.get_metadata()
     return {
-        "statusCode": 200,
-        "body": body
+        "statusCode": meta_data['status'],
+        "body": meta_data['result']
     }
+
+def parse_body(args):
+    try:
+        return b64decode(args['__ow_body']).decode().strip()        
+    except Exception as e:
+        print(e)
+        raise ApiError("could not parse __ow_body as base64")
 
 def main(args):
     """
@@ -72,9 +61,9 @@ def main(args):
         ]
     }
 
-    the invoker must provide a x-impersonate-auth header which contains the BASIC authentication of the nuvolaris user to be used to submit the command to
-    the provider.
-    Every specific provider will support specific request type and command.
+    the invoker must provide a x-impersonate-auth header containing the BASIC authentication of the wsku/user the action should impersonate 
+    when submitting the command. Every specific provider will support specific request type and command.
+    WARNING: the body will be received as base64 encoded string as this action will be deployed with --web raw enabled flag
     """
     headers = args['__ow_headers']
     if('x-impersonate-auth' not in headers):
@@ -83,8 +72,12 @@ def main(args):
     if(len(args['__ow_body']) == 0):
         return build_error("invalid request, no command payload received")
     
-    try:
-        user_data = Authorize().login(headers['x-impersonate-auth'])
+    try:        
+        user_data = Authorize(args['couchdb_host'],args['couchdb_user'],args['couchdb_password']).login(headers['x-impersonate-auth'])               
+        cmd = CommandData(json.loads(parse_body(args)))
+        if 'redis' in cmd.provider():            
+            return build_response(Redis(user_data).execute(cmd))
 
+        return build_error("no matching devel command found")
     except Exception as e:        
         return build_error(f"failed to execute nuv devel command. Reason: {e}")

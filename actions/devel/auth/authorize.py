@@ -85,7 +85,7 @@ class Authorize():
         else:
             raise DecodeError
 
-        return unquote(username), unquote(password)         
+        return unquote(username), unquote(password) 
 
     def fetch_user_data(self, username: str):
         """
@@ -99,6 +99,7 @@ class Authorize():
             if(response['docs']):
                     docs = list(response['docs'])
                     if(len(docs) > 0):
+                        print(f"Nuvolaris metadata for user {username} found. Returning Result.")
                         return docs[0]
             
             print(f"Nuvolaris metadata for user {username} not found!")

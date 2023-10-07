@@ -67,7 +67,26 @@ def prepare_upload_action():
         "inputs":upload_inputs
     }
 
-    return upload    
+    return upload 
+
+def prepare_devel_action():
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
+
+    devel_inputs=[]
+    devel_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    devel_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    devel_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+
+    devel = {
+        "name":"devel",
+        "function":"devel.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":devel
+    }
+
+    return devel   
 
 
 def prepare_system_actions():
@@ -76,6 +95,7 @@ def prepare_system_actions():
     actions = []
     actions.append(prepare_login_action())
     actions.append(prepare_upload_action())
+    actions.append(prepare_devel_action())
     return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):

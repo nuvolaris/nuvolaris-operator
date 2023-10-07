@@ -1,0 +1,5 @@
+{
+    "provider": "redis", 
+    "type": "execute", 
+    "command":"GET nuvolaris:key1"
+}
