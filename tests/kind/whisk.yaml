@@ -51,6 +51,7 @@ spec:
 #  controller:
 #    image: "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"    
   nuvolaris:
+    password: nuvpassw0rd  
     storageclass: auto #standard
     provisioner: auto #rancher.io/local-path
     ingressclass: auto #nginx

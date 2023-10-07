@@ -48,9 +48,8 @@ spec:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abczO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
       nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
-#  controller:
-#    image: "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"    
   nuvolaris:
+    password: nuvpassw0rd 
     storageclass: auto #standard
     provisioner: auto #rancher.io/local-path
     ingressclass: auto #nginx

@@ -21,7 +21,8 @@ metadata:
   name: controller
   namespace: nuvolaris
 spec:
-  nuvolaris: 
+  nuvolaris:
+    password: nuvpassw0rd  
     apihost: api.apps.nuvolaris-testing.oshgcp.nuvtest.net #$APIHOST_OSH
   components:
     # start openwhisk controller

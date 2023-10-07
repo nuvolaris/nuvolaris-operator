@@ -32,7 +32,7 @@ import nuvolaris.minio as minio
 import nuvolaris.patcher as patcher
 import nuvolaris.minio_static as static
 import nuvolaris.whisk_actions_deployer as system
-import nuvolaris.version_util as version_util
+import nuvolaris.operator_util as operator_util
 import nuvolaris.postgres_operator as postgres
 import nuvolaris.runtimes_preloader as preloader
 
@@ -199,7 +199,7 @@ def whisk_post_create(name, state):
     else:                   
         state['whisk-system']="error"
     
-    version_util.annotate_operator_components_version()  
+    operator_util.whisk_post_create() 
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
@@ -294,7 +294,7 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
     cfg.dump_config()
     
     owner = kube.get(f"wsk/{name}")
-    patcher.patch(diff, status, owner)
+    patcher.patch(diff, status, owner)    
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
 def whisk_resume(spec, name, **kwargs):
@@ -306,7 +306,7 @@ def whisk_resume(spec, name, **kwargs):
 
     logging.debug("*** dumping resumed configuration parameters")
     cfg.dump_config()
-    version_util.annotate_operator_components_version()         
+    operator_util.annotate_operator_components_version()         
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  

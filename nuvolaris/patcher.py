@@ -29,7 +29,7 @@ import nuvolaris.kopf_util as kopf_util
 import nuvolaris.postgres_operator as postgres
 import nuvolaris.endpoint as endpoint
 import nuvolaris.issuer as issuer
-import nuvolaris.version_util as version_util
+import nuvolaris.operator_util as operator_util
 import nuvolaris.runtimes_preloader as preloader
 
 def patch_preloader(owner: None):
@@ -135,7 +135,7 @@ def patch(diff, status, owner=None):
         endpoint.patch(status,what_to_do['endpoint'], owner)
 
     if components_updated:
-        version_util.annotate_operator_components_version()         
+        operator_util.whisk_post_create()
     
         
     

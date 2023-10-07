@@ -18,6 +18,9 @@
 import logging
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.kube as kube
+import nuvolaris.userdb_util as userdb
+
+from nuvolaris.nuvolaris_metadata import NuvolarisMetadata
 
 def annotate_operator_components_version():
     """
@@ -42,3 +45,17 @@ def annotate_operator_components_version():
         logging.info("**** completed annotation of nuvolaris operator component versions")       
     except Exception as e:
         logging.error(e)
+
+def update_nuvolaris_metadata():
+    try:
+        logging.info("**** persisting nuvolaris metadata")
+        nuv_metadata = NuvolarisMetadata()
+        nuv_metadata.dump()
+        userdb.save_nuvolaris_metadata(nuv_metadata)
+        logging.info("**** nuvolaris metadata successfully persisted")
+    except Exception as e:
+        logging.error(e)        
+
+def whisk_post_create():
+    update_nuvolaris_metadata()
+    annotate_operator_components_version()        

@@ -22,6 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
+      password: nuvpassw0rd 
       apihost: nuvolaris.ftt.eks.n9s.cc
   components:
     # start openwhisk controller

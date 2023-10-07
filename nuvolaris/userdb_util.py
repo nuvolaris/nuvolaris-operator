@@ -23,6 +23,7 @@ import nuvolaris.user_config as user_config
 import nuvolaris.util as util
 import nuvolaris.mongodb as mdb
 from nuvolaris.user_metadata import UserMetadata
+from nuvolaris.nuvolaris_metadata import NuvolarisMetadata
 
 USER_META_DBN = "users_metadata"
 
@@ -34,6 +35,9 @@ def _add_metadata(db, metadata):
     return util.check(cdb.update_templated_doc(db, USER_META_DBN, "user_metadata.json", metadata), f"add_metadata {metadata['login']}", res)
     
 def save_user_metadata(user_metadata:UserMetadata):
+    """
+    Add a generic user metadata into the internal CouchDB 
+    """
     metadata = user_metadata.get_metadata()
     logging.info(f"Storing Nuvolaris metadata for {metadata['login']}")
 
@@ -43,6 +47,20 @@ def save_user_metadata(user_metadata:UserMetadata):
     except Exception as e:
         logging.error(f"failed to store Nuvolaris metadata for {metadata['login']}. Cause: {e}")
         return None
+
+def save_nuvolaris_metadata(nuvolaris_metadata:NuvolarisMetadata):
+    """
+    Add nuvolaris user metadata into the internal CouchDB 
+    """
+    metadata = nuvolaris_metadata.get_metadata()
+    logging.info(f"Storing Nuvolaris metadata for {metadata['login']}")
+
+    try:
+        db = couchdb_util.CouchDB()
+        return _add_metadata(db, metadata)
+    except Exception as e:
+        logging.error(f"failed to store Nuvolaris metadata for {metadata['login']}. Cause: {e}")
+        return None        
 
 def delete_user_metadata(login):
     logging.info(f"removing Nuvolaris metadata for user {login}")
