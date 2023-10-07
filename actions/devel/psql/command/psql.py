@@ -17,9 +17,9 @@
 #
 
 import psycopg
-import command.util as ut
+import common.util as ut
 
-from command.command_data import CommandData
+from common.command_data import CommandData
 from psycopg.rows import dict_row
 
 class Psql():

@@ -22,10 +22,7 @@ class CommandData:
     _data = {}
 
     def __init__(self, cmd):
-        self._data = {
-            "provider":cmd['provider'],
-            "command":cmd['command']    
-        }
+        self._data = cmd
 
     def dump(self):
         logging.debug(json.dumps(self._data))
@@ -40,9 +37,9 @@ class CommandData:
         return self._data
 
     def command(self):
-        return self._data['command']
-    
-    def provider(self):
-        return self._data['provider']    
+        return self._data['command'] 
+
+    def args(self):
+        return self._data['args']
     
 

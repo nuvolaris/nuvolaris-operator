@@ -75,12 +75,16 @@ tasks:
       {{.WSKSYS}} action get nuv/login --url
 
   upload:prepare:
+    - |- 
+      mkdir -p upload/common
+      cp ./common/minio_util.py upload/common      
     - |-
       cd upload
       rm  -f ../{{.DEPLOY}}/upload.zip
       zip -r ../{{.DEPLOY}}/upload.zip *
 
   upload:deploy:
+    - task: upload:prepare
     - > 
       {{.WSKSYS}} package update nuv
       -p minio_host {{.MINIO_HOST}}
@@ -91,27 +95,77 @@ tasks:
     - > 
       {{.WSKSYS}} action get nuv/upload --url
 
-  devel:prepare:
+  devel:redis:prepare:
     - |- 
-      mkdir -p devel/nuvolaris
-      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/nuvolaris
+      mkdir -p devel/redis/nuvolaris
+      mkdir -p devel/redis/common
+      cp ./common/*.py devel/redis/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/redis/nuvolaris
     - |-
-      cd devel
-      rm  -f ../{{.DEPLOY}}/devel.zip
-      zip -r ../{{.DEPLOY}}/devel.zip *
+      cd devel/redis
+      rm  -f ../../{{.DEPLOY}}/redis.zip
+      zip -r ../../{{.DEPLOY}}/redis.zip *
 
-  devel:deploy:
-    - task: devel:prepare
+  devel:redis:deploy:
+    - task: devel:redis:prepare
     - > 
       {{.WSKSYS}} package update nuv
       -p couchdb_user "{{.CDB_USER}}"
       -p couchdb_password "{{.CDB_PASSWORD}}"
-      -p couchdb_host "{{.CDB_HOST}}"  
+      -p couchdb_host "{{.CDB_HOST}}"
     - > 
-      {{.WSKSYS}} action update nuv/devel 
-      {{.DEPLOY}}/devel.zip --kind python:3 --web raw
+      {{.WSKSYS}} action update nuv/redis
+      {{.DEPLOY}}/redis.zip --kind python:3 --web raw
     - > 
-      {{.WSKSYS}} action get nuv/devel --url                  
+      {{.WSKSYS}} action get nuv/redis --url  
+
+  devel:psql:prepare:
+    - |- 
+      mkdir -p devel/psql/nuvolaris
+      mkdir -p devel/psql/common
+      cp ./common/*.py  devel/psql/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris
+    - |-
+      cd devel/psql
+      rm  -f ../../{{.DEPLOY}}/psql.zip
+      zip -r ../../{{.DEPLOY}}/psql.zip *
+
+  devel:psql:deploy:
+    - task: devel:psql:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/psql
+      {{.DEPLOY}}/psql.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/psql --url 
+
+  devel:minio:prepare:
+    - |- 
+      mkdir -p devel/minio/nuvolaris
+      mkdir -p devel/minio/common
+      cp ./common/*.py  devel/minio/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/minio/nuvolaris
+    - |-
+      cd devel/minio
+      rm  -f ../../{{.DEPLOY}}/minio.zip
+      zip -r ../../{{.DEPLOY}}/minio.zip *
+
+  devel:minio:deploy:
+    - task: devel:minio:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/minio
+      {{.DEPLOY}}/minio.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/minio --url                              
 
   login:webtest:
     - >
@@ -131,7 +185,7 @@ tasks:
 
   upload:webtest2:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/content.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
 
   upload:chess:
     - >
@@ -139,27 +193,35 @@ tasks:
 
   devel:redis:set:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
 
   devel:redis:get:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json 
 
   devel:psql:select:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_select.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_select.json 
 
   devel:psql:desc:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_desc.json
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_desc.json
 
   devel:psql:create:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create1.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create1.json 
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create2.json                        
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create2.json                        
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create3.json        
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create3.json        
+
+  devel:minio:ls:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_buckets.json       
+
+  devel:minio:lsb:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Basic bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_ls.json               
 
 
   login:all:

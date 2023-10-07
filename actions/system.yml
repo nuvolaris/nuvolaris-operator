@@ -32,13 +32,42 @@ tasks:
       zip -r ../{{.DEPLOY}}/login.zip *
 
   upload:prepare:
+    - |- 
+      mkdir -p upload/common
+      cp ./common/minio_util.py upload/common
     - |-
       cd upload
       rm  -f ../{{.DEPLOY}}/upload.zip
-      zip -r ../{{.DEPLOY}}/upload.zip *      
+      zip -r ../{{.DEPLOY}}/upload.zip *  
+
+  redis:prepare:
+    - |- 
+      mkdir -p devel/redis/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/redis/nuvolaris 
+    - |- 
+      mkdir -p devel/redis/common
+      cp ./common/authorize.py ./common/command_data.py ./common/util.py  devel/redis/common        
+    - |-
+      cd devel/redis
+      rm  -f ../../{{.DEPLOY}}/redis.zip
+      zip -r ../../{{.DEPLOY}}/redis.zip *
+
+  psql:prepare:
+    - |- 
+      mkdir -p devel/psql/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+    - |- 
+      mkdir -p devel/psql/common
+      cp ./common/authorize.py ./common/command_data.py ./common/util.py  devel/psql/common        
+    - |-
+      cd devel/psql
+      rm  -f ../../{{.DEPLOY}}/psql.zip
+      zip -r ../../{{.DEPLOY}}/psql.zip *                 
 
   # prepares all the system related actions
   prepare:
     - task: login:prepare   
     - task: upload:prepare
+    - task: redis:prepare   
+    - task: psql:prepare 
                     

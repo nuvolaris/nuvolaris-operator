@@ -15,19 +15,31 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import json
+import logging
 
-def get_env_value(user_data, key):
-    """
-    Check if inside the given user_data object there is an env item with the
-    given name and returns the value if any.
-    :param user_data
-    :param key
-    :return None if the given key it is not prese
-    """    
-    envs = list(user_data['env'])
+class CommandData:
+    _data = {}
 
-    for env in envs:
-        if env['key'] == key:
-            return env['value']
+    def __init__(self, cmd):
+        self._data = cmd
 
-    return None
+    def dump(self):
+        logging.debug(json.dumps(self._data))
+
+    def status(self, status):
+        self._data['status']=status
+
+    def result(self, result):
+        self._data['result']=result
+
+    def get_metadata(self):
+        return self._data
+
+    def command(self):
+        return self._data['command'] 
+
+    def args(self):
+        return self._data['args']
+    
+

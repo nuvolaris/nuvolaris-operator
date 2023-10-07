@@ -16,10 +16,10 @@
 # under the License.
 #
 
-import command.util as ut
+import common.util as ut
 import redis
 
-from command.command_data import CommandData
+from common.command_data import CommandData
 
 class Redis():
     """
