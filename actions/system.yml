@@ -66,11 +66,11 @@ tasks:
 
   minio:prepare:
     - |- 
-      mkdir -p devel/psql/nuvolaris
-      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+      mkdir -p devel/minio/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/minio/nuvolaris 
     - |- 
       mkdir -p devel/minio/common
-      cp ./*.py  devel/minio/common        
+      cp ./common/*.py devel/minio/common        
     - |-
       cd devel/minio
       rm  -f ../../{{.DEPLOY}}/minio.zip
@@ -82,11 +82,24 @@ tasks:
       cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
     - |- 
       mkdir -p devel/upload/common
-      cp ./*.py  devel/upload/common        
+      cp ./common/*.py  devel/upload/common        
     - |-
       cd devel/upload
       rm  -f ../../{{.DEPLOY}}/devel_upload.zip
-      zip -r ../../{{.DEPLOY}}/devel_upload.zip *                             
+      zip -r ../../{{.DEPLOY}}/devel_upload.zip *
+
+
+  ferretdb:prepare:
+    - |- 
+      mkdir -p devel/ferretdb/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/ferretdb/nuvolaris 
+    - |- 
+      mkdir -p devel/ferretdb/common
+      cp ./common/*.py  devel/ferretdb/common        
+    - |-
+      cd devel/ferretdb
+      rm  -f ../../{{.DEPLOY}}/ferretdb.zip
+      zip -r ../../{{.DEPLOY}}/ferretdb.zip *                                  
 
   # prepares all the system related actions
   prepare:
@@ -95,5 +108,6 @@ tasks:
     - task: redis:prepare   
     - task: psql:prepare 
     - task: minio:prepare 
-    - task: devel_upload:prepare 
+    - task: devel_upload:prepare
+    - task: ferretdb:prepare
                     

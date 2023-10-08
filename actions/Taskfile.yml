@@ -189,7 +189,31 @@ tasks:
       {{.WSKSYS}} action update nuv/devel_upload
       {{.DEPLOY}}/devel_upload.zip --kind python:3 --web raw
     - > 
-      {{.WSKSYS}} action get nuv/devel_upload --url                                    
+      {{.WSKSYS}} action get nuv/devel_upload --url 
+
+  devel:ferretdb:prepare:
+    - |- 
+      mkdir -p devel/ferretdb/nuvolaris
+      mkdir -p devel/ferretdb/common
+      cp ./common/*.py devel/ferretdb/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/ferretdb/nuvolaris
+    - |-
+      cd devel/ferretdb
+      rm  -f ../../{{.DEPLOY}}/ferretdb.zip
+      zip -r ../../{{.DEPLOY}}/ferretdb.zip *
+
+  devel:ferretdb:deploy:
+    - task: devel:ferretdb:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/ferretdb
+      {{.DEPLOY}}/ferretdb.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/ferretdb --url                                         
 
   login:webtest:
     - >
@@ -217,56 +241,63 @@ tasks:
 
   devel:redis:set:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
 
   devel:redis:get:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json 
 
   devel:psql:select:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_select.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_select.json 
 
   devel:psql:desc:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_desc.json
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_desc.json
 
   devel:psql:create:
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create1.json 
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create1.json 
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create2.json                        
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create2.json                        
     - >
-      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/psql_create3.json        
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create3.json        
 
   devel:minio:ls:
       - >
-        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_buckets.json       
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_buckets.json       
 
   devel:minio:lsb:
       - >
-        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_ls.json               
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_ls.json               
 
   devel:minio:rm:
       - >
-        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_rm.json 
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_rm.json 
 
   devel:minio:mv:
       - >
-        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_mv.json 
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_mv.json 
 
   devel:minio:cp:
       - >
-        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk"  -H "Content-Type: application/json" -d@../demos/devel/minio_cp.json 
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_cp.json 
 
   devel:upload:webtest:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-web/test/index.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-web/test/index.html
 
   devel:upload:data:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: bnV2b2xhcmlzOm51dnBhc3N3MHJk" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-dataa/test/index.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-data/test/index.html
 
+  devel:ferretdb:insert:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/ferretdb -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/mdb_insert.json
+
+  devel:ferretdb:find:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/ferretdb -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/mdb_find.json
 
 
 

@@ -24,6 +24,7 @@ import mimetypes
 
 from minio import Minio
 from minio.error import S3Error
+from minio.commonconfig import CopySource
 
 def extract_mimetype(file):
     mimetype, _ = mimetypes.guess_type(file)
@@ -49,7 +50,7 @@ def upload_file(mo_client, file, bucket, object_name=None):
     :param file_name: File to upload
     :param bucket: Bucket to upload to
     :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
+    :return: a tuple with the Booleand str,
     """
 
     # If S3 object_name was not specified, use file_name
@@ -63,11 +64,11 @@ def upload_file(mo_client, file, bucket, object_name=None):
         mimetype = extract_mimetype(object_name)
         response = mo_client.fput_object(bucket_name=bucket,object_name=object_name,file_path=file,content_type=mimetype)
         if response._object_name:
-            return True
+            return True, response._object_name
     except Exception as e:
         print(e)
-        return False
-    return False
+        return False, str(e)
+    return False, "KO"
 
 def prepare_file_upload(username, filename, file_content_as_b64):
     """ Creates a tmp area for the given user where the uploaded file will be stored under a random generated name
@@ -113,5 +114,68 @@ def delete_files_in_directory_and_subdirectories(directory_path):
 def get_random_string(length):
     # choose from all lowercase letter
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))                    
+    return ''.join(random.choice(letters) for i in range(length))
+
+def rm_file(mo_client, bucket, file):
+    """ Remove a file from a bucket
+    :parma mo_client a minio client instance to execute the command
+    :param bucket the bucket name
+    :param file the file name
+    :return True if the file has been removed, False otherwise
+    """
+    
+    try:
+        mo_client.remove_object(bucket, file)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+    return False 
+
+def cp_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file):
+    """Copy a file between two buckets
+
+    :param orig_bucket: Origin bucket
+    :param orig_file: Origin file
+    :param dest_bucket: Destination bucket
+    :param dest_file: Destination file
+    :return: name of the destination file is everything is ok. None otherwise
+    """
+    print(f"**** moving file {orig_file} from bucket {orig_bucket} to bucket {dest_bucket} with name {dest_file}")
+    try:
+        # copy an object from a bucket to another.
+        cp_result = mo_client.copy_object(
+            dest_bucket,
+            dest_file,
+            CopySource(orig_bucket, orig_file)
+        )
+        if cp_result.object_name:            
+            return cp_result.object_name
+    except Exception as e:
+        print(e)
+        return None
+    return None  
+
+def mv_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file):
+    """Move a file between two buckets
+
+    :param orig_bucket: Origin bucket
+    :param orig_file: Origin file
+    :param dest_bucket: Destination bucket
+    :param dest_file: Destination file
+    :return: name of the destination file is everything is ok. None otherwise
+    """
+    print(f"**** moving file {orig_file} from bucket {orig_bucket} to bucket {dest_bucket} with name {dest_file}")
+
+    # Upload the file
+    try:
+        # mv an object from a bucket to another.
+        object_name = cp_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file)
+        if object_name:
+            rm_file(orig_bucket,orig_file)            
+            return object_name
+    except Exception as e:
+        print(e)
+        return None
+    return None                          
 

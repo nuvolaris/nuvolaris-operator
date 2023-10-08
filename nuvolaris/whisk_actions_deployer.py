@@ -148,6 +148,26 @@ def prepare_dev_upload_action():
         "inputs":dev_upload_inputs
     }
 
+    return dev_upload  
+
+def prepare_ferretdb_action():
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
+
+    ferretdb_inputs=[]
+    ferretdb_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    ferretdb_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    ferretdb_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    ferretdb_inputs.append({"key":"couchdb_port", "value":couchdb_port})
+
+    dev_upload = {
+        "name":"ferretdb",
+        "function":"ferretdb.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":ferretdb_inputs
+    }
+
     return dev_upload         
 
 
@@ -161,6 +181,7 @@ def prepare_system_actions():
     actions.append(prepare_psql_action())
     actions.append(prepare_minio_action())
     actions.append(prepare_dev_upload_action())
+    actions.append(prepare_ferretdb_action())
     return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):

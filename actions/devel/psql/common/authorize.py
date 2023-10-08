@@ -21,6 +21,7 @@ from urllib.parse import quote, unquote
 import nuvolaris.config as cfg
 import nuvolaris.couchdb_util as cu
 import json
+import util as ut
 
 USER_META_DBN = "users_metadata"
 
@@ -115,7 +116,7 @@ class Authorize():
         username, password = self.decode(authorization)
         user_data = self.fetch_user_data(username)
 
-        if user_data and password == user_data['password']:
+        if user_data and password == ut.get_env_value(user_data,'AUTH'):
             return user_data
         
         raise AuthorizationError

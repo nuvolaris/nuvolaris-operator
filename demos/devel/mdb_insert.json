@@ -1,0 +1,9 @@
+{
+    "insert":"test",    
+    "documents":[
+        {
+            "Name":"Ciccio",
+            "Surname":"Traliccio"
+        }
+    ]
+}
