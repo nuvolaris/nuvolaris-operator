@@ -20,9 +20,11 @@ import logging
 
 class CommandData:
     _data = {}
+    _raw_data = {}
 
     def __init__(self, cmd):
         self._data = cmd
+        self._raw_data = cmd.copy()
 
     def dump(self):
         logging.debug(json.dumps(self._data))
@@ -35,6 +37,9 @@ class CommandData:
 
     def get_metadata(self):
         return self._data
+    
+    def get_raw_data(self):
+        return self._raw_data
 
     def command(self):
         return self._data['command'] 

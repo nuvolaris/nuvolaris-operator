@@ -21,9 +21,10 @@ from urllib.parse import quote, unquote
 import nuvolaris.config as cfg
 import nuvolaris.couchdb_util as cu
 import json
-import util as ut
+import common.util as ut
 
 USER_META_DBN = "users_metadata"
+SUBJECT_META_DBN = "subjects"
 
 class DecodeError(Exception):
     pass
@@ -86,13 +87,42 @@ class Authorize():
         else:
             raise DecodeError
 
-        return unquote(username), unquote(password) 
+        return unquote(username), unquote(password)
+
+    def fetch_subject(self, uuid: str, key: str):
+        """
+        Query the internal couchdb searching for the subject mathing the given uuid, key.
+        Normally these stored in wsk or wsku in the form uuid:key
+        :param uuid the OW subject uuid
+        :param key the OW subject key
+        :return a ubject document
+        """
+        print(f"searching for openwhisk subject {uuid} data")
+        try:
+            selector= {
+                "selector": {"namespaces": {"$elemMatch": {"uuid": uuid,"key": key}}}
+            }
+
+            response = self._db.find_doc(SUBJECT_META_DBN, json.dumps(selector))
+
+            if(response['docs']):
+                    docs = list(response['docs'])
+                    if(len(docs) > 0):
+                        print(f"Nuvolaris namespace for user {uuid} found. Returning Result.")
+                        return docs[0]
+            
+            print(f"Nuvolaris metadata for user {uuid} not found!")
+            return None
+        except Exception as e:
+            print(f"failed to query Nuvolaris metadata for user {uuid}. Reason: {e}")
+            return None        
 
     def fetch_user_data(self, username: str):
         """
-        Query the internal mongodb searching for the given username
+        Query the internal couchdb searching for the given principal to retrieve all the 
+        relevant metadata
         """
-        print(f"searching for user {username} data")
+        print(f"searching for user {username} metda-data")
         try:
             selector = {"selector":{"login": {"$eq": username }}}
             response = self._db.find_doc(USER_META_DBN, json.dumps(selector))
@@ -111,12 +141,17 @@ class Authorize():
 
     def login(self, authorization: str):
         """
-        Attempt to login the user identified by the given Basic authorization token
+        Attempt to login the user identified by the given Openwhisk authorization AUTH token as base64
         """
-        username, password = self.decode(authorization)
-        user_data = self.fetch_user_data(username)
+        uuid, key = self.decode(authorization)
+        subject = self.fetch_subject(uuid, key)
 
-        if user_data and password == ut.get_env_value(user_data,'AUTH'):
+        if not subject:
+            raise AuthorizationError("Openwhisk subject not found.")
+
+        user_data = self.fetch_user_data(subject['subject'])
+
+        if user_data:
             return user_data
         
-        raise AuthorizationError
+        raise AuthorizationError("Could not retrieve user metadata.")

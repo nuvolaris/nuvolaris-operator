@@ -91,9 +91,13 @@ class Authorize():
 
     def fetch_subject(self, uuid: str, key: str):
         """
-        Query the internal couchdb searching for the subject mathing the given credentials
+        Query the internal couchdb searching for the subject mathing the given uuid, key.
+        Normally these stored in wsk or wsku in the form uuid:key
+        :param uuid the OW subject uuid
+        :param key the OW subject key
+        :return a ubject document
         """
-        print(f"searching for subject {uuid} data")
+        print(f"searching for openwhisk subject {uuid} data")
         try:
             selector= {
                 "selector": {"namespaces": {"$elemMatch": {"uuid": uuid,"key": key}}}
@@ -115,9 +119,10 @@ class Authorize():
 
     def fetch_user_data(self, username: str):
         """
-        Query the internal mongodb searching for the given username
+        Query the internal couchdb searching for the given principal to retrieve all the 
+        relevant metadata
         """
-        print(f"searching for user {username} data")
+        print(f"searching for user {username} metda-data")
         try:
             selector = {"selector":{"login": {"$eq": username }}}
             response = self._db.find_doc(USER_META_DBN, json.dumps(selector))
@@ -136,17 +141,17 @@ class Authorize():
 
     def login(self, authorization: str):
         """
-        Attempt to login the user identified by the given Openwhisk authorization token
+        Attempt to login the user identified by the given Openwhisk authorization AUTH token as base64
         """
-        username, password = self.decode(authorization)
-        subject = self.fetch_subject(username, password)
+        uuid, key = self.decode(authorization)
+        subject = self.fetch_subject(uuid, key)
 
         if not subject:
-            raise AuthorizationError
+            raise AuthorizationError("Openwhisk subject not found.")
 
         user_data = self.fetch_user_data(subject['subject'])
 
         if user_data:
             return user_data
         
-        raise AuthorizationError
+        raise AuthorizationError("Could not retrieve user metadata.")
