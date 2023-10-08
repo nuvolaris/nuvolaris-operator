@@ -56,3 +56,11 @@ cp ${HOME}/actions/common/*.py ${HOME}/actions/minio/common
 cd ${HOME}/actions/minio
 rm  -f ${HOME}/deploy/whisk-system/minio.zip
 zip -r ${HOME}/deploy/whisk-system/minio.zip *
+
+mkdir -p ${HOME}/actions/devel_upload/nuvolaris
+mkdir -p ${HOME}/actions/devel_upload/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel_upload/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel_upload/common
+cd ${HOME}/actions/devel_upload
+rm  -f ${HOME}/deploy/whisk-system/devel_upload.zip
+zip -r ${HOME}/deploy/whisk-system/devel_upload.zip *

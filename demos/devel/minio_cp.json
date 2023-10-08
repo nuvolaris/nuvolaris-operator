@@ -1,0 +1,9 @@
+{
+    "command":"cp",
+    "args":[
+        "nuvolaris-web",
+        "index.html",
+        "nuvolaris-web",
+        "tidy/content2.html"
+    ]
+}

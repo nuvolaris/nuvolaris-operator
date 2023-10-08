@@ -62,7 +62,31 @@ tasks:
     - |-
       cd devel/psql
       rm  -f ../../{{.DEPLOY}}/psql.zip
-      zip -r ../../{{.DEPLOY}}/psql.zip *                 
+      zip -r ../../{{.DEPLOY}}/psql.zip *
+
+  minio:prepare:
+    - |- 
+      mkdir -p devel/psql/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+    - |- 
+      mkdir -p devel/minio/common
+      cp ./*.py  devel/minio/common        
+    - |-
+      cd devel/minio
+      rm  -f ../../{{.DEPLOY}}/minio.zip
+      zip -r ../../{{.DEPLOY}}/minio.zip *
+
+  devel_upload:prepare:
+    - |- 
+      mkdir -p devel/upload/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+    - |- 
+      mkdir -p devel/upload/common
+      cp ./*.py  devel/upload/common        
+    - |-
+      cd devel/upload
+      rm  -f ../../{{.DEPLOY}}/devel_upload.zip
+      zip -r ../../{{.DEPLOY}}/devel_upload.zip *                             
 
   # prepares all the system related actions
   prepare:
@@ -70,4 +94,6 @@ tasks:
     - task: upload:prepare
     - task: redis:prepare   
     - task: psql:prepare 
+    - task: minio:prepare 
+    - task: devel_upload:prepare 
                     

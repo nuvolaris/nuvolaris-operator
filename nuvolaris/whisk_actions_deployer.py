@@ -39,6 +39,7 @@ def prepare_login_action():
     login_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
     login_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
     login_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    login_inputs.append({"key":"couchdb_port", "value":couchdb_port})
 
     login = {
         "name":"login",
@@ -57,7 +58,7 @@ def prepare_upload_action():
 
     upload_inputs=[]
     upload_inputs.append({"key":"minio_host", "value":minio_full_host})
-    upload_inputs.append({"key":"minio_port", "value":minio_port})
+    upload_inputs.append({"key":"minio_port", "value":minio_port})    
 
     upload = {
         "name":"upload",
@@ -69,24 +70,85 @@ def prepare_upload_action():
 
     return upload 
 
-def prepare_devel_action():
+def prepare_redis_action():
     couchdb_host = cfg.get("couchdb.host") or "couchdb"
     couchdb_port = cfg.get("couchdb.port") or "5984"
 
-    devel_inputs=[]
-    devel_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    devel_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    devel_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    redis_inputs=[]
+    redis_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    redis_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    redis_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    redis_inputs.append({"key":"couchdb_port", "value":couchdb_port})
 
-    devel = {
-        "name":"devel",
-        "function":"devel.zip",
+    redis = {
+        "name":"redis",
+        "function":"redis.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":devel
+        "inputs":redis_inputs
     }
 
-    return devel   
+    return redis 
+
+def prepare_psql_action():
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
+
+    psql_inputs=[]
+    psql_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    psql_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    psql_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    psql_inputs.append({"key":"couchdb_port", "value":couchdb_port})
+
+    psql = {
+        "name":"psql",
+        "function":"psql.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":psql_inputs
+    }
+
+    return psql  
+
+def prepare_minio_action():
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
+
+    minio_inputs=[]
+    minio_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    minio_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    minio_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    minio_inputs.append({"key":"couchdb_port", "value":couchdb_port})
+
+    minio = {
+        "name":"minio",
+        "function":"minio.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":minio_inputs
+    }
+
+    return minio  
+
+def prepare_dev_upload_action():
+    couchdb_host = cfg.get("couchdb.host") or "couchdb"
+    couchdb_port = cfg.get("couchdb.port") or "5984"
+
+    dev_upload_inputs=[]
+    dev_upload_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    dev_upload_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    dev_upload_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    dev_upload_inputs.append({"key":"couchdb_port", "value":couchdb_port})
+
+    dev_upload = {
+        "name":"devel_upload",
+        "function":"devel_upload.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":dev_upload_inputs
+    }
+
+    return dev_upload         
 
 
 def prepare_system_actions():
@@ -95,7 +157,10 @@ def prepare_system_actions():
     actions = []
     actions.append(prepare_login_action())
     actions.append(prepare_upload_action())
-    actions.append(prepare_devel_action())
+    actions.append(prepare_redis_action())
+    actions.append(prepare_psql_action())
+    actions.append(prepare_minio_action())
+    actions.append(prepare_dev_upload_action())
     return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):

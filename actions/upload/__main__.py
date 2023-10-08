@@ -12,13 +12,16 @@ def build_error(message: str):
         "body": message
     }
 
-def build_response(user, filename,bucket, upload_result):
+def build_response(user, filename,bucket, upload_result,upload_message):
     body = {
         "user":user,
         "filename":filename,
         "bucket":bucket,
         "uploaded": upload_result
     }
+
+    if upload_message:
+        body['message']=upload_message
 
     return {
         "statusCode": upload_result and 200 or 400,
@@ -79,7 +82,7 @@ def main(args):
     tmp_file = mutil.prepare_file_upload(upload_data['user'],upload_data['filename'],content_as_b64)
 
     if tmp_file:        
-        upload_result = mutil.upload_file(mo_client,tmp_file,f"{upload_data['user']}-web",upload_data['filename'])
-        return build_response(upload_data['user'],upload_data['filename'],f"{upload_data['user']}-web",upload_result)
+        upload_result, upload_message = mutil.upload_file(mo_client,tmp_file,f"{upload_data['user']}-web",upload_data['filename'])
+        return build_response(upload_data['user'],upload_data['filename'],f"{upload_data['user']}-web",upload_result, upload_message)
     else:
         return build_error("Unexptected error upload action. Check activation log")

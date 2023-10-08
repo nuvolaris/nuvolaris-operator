@@ -21,6 +21,8 @@ import common.minio_util as mutil
 import json
 from common.command_data import CommandData
 
+from minio.commonconfig import CopySource
+
 class Minio():
     """
     Implementation of a Minio Command executor. It will require
@@ -57,8 +59,9 @@ class Minio():
         input.result(result)
         input.status(200)
 
-    def _list_bucket_content(self, bucket, input:CommandData):
+    def _list_bucket_content(self,bucket,input:CommandData):
         print(f"**** listing bucket {bucket} content")
+        
         mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
         objects = mo_client.list_objects(bucket_name=bucket, recursive= True)
         result = []
@@ -67,16 +70,64 @@ class Minio():
             result.append({"name":obj.object_name,"last_modified": str(obj.last_modified), "size":obj.size})
 
         input.result(result)
-        input.status(200)   
+        input.status(200) 
+
+    def _rm_bucket_object(self,bucket,filename,input:CommandData):
+        print(f"**** removing file {filename} inside bucket {bucket}")
+        
+        mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
+        mo_client.remove_object(bucket, filename)        
+        
+        result = {"result":"OK"}
+        input.result(result)
+        input.status(200) 
+
+    def _mv_bucket_object(self,orig_bucket,orig_filename,dest_bucket,dest_filename,input:CommandData):
+        print(f"**** moving file {orig_filename} from bucket {orig_bucket} to bucket {dest_bucket} with name {dest_filename}")
+        
+        mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
+        object_name = mutil.mv_file(mo_client,orig_bucket,orig_filename,dest_bucket,dest_filename)
+
+        if object_name:                
+            input.result({"name":object_name})
+            input.status(200)               
+        else:    
+            input.result(f"move operation failed")
+            input.status(400)
+
+    def _cp_bucket_object(self,orig_bucket,orig_filename,dest_bucket,dest_filename,input:CommandData):
+        print(f"**** copying file {orig_filename} from bucket {orig_bucket} to bucket {dest_bucket} with name {dest_filename}")
+        
+        mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
+        object_name = mutil.cp_file(mo_client,orig_bucket,orig_filename,dest_bucket,dest_filename)
+
+        if object_name:                
+            input.result({"name":object_name})
+            input.status(200)               
+        else:    
+            input.result(f"move operation failed")
+            input.status(400)            
 
     def execute(self, input:CommandData):
         print(f"**** Minio command to execute {input.command()}")        
         try:
+            input.status(400)
+            input.result(f"could not execute minio command {input.command()} invalid arguments.")
+
             if "ls" in input.command() and not "args" in input.get_metadata():                
                 self._list_buckets(input)
 
-            if "ls" in input.command() and "args" in input.get_metadata() and len(input.args()) > 0:
-                self._list_bucket_content(input.args()[0], input)
+            if "ls" in input.command() and "args" in input.get_metadata() and len(input.args()) == 1:
+                self._list_bucket_content(input.args()[0],input)
+
+            if "rm" in input.command() and "args" in input.get_metadata() and len(input.args()) == 2:
+                self._rm_bucket_object(input.args()[0],input.args()[1],input) 
+
+            if "mv" in input.command() and "args" in input.get_metadata() and len(input.args()) == 4:
+                self._mv_bucket_object(input.args()[0],input.args()[1],input.args()[2],input.args()[3], input) 
+
+            if "cp" in input.command() and "args" in input.get_metadata() and len(input.args()) == 4:
+                self._cp_bucket_object(input.args()[0],input.args()[1],input.args()[2],input.args()[3], input)                                                
 
         except Exception as e:
             input.result(f"could not execute minio command {e}")
