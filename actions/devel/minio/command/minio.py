@@ -51,12 +51,7 @@ class Minio():
         print("**** listing user buckets")
         mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
         buckets = mo_client.list_buckets()
-        result = []
-
-        for bucket in buckets:
-            result.append({"bucket": bucket.name, "creation_date": str(bucket.creation_date)})
-
-        input.result(result)
+        input.result(str(buckets))
         input.status(200)
 
     def _list_bucket_content(self,bucket,input:CommandData):
@@ -64,12 +59,7 @@ class Minio():
         
         mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
         objects = mo_client.list_objects(bucket_name=bucket, recursive= True)
-        result = []
-        
-        for obj in objects:
-            result.append({"name":obj.object_name,"last_modified": str(obj.last_modified), "size":obj.size})
-
-        input.result(result)
+        input.result(str(objects))
         input.status(200) 
 
     def _rm_bucket_object(self,bucket,filename,input:CommandData):

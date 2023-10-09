@@ -52,7 +52,7 @@ class FerretDB():
 
 
     def _send_command(self,input:CommandData):
-        print(json.dumps(input.get_raw_data()))        
+        print(f"inside ferretdb _send_command {json.dumps(input.get_raw_data())}")        
         db = self._get_db()
         response = db.command(input.get_raw_data())
 

@@ -50,8 +50,9 @@ class Psql():
         with psycopg.connect(self._postgres_url) as conn:
             # Open a cursor to perform database operations
             with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(query)                
-                input.result(cur.fetchall())
+                cur.execute(query)
+                result = cur.fetchall()                
+                input.result(str(result))
                 input.status(200)
                 return input
 

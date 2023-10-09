@@ -55,11 +55,7 @@ def login(**kwargs):
 def whisk_create(spec, name, **kwargs):
     logging.info(f"*** whisk_create {name}")
 
-    cfg.clean()
-    cfg.configure(spec)
-    cfg.detect()
-    cfg.put("config.apihost", "https://pending")
-    cfg.dump_config()
+    operator_util.config_from_spec(spec)
     owner = kube.get(f"wsk/{name}")
 
     state = {
@@ -285,28 +281,17 @@ def deploy_update(old, new, name, **kwargs):
 @kopf.on.update('nuvolaris.org', 'v1', 'whisks')
 def whisk_update(spec, status, namespace, diff, name, **kwargs):
     logging.info(f"*** detected an update of wsk/{name} under namespace {namespace}")
-
-    cfg.clean()
-    cfg.configure(spec)
-    cfg.detect()
-
-    logging.debug("*** dumping new configuration parameters")
-    cfg.dump_config()
     
+    operator_util.config_from_spec(spec,handler_type="on_update")
     owner = kube.get(f"wsk/{name}")
+
     patcher.patch(diff, status, owner)    
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
 def whisk_resume(spec, name, **kwargs):
     logging.info(f"*** whisk_resume {name}")
-
-    cfg.clean()
-    cfg.configure(spec)
-    cfg.detect()
-
-    logging.debug("*** dumping resumed configuration parameters")
-    cfg.dump_config()
-    operator_util.annotate_operator_components_version()         
+    operator_util.config_from_spec(spec, handler_type="on_resume")
+    operator_util.annotate_operator_components_version()
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  

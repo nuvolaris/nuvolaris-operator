@@ -54,8 +54,19 @@ class Authorize():
         username_password = f'{quote(username)}:{quote(password)}'
         return f'Basic {b64encode(username_password.encode()).decode()}'
 
+    def _parse_b64(self, encoded_str):  
+            try:
+                username, password = b64decode(encoded_str).decode().split(':', 1)
+            except:
+                # fallback in case the token is not bas64 encoded                
+                username, password = encoded_str.split(':', 1)
 
-    def decode(sels, encoded_str):
+                if not username or not password:
+                    raise DecodeError("authentication token does not seems to be b64 encoded")
+                
+            return username, password    
+
+    def decode(self, encoded_str):
         """Decode an encrypted HTTP basic authentication string. Returns a tuple of
         the form (username, password), and raises a DecodeError exception if
         nothing could be decoded.
@@ -65,27 +76,21 @@ class Authorize():
         # If split is only one element, try to decode the username and password
         # directly.
         if len(split) == 1:
-            try:
-                username, password = b64decode(split[0]).decode().split(':', 1)
-            except:
-                raise DecodeError
+            username, password = self._parse_b64(split[0])
 
         # If there are only two elements, check the first and ensure it says
         # 'basic' so that we know we're about to decode the right thing. If not,
         # bail out.
         elif len(split) == 2:
             if split[0].strip().lower() == 'basic':
-                try:
-                    username, password = b64decode(split[1]).decode().split(':', 1)
-                except:
-                    raise DecodeError
+                username, password = self._parse_b64(split[1])
             else:
-                raise DecodeError
+                raise DecodeError("authentication token provides more than 2 elements. could not parse properly")
 
         # If there are more than 2 elements, something crazy must be happening.
         # Bail.
         else:
-            raise DecodeError
+            raise DecodeError("unpredictable error parsing authentication token")
 
         return unquote(username), unquote(password)
 
@@ -97,7 +102,7 @@ class Authorize():
         :param key the OW subject key
         :return a ubject document
         """
-        print(f"searching for openwhisk subject {uuid} data")
+        print(f"searching for openwhisk subject {uuid}")
         try:
             selector= {
                 "selector": {"namespaces": {"$elemMatch": {"uuid": uuid,"key": key}}}
@@ -122,7 +127,7 @@ class Authorize():
         Query the internal couchdb searching for the given principal to retrieve all the 
         relevant metadata
         """
-        print(f"searching for user {username} metda-data")
+        print(f"searching for user {username} meta-data")
         try:
             selector = {"selector":{"login": {"$eq": username }}}
             response = self._db.find_doc(USER_META_DBN, json.dumps(selector))

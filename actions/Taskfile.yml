@@ -321,5 +321,12 @@ tasks:
 
   all:
     - task: prepare
-    - task: deploy        
+    - task: deploy 
+
+  deploy:devel:
+    - task: devel:redis:deploy
+    - task: devel:minio:deploy
+    - task: devel:psql:deploy
+    - task: devel:upload:deploy
+    - task: devel:ferretdb:deploy
                     

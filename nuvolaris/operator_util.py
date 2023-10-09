@@ -19,6 +19,8 @@ import logging
 import nuvolaris.openwhisk as openwhisk
 import nuvolaris.kube as kube
 import nuvolaris.userdb_util as userdb
+import nuvolaris.config as cfg
+import nuvolaris.util as ut
 
 from nuvolaris.nuvolaris_metadata import NuvolarisMetadata
 
@@ -58,4 +60,28 @@ def update_nuvolaris_metadata():
 
 def whisk_post_create():
     update_nuvolaris_metadata()
-    annotate_operator_components_version()        
+    annotate_operator_components_version()
+
+def config_from_spec(spec, handler_type = "on_create"):
+    """
+    Initialize the global configuration from the given spec.
+    :param spec 
+    :param on_resume boolen flag telling if thsi method is called from the on_resume handler
+    """
+    cfg.clean()
+    cfg.configure(spec)
+    cfg.detect()
+
+    if "on_create" in handler_type:       
+        cfg.put("config.apihost", "https://pending")
+        logging.debug("**** dumping initial configuration")
+
+    if "on_update" in handler_type:               
+        logging.debug("**** dumping updated configuration")        
+
+    if "on_resume" in handler_type:
+        apihost = ut.get_apihost_from_config_map()
+        cfg.put("config.apihost", apihost)
+        logging.debug("**** dumping resumed configuration")        
+
+    cfg.dump_config()

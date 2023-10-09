@@ -46,7 +46,7 @@ class Redis():
         try:
             r = redis.from_url(self._redis_url)
             result = r.execute_command(input.command())
-            input.result(result.decode('utf-8'))
+            input.result(str(result.decode('utf-8')))
             input.status(200)
         except Exception as e:
             input.result(f"could not execute redis command {e}")

@@ -1,9 +1,18 @@
 {
-    "insert":"test",    
+    "insert":"nuvolaris",    
     "documents":[
         {
-            "Name":"Ciccio",
-            "Surname":"Traliccio"
+            "Name":"Affare",
+            "Surname":"fatto"
+        },
+        {
+            "Name":"Nuvolaris",
+            "Surname":"rocks"
+        },
+        {
+            "Name":"Gigi",
+            "Surname":"La trottola",
+            "Age":65
         }
     ]
 }
