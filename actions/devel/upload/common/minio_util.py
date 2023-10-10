@@ -172,7 +172,7 @@ def mv_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file):
         # mv an object from a bucket to another.
         object_name = cp_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file)
         if object_name:
-            rm_file(orig_bucket,orig_file)            
+            rm_file(mo_client,orig_bucket,orig_file)          
             return object_name
     except Exception as e:
         print(e)
