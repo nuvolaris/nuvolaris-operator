@@ -177,5 +177,5 @@ def mv_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file):
     except Exception as e:
         print(e)
         return None
-    return None                          
+    return None                             
 

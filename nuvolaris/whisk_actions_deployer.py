@@ -30,23 +30,25 @@ from nuvolaris.whisk_system_util import WhiskSystemClient
 from nuvolaris.util import nuv_retry
 from subprocess import CompletedProcess
 
-
-def prepare_login_action():
+def get_couchdb_inputs():
     couchdb_host = cfg.get("couchdb.host") or "couchdb"
     couchdb_port = cfg.get("couchdb.port") or "5984"
 
-    login_inputs=[]
-    login_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    login_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    login_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    login_inputs.append({"key":"couchdb_port", "value":couchdb_port})
+    cdb_inputs=[]
+    cdb_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    cdb_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    cdb_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    cdb_inputs.append({"key":"couchdb_port", "value":couchdb_port})
 
+    return cdb_inputs
+
+def prepare_login_action():
     login = {
         "name":"login",
         "function":"login.zip",
         "runtime":"python:3",
         "web":"true",
-        "inputs":login_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return login
@@ -71,104 +73,71 @@ def prepare_upload_action():
     return upload 
 
 def prepare_redis_action():
-    couchdb_host = cfg.get("couchdb.host") or "couchdb"
-    couchdb_port = cfg.get("couchdb.port") or "5984"
-
-    redis_inputs=[]
-    redis_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    redis_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    redis_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    redis_inputs.append({"key":"couchdb_port", "value":couchdb_port})
 
     redis = {
         "name":"redis",
         "function":"redis.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":redis_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return redis 
 
 def prepare_psql_action():
-    couchdb_host = cfg.get("couchdb.host") or "couchdb"
-    couchdb_port = cfg.get("couchdb.port") or "5984"
-
-    psql_inputs=[]
-    psql_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    psql_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    psql_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    psql_inputs.append({"key":"couchdb_port", "value":couchdb_port})
-
     psql = {
         "name":"psql",
         "function":"psql.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":psql_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return psql  
 
 def prepare_minio_action():
-    couchdb_host = cfg.get("couchdb.host") or "couchdb"
-    couchdb_port = cfg.get("couchdb.port") or "5984"
-
-    minio_inputs=[]
-    minio_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    minio_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    minio_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    minio_inputs.append({"key":"couchdb_port", "value":couchdb_port})
-
     minio = {
         "name":"minio",
         "function":"minio.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":minio_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return minio  
 
 def prepare_dev_upload_action():
-    couchdb_host = cfg.get("couchdb.host") or "couchdb"
-    couchdb_port = cfg.get("couchdb.port") or "5984"
-
-    dev_upload_inputs=[]
-    dev_upload_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    dev_upload_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    dev_upload_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    dev_upload_inputs.append({"key":"couchdb_port", "value":couchdb_port})
-
     dev_upload = {
         "name":"devel_upload",
         "function":"devel_upload.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":dev_upload_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return dev_upload  
 
 def prepare_ferretdb_action():
-    couchdb_host = cfg.get("couchdb.host") or "couchdb"
-    couchdb_port = cfg.get("couchdb.port") or "5984"
-
-    ferretdb_inputs=[]
-    ferretdb_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    ferretdb_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    ferretdb_inputs.append({"key":"couchdb_host", "value":couchdb_host})
-    ferretdb_inputs.append({"key":"couchdb_port", "value":couchdb_port})
-
-    dev_upload = {
+    ferretdb = {
         "name":"ferretdb",
         "function":"ferretdb.zip",
         "runtime":"python:3",
         "web":"raw",
-        "inputs":ferretdb_inputs
+        "inputs":get_couchdb_inputs()
     }
 
-    return dev_upload         
+    return ferretdb 
+
+def prepare_dev_download_action():
+    dev_download = {
+        "name":"devel_download",
+        "function":"devel_download.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return dev_download             
 
 
 def prepare_system_actions():
@@ -182,6 +151,7 @@ def prepare_system_actions():
     actions.append(prepare_minio_action())
     actions.append(prepare_dev_upload_action())
     actions.append(prepare_ferretdb_action())
+    actions.append(prepare_dev_download_action())
     return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):

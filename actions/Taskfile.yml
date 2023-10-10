@@ -28,18 +28,23 @@ vars:
     sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}'
   WSKSYS: wsk --apihost {{.APIHOST}} -u {{.SYSTEM}}
   DEPLOY: ../deploy/whisk-system
+  
   CDB_USER:
-    sh: yq .spec.couchdb.admin.user {{.CONFIG}}
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.user}'
+
   CDB_PASSWORD:
-    sh: yq .spec.couchdb.admin.password {{.CONFIG}}
-  CDB_HOST:
-    sh: yq .spec.couchdb.host {{.CONFIG}}
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.password}'
+
+  CDB_HOST: couchdb    
+
   MINIO_HOST: minio.nuvolaris.svc.cluster.local   
   MINIO_PORT: 9000    
 
 tasks:
 
   list: "{{.WSKSYS}} action list"
+
+  action:get: "{{.WSKSYS}} action get {{.NAME}}"
 
   activation:list: "{{.WSKSYS}} activation list"
 
@@ -213,7 +218,31 @@ tasks:
       {{.WSKSYS}} action update nuv/ferretdb
       {{.DEPLOY}}/ferretdb.zip --kind python:3 --web raw
     - > 
-      {{.WSKSYS}} action get nuv/ferretdb --url                                         
+      {{.WSKSYS}} action get nuv/ferretdb --url
+
+  devel:download:prepare:
+    - |- 
+      mkdir -p devel/download/nuvolaris
+      mkdir -p devel/download/common
+      cp ./common/*.py  devel/download/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/download/nuvolaris
+    - |-
+      cd devel/download
+      rm  -f ../../{{.DEPLOY}}/devel_download.zip
+      zip -r ../../{{.DEPLOY}}/devel_download.zip *
+
+  devel:download:deploy:
+    - task: devel:download:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/devel_download
+      {{.DEPLOY}}/devel_download.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/devel_download --url                                               
 
   login:webtest:
     - >
@@ -329,4 +358,5 @@ tasks:
     - task: devel:psql:deploy
     - task: devel:upload:deploy
     - task: devel:ferretdb:deploy
+    - task: devel:download:deploy
                     

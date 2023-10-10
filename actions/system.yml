@@ -79,7 +79,7 @@ tasks:
   devel_upload:prepare:
     - |- 
       mkdir -p devel/upload/nuvolaris
-      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/upload/nuvolaris 
     - |- 
       mkdir -p devel/upload/common
       cp ./common/*.py  devel/upload/common        
@@ -87,6 +87,18 @@ tasks:
       cd devel/upload
       rm  -f ../../{{.DEPLOY}}/devel_upload.zip
       zip -r ../../{{.DEPLOY}}/devel_upload.zip *
+
+  devel_download:prepare:
+    - |- 
+      mkdir -p devel/download/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/download/nuvolaris 
+    - |- 
+      mkdir -p devel/download/common
+      cp ./common/*.py  devel/download/common        
+    - |-
+      cd devel/download
+      rm  -f ../../{{.DEPLOY}}/devel_download.zip
+      zip -r ../../{{.DEPLOY}}/devel_download.zip *      
 
 
   ferretdb:prepare:
@@ -109,5 +121,6 @@ tasks:
     - task: psql:prepare 
     - task: minio:prepare 
     - task: devel_upload:prepare
+    - task: devel_download:prepare
     - task: ferretdb:prepare
                     
