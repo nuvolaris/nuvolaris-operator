@@ -41,7 +41,7 @@ clusters/worker.yaml
 run.pid
 *.off
 actions/*/nuvolaris/
-!actions/*/__main__.py
+!actions/**/__main__.py
 _*.yaml
 apihost.txt
 .git-hooks/
