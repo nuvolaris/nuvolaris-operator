@@ -28,18 +28,23 @@ vars:
     sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}'
   WSKSYS: wsk --apihost {{.APIHOST}} -u {{.SYSTEM}}
   DEPLOY: ../deploy/whisk-system
+  
   CDB_USER:
-    sh: yq .spec.couchdb.admin.user {{.CONFIG}}
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.user}'
+
   CDB_PASSWORD:
-    sh: yq .spec.couchdb.admin.password {{.CONFIG}}
-  CDB_HOST:
-    sh: yq .spec.couchdb.host {{.CONFIG}}
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.password}'
+
+  CDB_HOST: couchdb    
+
   MINIO_HOST: minio.nuvolaris.svc.cluster.local   
   MINIO_PORT: 9000    
 
 tasks:
 
   list: "{{.WSKSYS}} action list"
+
+  action:get: "{{.WSKSYS}} action get {{.NAME}}"
 
   activation:list: "{{.WSKSYS}} activation list"
 
@@ -75,12 +80,16 @@ tasks:
       {{.WSKSYS}} action get nuv/login --url
 
   upload:prepare:
+    - |- 
+      mkdir -p upload/common
+      cp ./common/minio_util.py upload/common      
     - |-
       cd upload
       rm  -f ../{{.DEPLOY}}/upload.zip
       zip -r ../{{.DEPLOY}}/upload.zip *
 
   upload:deploy:
+    - task: upload:prepare
     - > 
       {{.WSKSYS}} package update nuv
       -p minio_host {{.MINIO_HOST}}
@@ -89,7 +98,151 @@ tasks:
       {{.WSKSYS}} action update nuv/upload 
       {{.DEPLOY}}/upload.zip --kind python:3 --web true
     - > 
-      {{.WSKSYS}} action get nuv/upload --url             
+      {{.WSKSYS}} action get nuv/upload --url
+
+  devel:redis:prepare:
+    - |- 
+      mkdir -p devel/redis/nuvolaris
+      mkdir -p devel/redis/common
+      cp ./common/*.py devel/redis/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/redis/nuvolaris
+    - |-
+      cd devel/redis
+      rm  -f ../../{{.DEPLOY}}/redis.zip
+      zip -r ../../{{.DEPLOY}}/redis.zip *
+
+  devel:redis:deploy:
+    - task: devel:redis:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/redis
+      {{.DEPLOY}}/redis.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/redis --url  
+
+  devel:psql:prepare:
+    - |- 
+      mkdir -p devel/psql/nuvolaris
+      mkdir -p devel/psql/common
+      cp ./common/*.py  devel/psql/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris
+    - |-
+      cd devel/psql
+      rm  -f ../../{{.DEPLOY}}/psql.zip
+      zip -r ../../{{.DEPLOY}}/psql.zip *
+
+  devel:psql:deploy:
+    - task: devel:psql:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/psql
+      {{.DEPLOY}}/psql.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/psql --url 
+
+  devel:minio:prepare:
+    - |- 
+      mkdir -p devel/minio/nuvolaris
+      mkdir -p devel/minio/common
+      cp ./common/*.py  devel/minio/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/minio/nuvolaris
+    - |-
+      cd devel/minio
+      rm  -f ../../{{.DEPLOY}}/minio.zip
+      zip -r ../../{{.DEPLOY}}/minio.zip *
+
+  devel:minio:deploy:
+    - task: devel:minio:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/minio
+      {{.DEPLOY}}/minio.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/minio --url 
+
+  devel:upload:prepare:
+    - |- 
+      mkdir -p devel/upload/nuvolaris
+      mkdir -p devel/upload/common
+      cp ./common/*.py  devel/upload/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/upload/nuvolaris
+    - |-
+      cd devel/upload
+      rm  -f ../../{{.DEPLOY}}/devel_upload.zip
+      zip -r ../../{{.DEPLOY}}/devel_upload.zip *
+
+  devel:upload:deploy:
+    - task: devel:upload:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/devel_upload
+      {{.DEPLOY}}/devel_upload.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/devel_upload --url 
+
+  devel:ferretdb:prepare:
+    - |- 
+      mkdir -p devel/ferretdb/nuvolaris
+      mkdir -p devel/ferretdb/common
+      cp ./common/*.py devel/ferretdb/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/ferretdb/nuvolaris
+    - |-
+      cd devel/ferretdb
+      rm  -f ../../{{.DEPLOY}}/ferretdb.zip
+      zip -r ../../{{.DEPLOY}}/ferretdb.zip *
+
+  devel:ferretdb:deploy:
+    - task: devel:ferretdb:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/ferretdb
+      {{.DEPLOY}}/ferretdb.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/ferretdb --url
+
+  devel:download:prepare:
+    - |- 
+      mkdir -p devel/download/nuvolaris
+      mkdir -p devel/download/common
+      cp ./common/*.py  devel/download/common
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/download/nuvolaris
+    - |-
+      cd devel/download
+      rm  -f ../../{{.DEPLOY}}/devel_download.zip
+      zip -r ../../{{.DEPLOY}}/devel_download.zip *
+
+  devel:download:deploy:
+    - task: devel:download:prepare
+    - > 
+      {{.WSKSYS}} package update nuv
+      -p couchdb_user "{{.CDB_USER}}"
+      -p couchdb_password "{{.CDB_PASSWORD}}"
+      -p couchdb_host "{{.CDB_HOST}}"
+    - > 
+      {{.WSKSYS}} action update nuv/devel_download
+      {{.DEPLOY}}/devel_download.zip --kind python:3 --web raw
+    - > 
+      {{.WSKSYS}} action get nuv/devel_download --url                                               
 
   login:webtest:
     - >
@@ -109,11 +262,72 @@ tasks:
 
   upload:webtest2:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/content.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
 
   upload:chess:
     - >
       curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
+
+  devel:redis:set:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/redis_set.json
+
+  devel:redis:get:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/redis -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/redis_get.json 
+
+  devel:psql:select:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_select.json 
+
+  devel:psql:desc:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_desc.json
+
+  devel:psql:create:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create1.json 
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create2.json                        
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/psql -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/psql_create3.json        
+
+  devel:minio:ls:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_buckets.json       
+
+  devel:minio:lsb:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_ls.json               
+
+  devel:minio:rm:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_rm.json 
+
+  devel:minio:mv:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_mv.json 
+
+  devel:minio:cp:
+      - >
+        curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/minio -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/minio_cp.json 
+
+  devel:upload:webtest:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-web/test/index.html
+
+  devel:upload:data:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=" {{.APIHOST}}/api/v1/web/whisk-system/nuv/devel_upload/nuvolaris-data/test/index.html
+
+  devel:ferretdb:insert:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/ferretdb -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/mdb_insert.json
+
+  devel:ferretdb:find:
+    - >
+      curl {{.APIHOST}}/api/v1/web/whisk-system/nuv/ferretdb -H "x-impersonate-auth: Y2JkNjgwNzUtZGFjMi00NzVlLThjMDctZDYyYTMwYzdlNjgzOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A="  -H "Content-Type: application/json" -d@../demos/devel/mdb_find.json
+
 
 
   login:all:
@@ -136,5 +350,13 @@ tasks:
 
   all:
     - task: prepare
-    - task: deploy        
+    - task: deploy 
+
+  deploy:devel:
+    - task: devel:redis:deploy
+    - task: devel:minio:deploy
+    - task: devel:psql:deploy
+    - task: devel:upload:deploy
+    - task: devel:ferretdb:deploy
+    - task: devel:download:deploy
                     

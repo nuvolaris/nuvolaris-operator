@@ -1,0 +1,7 @@
+{
+    "command":"rm",
+    "args":[
+        "nuvolaris-web",
+        "tidy/content.html"
+    ]
+}

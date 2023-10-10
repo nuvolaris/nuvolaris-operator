@@ -22,10 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      #apihost: $APIHOST
-      #apiport: 80
-      #protocol: http
-      placeholder: none
+      password: nuvpassw0rd 
   components:
     # start openwhisk controller
     openwhisk: true

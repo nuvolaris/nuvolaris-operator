@@ -26,6 +26,57 @@ cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions
 cd ${HOME}/actions/login
 rm  -f ${HOME}/deploy/whisk-system/login.zip
 zip -r ${HOME}/deploy/whisk-system/login.zip *
+
 cd ${HOME}/actions/upload
+mkdir -p ${HOME}/actions/upload/common
+cp ${HOME}/actions/common/minio_util.py ${HOME}/actions/upload/common
 rm  -f ${HOME}/deploy/whisk-system/upload.zip
 zip -r ${HOME}/deploy/whisk-system/upload.zip *
+
+mkdir -p ${HOME}/actions/devel/redis/nuvolaris
+mkdir -p ${HOME}/actions/devel/redis/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/redis/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/redis/common
+cd ${HOME}/actions/devel/redis
+rm  -f ${HOME}/deploy/whisk-system/redis.zip
+zip -r ${HOME}/deploy/whisk-system/redis.zip *
+
+mkdir -p ${HOME}/actions/devel/psql/nuvolaris
+mkdir -p ${HOME}/actions/devel/psql/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/psql/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/psql/common
+cd ${HOME}/actions/devel/psql
+rm  -f ${HOME}/deploy/whisk-system/psql.zip
+zip -r ${HOME}/deploy/whisk-system/psql.zip *
+
+mkdir -p ${HOME}/actions/devel/minio/nuvolaris
+mkdir -p ${HOME}/actions/devel/minio/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/minio/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/minio/common
+cd ${HOME}/actions/devel/minio
+rm  -f ${HOME}/deploy/whisk-system/minio.zip
+zip -r ${HOME}/deploy/whisk-system/minio.zip *
+
+mkdir -p ${HOME}/actions/devel/ferretdb/nuvolaris
+mkdir -p ${HOME}/actions/devel/ferretdb/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/ferretdb/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/ferretdb/common
+cd ${HOME}/actions/devel/ferretdb
+rm  -f ${HOME}/deploy/whisk-system/ferretdb.zip
+zip -r ${HOME}/deploy/whisk-system/ferretdb.zip *
+
+mkdir -p ${HOME}/actions/devel/download/nuvolaris
+mkdir -p ${HOME}/actions/devel/download/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/download/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/download/common
+cd ${HOME}/actions/devel/download
+rm  -f ${HOME}/deploy/whisk-system/devel_download.zip
+zip -r ${HOME}/deploy/whisk-system/devel_download.zip *
+
+mkdir -p ${HOME}/actions/devel/upload/nuvolaris
+mkdir -p ${HOME}/actions/devel/upload/common
+cp ${HOME}/nuvolaris/config.py ${HOME}/nuvolaris/couchdb_util.py ${HOME}/actions/devel/upload/nuvolaris
+cp ${HOME}/actions/common/*.py ${HOME}/actions/devel/upload/common
+cd ${HOME}/actions/devel/upload
+rm  -f ${HOME}/deploy/whisk-system/devel_upload.zip
+zip -r ${HOME}/deploy/whisk-system/devel_upload.zip *

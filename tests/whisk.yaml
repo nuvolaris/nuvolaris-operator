@@ -20,7 +20,9 @@ kind: Whisk
 metadata:
   name: controller
   namespace: nuvolaris
-spec: 
+spec:
+  nuvolaris:
+    password: nuvpassw0rd 
   components:
     # start openwhisk controller
     openwhisk: true

@@ -390,7 +390,7 @@ def get_value_from_config_map(namespace="nuvolaris", path='{.metadata.annotation
     if(annotations):
         return annotations[0]
 
-    raise Exception("Could not find annotation inside internal cm/config config Map")
+    raise Exception(f"Could not find {path} annotation inside internal cm/config config Map")
 
 def get_enable_pod_security():
     """

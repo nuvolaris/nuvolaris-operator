@@ -1,0 +1,6 @@
+{
+    "command":"ls",
+    "args":[
+        "nuvolaris-web"
+    ]
+}

@@ -32,13 +32,95 @@ tasks:
       zip -r ../{{.DEPLOY}}/login.zip *
 
   upload:prepare:
+    - |- 
+      mkdir -p upload/common
+      cp ./common/minio_util.py upload/common
     - |-
       cd upload
       rm  -f ../{{.DEPLOY}}/upload.zip
-      zip -r ../{{.DEPLOY}}/upload.zip *      
+      zip -r ../{{.DEPLOY}}/upload.zip *  
+
+  redis:prepare:
+    - |- 
+      mkdir -p devel/redis/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/redis/nuvolaris 
+    - |- 
+      mkdir -p devel/redis/common
+      cp ./common/authorize.py ./common/command_data.py ./common/util.py  devel/redis/common        
+    - |-
+      cd devel/redis
+      rm  -f ../../{{.DEPLOY}}/redis.zip
+      zip -r ../../{{.DEPLOY}}/redis.zip *
+
+  psql:prepare:
+    - |- 
+      mkdir -p devel/psql/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/psql/nuvolaris 
+    - |- 
+      mkdir -p devel/psql/common
+      cp ./common/authorize.py ./common/command_data.py ./common/util.py  devel/psql/common        
+    - |-
+      cd devel/psql
+      rm  -f ../../{{.DEPLOY}}/psql.zip
+      zip -r ../../{{.DEPLOY}}/psql.zip *
+
+  minio:prepare:
+    - |- 
+      mkdir -p devel/minio/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/minio/nuvolaris 
+    - |- 
+      mkdir -p devel/minio/common
+      cp ./common/*.py devel/minio/common        
+    - |-
+      cd devel/minio
+      rm  -f ../../{{.DEPLOY}}/minio.zip
+      zip -r ../../{{.DEPLOY}}/minio.zip *
+
+  devel_upload:prepare:
+    - |- 
+      mkdir -p devel/upload/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/upload/nuvolaris 
+    - |- 
+      mkdir -p devel/upload/common
+      cp ./common/*.py  devel/upload/common        
+    - |-
+      cd devel/upload
+      rm  -f ../../{{.DEPLOY}}/devel_upload.zip
+      zip -r ../../{{.DEPLOY}}/devel_upload.zip *
+
+  devel_download:prepare:
+    - |- 
+      mkdir -p devel/download/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/download/nuvolaris 
+    - |- 
+      mkdir -p devel/download/common
+      cp ./common/*.py  devel/download/common        
+    - |-
+      cd devel/download
+      rm  -f ../../{{.DEPLOY}}/devel_download.zip
+      zip -r ../../{{.DEPLOY}}/devel_download.zip *      
+
+
+  ferretdb:prepare:
+    - |- 
+      mkdir -p devel/ferretdb/nuvolaris
+      cp ../nuvolaris/config.py ../nuvolaris/couchdb_util.py devel/ferretdb/nuvolaris 
+    - |- 
+      mkdir -p devel/ferretdb/common
+      cp ./common/*.py  devel/ferretdb/common        
+    - |-
+      cd devel/ferretdb
+      rm  -f ../../{{.DEPLOY}}/ferretdb.zip
+      zip -r ../../{{.DEPLOY}}/ferretdb.zip *                                  
 
   # prepares all the system related actions
   prepare:
     - task: login:prepare   
     - task: upload:prepare
+    - task: redis:prepare   
+    - task: psql:prepare 
+    - task: minio:prepare 
+    - task: devel_upload:prepare
+    - task: devel_download:prepare
+    - task: ferretdb:prepare
                     

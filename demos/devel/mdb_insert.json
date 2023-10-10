@@ -1,0 +1,18 @@
+{
+    "insert":"nuvolaris",    
+    "documents":[
+        {
+            "Name":"Affare",
+            "Surname":"fatto"
+        },
+        {
+            "Name":"Nuvolaris",
+            "Surname":"rocks"
+        },
+        {
+            "Name":"Gigi",
+            "Surname":"La trottola",
+            "Age":65
+        }
+    ]
+}

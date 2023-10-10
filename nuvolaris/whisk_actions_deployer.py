@@ -30,22 +30,25 @@ from nuvolaris.whisk_system_util import WhiskSystemClient
 from nuvolaris.util import nuv_retry
 from subprocess import CompletedProcess
 
-
-def prepare_login_action():
+def get_couchdb_inputs():
     couchdb_host = cfg.get("couchdb.host") or "couchdb"
     couchdb_port = cfg.get("couchdb.port") or "5984"
 
-    login_inputs=[]
-    login_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
-    login_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
-    login_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    cdb_inputs=[]
+    cdb_inputs.append({"key":"couchdb_user", "value":cfg.get("couchdb.admin.user", "COUCHDB_ADMIN_USER", "whisk_admin")})
+    cdb_inputs.append({"key":"couchdb_password", "value":cfg.get("couchdb.admin.password", "COUCHDB_ADMIN_PASSWORD", "some_passw0rd")})
+    cdb_inputs.append({"key":"couchdb_host", "value":couchdb_host})
+    cdb_inputs.append({"key":"couchdb_port", "value":couchdb_port})
 
+    return cdb_inputs
+
+def prepare_login_action():
     login = {
         "name":"login",
         "function":"login.zip",
         "runtime":"python:3",
         "web":"true",
-        "inputs":login_inputs
+        "inputs":get_couchdb_inputs()
     }
 
     return login
@@ -57,7 +60,7 @@ def prepare_upload_action():
 
     upload_inputs=[]
     upload_inputs.append({"key":"minio_host", "value":minio_full_host})
-    upload_inputs.append({"key":"minio_port", "value":minio_port})
+    upload_inputs.append({"key":"minio_port", "value":minio_port})    
 
     upload = {
         "name":"upload",
@@ -67,7 +70,74 @@ def prepare_upload_action():
         "inputs":upload_inputs
     }
 
-    return upload    
+    return upload 
+
+def prepare_redis_action():
+
+    redis = {
+        "name":"redis",
+        "function":"redis.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return redis 
+
+def prepare_psql_action():
+    psql = {
+        "name":"psql",
+        "function":"psql.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return psql  
+
+def prepare_minio_action():
+    minio = {
+        "name":"minio",
+        "function":"minio.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return minio  
+
+def prepare_dev_upload_action():
+    dev_upload = {
+        "name":"devel_upload",
+        "function":"devel_upload.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return dev_upload  
+
+def prepare_ferretdb_action():
+    ferretdb = {
+        "name":"ferretdb",
+        "function":"ferretdb.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return ferretdb 
+
+def prepare_dev_download_action():
+    dev_download = {
+        "name":"devel_download",
+        "function":"devel_download.zip",
+        "runtime":"python:3",
+        "web":"raw",
+        "inputs":get_couchdb_inputs()
+    }
+
+    return dev_download             
 
 
 def prepare_system_actions():
@@ -76,6 +146,12 @@ def prepare_system_actions():
     actions = []
     actions.append(prepare_login_action())
     actions.append(prepare_upload_action())
+    actions.append(prepare_redis_action())
+    actions.append(prepare_psql_action())
+    actions.append(prepare_minio_action())
+    actions.append(prepare_dev_upload_action())
+    actions.append(prepare_ferretdb_action())
+    actions.append(prepare_dev_download_action())
     return {"actions":actions}
 
 def process_wsk_result(result: CompletedProcess, expected_success_msg: str):
