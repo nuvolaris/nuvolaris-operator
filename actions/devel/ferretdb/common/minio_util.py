@@ -29,7 +29,7 @@ from minio.commonconfig import CopySource
 def extract_mimetype(file):
     mimetype, _ = mimetypes.guess_type(file)
     if mimetype is None:
-        raise Exception(f"Failed to guess mimetype for {file}")
+        return "application/octet-stream"
     else:
         return mimetype
 
