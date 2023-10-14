@@ -27,7 +27,13 @@ from minio.error import S3Error
 from minio.commonconfig import CopySource
 
 def extract_mimetype(file):
-    mimetype, _ = mimetypes.guess_type(file)
+
+    # python mymetype does does not support yet yaml files
+    if ".yaml" in file.lower() or ".yml" in file.lower():
+        mimetype = "application/yaml"
+    else:    
+        mimetype, _ = mimetypes.guess_type(file)
+        
     if mimetype is None:
         raise Exception(f"Failed to guess mimetype for {file}")
     else:
@@ -177,5 +183,5 @@ def mv_file(mo_client, orig_bucket, orig_file, dest_bucket, dest_file):
     except Exception as e:
         print(e)
         return None
-    return None                          
+    return None                             
 

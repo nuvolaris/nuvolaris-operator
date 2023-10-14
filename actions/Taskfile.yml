@@ -264,6 +264,10 @@ tasks:
     - >
       curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
 
+  upload:yaml:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/couchdb-init.yaml -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/yaml/couchdb-init.yaml      
+
   upload:chess:
     - >
       curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
