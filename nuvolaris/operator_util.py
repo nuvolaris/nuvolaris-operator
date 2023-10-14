@@ -21,6 +21,7 @@ import nuvolaris.kube as kube
 import nuvolaris.userdb_util as userdb
 import nuvolaris.config as cfg
 import nuvolaris.util as ut
+import nuvolaris.whisk_actions_deployer as system
 
 from nuvolaris.nuvolaris_metadata import NuvolarisMetadata
 
@@ -58,9 +59,33 @@ def update_nuvolaris_metadata():
     except Exception as e:
         logging.error(e)        
 
-def whisk_post_create():
+def whisk_post_create(name):
+    """
+    Executes a set of common operations after the operator terminated the deployment process.
+    - persists nuvolaris metadata into the internal couchdb
+    - annotate operator deployed components version
+    - deploys system actions
+    """
+    logging.info(f"*** whisk_post_create {name}")
     update_nuvolaris_metadata()
     annotate_operator_components_version()
+    return system.deploy_whisk_system_action()
+
+def whisk_post_resume(name):
+    """    
+    Executes a set of common operations after the operator resumes, which is also the scenario
+    triggered by a nuv update operator
+    - annotate operator deployed components version
+    - redeploys system actions
+    """
+    logging.info(f"*** whisk_post_resume {name}") 
+    annotate_operator_components_version()
+    sysres = system.deploy_whisk_system_action()
+
+    if sysres:
+        logging.info("system action redeployed after operator restart")
+    else:    
+        logging.warn("system action deploy issues after operator restart. Checl logs for further details")
 
 def config_from_spec(spec, handler_type = "on_create"):
     """
