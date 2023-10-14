@@ -82,26 +82,26 @@ tasks:
     - > 
       {{.WSKSYS}} action get nuv/login --url
 
-  upload:prepare:
+  content:prepare:
     - |- 
-      mkdir -p upload/common
-      cp ./common/minio_util.py upload/common      
+      mkdir -p content/common
+      cp ./common/minio_util.py content/common      
     - |-
-      cd upload
-      rm  -f ../{{.DEPLOY}}/upload.zip
-      zip -r ../{{.DEPLOY}}/upload.zip *
+      cd content
+      rm  -f ../{{.DEPLOY}}/content.zip
+      zip -r ../{{.DEPLOY}}/content.zip *
 
-  upload:deploy:
-    - task: upload:prepare
+  content:deploy:
+    - task: content:prepare
     - > 
       {{.WSKSYS}} package update nuv
       -p minio_host {{.MINIO_HOST}}
       -p minio_port {{.MINIO_PORT}}  
     - > 
-      {{.WSKSYS}} action update nuv/upload 
-      {{.DEPLOY}}/upload.zip --kind python:3 --web true
+      {{.WSKSYS}} action update nuv/content 
+      {{.DEPLOY}}/content.zip --kind python:3 --web true
     - > 
-      {{.WSKSYS}} action get nuv/upload --url
+      {{.WSKSYS}} action get nuv/content --url
 
   devel:redis:prepare:
     - |- 
@@ -259,21 +259,25 @@ tasks:
     - >
       curl -X POST https://gptuser.api.k3s.nuvtest.net/api/v1/web/whisk-system/nuv/login -H "Content-Type: application/json" -d '{"login": "{{.USERNAME}}", "password": "{{.PASSWORD}}"}'
 
-  upload:webtest:
+  content:webtest:
     - >
-      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/index2.html
+      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/content/nuvolaris/index2.html
 
-  upload:webtest2:
+  content:webtest2:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/content/nuvolaris/tidy/content.html
 
-  upload:yaml:
+  content:yaml:
     - >
-      curl -X PUT -T ../nuvolaris/templates/couchdb-init.yaml -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/yaml/couchdb-init.yaml      
+      curl -X PUT -T ../nuvolaris/templates/couchdb-init.yaml -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/content/nuvolaris/yaml/couchdb-init.yaml
 
-  upload:chess:
+  content-delete:yaml:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
+      curl -X DELETE -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/content/nuvolaris/yaml/couchdb-init.yaml            
+
+  content:chess:
+    - >
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/content/nuvolaris/chess/index.html
 
   devel:redis:set:
     - >
@@ -342,18 +346,18 @@ tasks:
     - task: login:deploy
     - task: login:webtest
 
-  upload:all:
-    - task: upload:prepare
-    - task: upload:deploy   
+  content:all:
+    - task: content:prepare
+    - task: content:deploy   
 
   # prepares all the system related actions
   prepare:
     - task: login:prepare
-    - task: upload:prepare
+    - task: content:prepare
 
   deploy:
     - task: login:deploy
-    - task: upload:deploy
+    - task: content:deploy
 
   all:
     - task: prepare

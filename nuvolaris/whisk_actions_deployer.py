@@ -53,24 +53,24 @@ def prepare_login_action():
 
     return login
 
-def prepare_upload_action():
+def prepare_content_action():
     minio_host= cfg.get("minio.host") or "minio"
     minio_port= cfg.get("minio.port") or "9000"
     minio_full_host = f"{minio_host}.nuvolaris.svc.cluster.local"
 
-    upload_inputs=[]
-    upload_inputs.append({"key":"minio_host", "value":minio_full_host})
-    upload_inputs.append({"key":"minio_port", "value":minio_port})    
+    content_inputs=[]
+    content_inputs.append({"key":"minio_host", "value":minio_full_host})
+    content_inputs.append({"key":"minio_port", "value":minio_port})    
 
-    upload = {
-        "name":"upload",
-        "function":"upload.zip",
+    content = {
+        "name":"content",
+        "function":"content.zip",
         "runtime":"python:3",
         "web":"true",
-        "inputs":upload_inputs
+        "inputs":content_inputs
     }
 
-    return upload 
+    return content 
 
 def prepare_redis_action():
 
@@ -145,7 +145,7 @@ def prepare_system_actions():
     """
     actions = []
     actions.append(prepare_login_action())
-    actions.append(prepare_upload_action())
+    actions.append(prepare_content_action())
     actions.append(prepare_redis_action())
     actions.append(prepare_psql_action())
     actions.append(prepare_minio_action())
