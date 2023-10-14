@@ -17,7 +17,7 @@
 #
 import kopf
 import logging
-import json, flatdict, os, os.path
+import json, os, os.path
 import nuvolaris.config as cfg
 import nuvolaris.kube as kube
 import nuvolaris.redis as redis
@@ -31,7 +31,6 @@ import nuvolaris.endpoint as endpoint
 import nuvolaris.minio as minio
 import nuvolaris.patcher as patcher
 import nuvolaris.minio_static as static
-import nuvolaris.whisk_actions_deployer as system
 import nuvolaris.operator_util as operator_util
 import nuvolaris.postgres_operator as postgres
 import nuvolaris.runtimes_preloader as preloader
@@ -187,15 +186,12 @@ def whisk_create(spec, name, **kwargs):
     whisk_post_create(name,state)
     return state
 
-def whisk_post_create(name, state):
-    logging.info(f"*** whisk_post_create {name}")
-    sysres = system.deploy_whisk_system_action()
+def whisk_post_create(name, state):    
+    sysres = operator_util.whisk_post_create(name)
     if(sysres):
         state['whisk-system']="on"
     else:                   
         state['whisk-system']="error"
-    
-    operator_util.whisk_post_create() 
 
 # tested by an integration test
 @kopf.on.delete('nuvolaris.org', 'v1', 'whisks')
@@ -288,10 +284,9 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
     patcher.patch(diff, status, owner)    
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
-def whisk_resume(spec, name, **kwargs):
-    logging.info(f"*** whisk_resume {name}")
+def whisk_resume(spec, name, **kwargs):   
     operator_util.config_from_spec(spec, handler_type="on_resume")
-    operator_util.annotate_operator_components_version()
+    operator_util.whisk_post_resume(name)
 
 def runtimes_filter(name, type, **kwargs):
     return name == 'openwhisk-runtimes' and type == 'MODIFIED'  

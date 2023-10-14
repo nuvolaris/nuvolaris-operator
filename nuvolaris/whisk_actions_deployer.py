@@ -194,10 +194,13 @@ def safe_deploy(wskClient):
     return True
 
 def deploy_whisk_system_action():
-    auth = cfg.get('openwhisk.namespaces.whisk-system')
-    data = prepare_system_actions()
-    tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
+    try:
+        auth = cfg.get('openwhisk.namespaces.whisk-system')
+        data = prepare_system_actions()
+        tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
 
-    wskClient = WhiskSystemClient(auth)
-    result = safe_deploy(wskClient)
-    return result
+        wskClient = WhiskSystemClient(auth)
+        result = safe_deploy(wskClient)
+        return result
+    except Exception as e:
+        logging.error("Error detected when deploying system actions", e)
