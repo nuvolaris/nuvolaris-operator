@@ -40,7 +40,7 @@ clusters/worker.yaml
 *.kubeconfig
 run.pid
 *.off
-actions/*/nuvolaris/
+actions/**/nuvolaris/
 !actions/**/__main__.py
 _*.yaml
 apihost.txt
