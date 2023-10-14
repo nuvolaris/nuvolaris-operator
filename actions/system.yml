@@ -31,14 +31,14 @@ tasks:
       rm  -f ../{{.DEPLOY}}/login.zip
       zip -r ../{{.DEPLOY}}/login.zip *
 
-  upload:prepare:
+  content:prepare:
     - |- 
-      mkdir -p upload/common
-      cp ./common/minio_util.py upload/common
+      mkdir -p content/common
+      cp ./common/minio_util.py content/common
     - |-
-      cd upload
-      rm  -f ../{{.DEPLOY}}/upload.zip
-      zip -r ../{{.DEPLOY}}/upload.zip *  
+      cd content
+      rm  -f ../{{.DEPLOY}}/content.zip
+      zip -r ../{{.DEPLOY}}/content.zip *  
 
   redis:prepare:
     - |- 
@@ -116,7 +116,7 @@ tasks:
   # prepares all the system related actions
   prepare:
     - task: login:prepare   
-    - task: upload:prepare
+    - task: content:prepare
     - task: redis:prepare   
     - task: psql:prepare 
     - task: minio:prepare 

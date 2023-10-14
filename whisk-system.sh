@@ -27,11 +27,11 @@ cd ${HOME}/actions/login
 rm  -f ${HOME}/deploy/whisk-system/login.zip
 zip -r ${HOME}/deploy/whisk-system/login.zip *
 
-cd ${HOME}/actions/upload
-mkdir -p ${HOME}/actions/upload/common
-cp ${HOME}/actions/common/minio_util.py ${HOME}/actions/upload/common
-rm  -f ${HOME}/deploy/whisk-system/upload.zip
-zip -r ${HOME}/deploy/whisk-system/upload.zip *
+cd ${HOME}/actions/content
+mkdir -p ${HOME}/actions/content/common
+cp ${HOME}/actions/common/minio_util.py ${HOME}/actions/content/common
+rm  -f ${HOME}/deploy/whisk-system/content.zip
+zip -r ${HOME}/deploy/whisk-system/content.zip *
 
 mkdir -p ${HOME}/actions/devel/redis/nuvolaris
 mkdir -p ${HOME}/actions/devel/redis/common
