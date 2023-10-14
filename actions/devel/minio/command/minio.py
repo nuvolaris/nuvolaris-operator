@@ -19,6 +19,8 @@
 import common.util as ut
 import common.minio_util as mutil
 import json
+import re
+
 from common.command_data import CommandData
 
 from minio.commonconfig import CopySource
@@ -107,7 +109,35 @@ class Minio():
             input.status(200)               
         else:    
             input.result(f"move operation failed")
-            input.status(400)            
+            input.status(400)
+
+    def _clean_bucket_content(self,input:CommandData, bucket, pattern=".*", dry_run="true"):
+        """"
+        Removes matching content from the specified bucket
+        :param input the entire input command
+        :param bucket
+        :param pattern a regexp specifying the filename to match (defaults to .*)
+        :param dry_run a boolean to enable dry run execution (defaults to False)
+        """
+        print(f"**** cleaning bucket {bucket} content matching {pattern}. Dry run mode {dry_run}")
+        
+        mo_client = mutil.build_mo_client(self._minio_host, self._minio_port,self._minio_access_key, self._minio_secret_key)
+        result = []
+        objects = mo_client.list_objects(bucket_name=bucket, recursive= True)
+
+        for obj in objects:
+            if re.search(pattern, obj.object_name):
+                if "true" in dry_run:
+                    result.append({"name":obj.object_name,"last_modified": str(obj.last_modified), "size":obj.size})
+                else:    
+                    removed = mutil.rm_file(mo_client,bucket,obj.object_name)
+                    if removed:
+                        result.append({"name":obj.object_name})
+            else:
+                print(f"skipping {obj.object_name} as it does not match {pattern}")
+
+        input.result(result)
+        input.status(200)                         
 
     def execute(self, input:CommandData):
         print(f"**** Minio command to execute {input.command()}")        
@@ -129,6 +159,9 @@ class Minio():
 
             if "cp" in input.command() and "args" in input.get_metadata() and len(input.args()) == 4:
                 self._cp_bucket_object(input.args()[0],input.args()[1],input.args()[2],input.args()[3], input)                                                
+
+            if "clean" in input.command() and "args" in input.get_metadata() and len(input.args()) == 3:
+                self._clean_bucket_content(input,input.args()[0],input.args()[1],input.args()[2])                
 
         except Exception as e:
             input.result(f"could not execute minio command {e}")
