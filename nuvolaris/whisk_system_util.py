@@ -22,8 +22,8 @@ import nuvolaris.config as cfg
 
 class WhiskSystemClient:
     def __init__(self, auth):
-        self.controller_host   = cfg.get("controller.host","CONTROLLER_HOST","controller")
-        self.controller_port   = cfg.get("controller.port","CONTROLLER_PORT",3233)       
+        self.controller_host   = cfg.get("controller.host","OW_CONTROLLER_HOST","controller")
+        self.controller_port   = cfg.get("controller.port","OW_CONTROLLER_PORT",3233)       
         self.admin_auth   = auth
         self.ow_host_url   = f"http://{self.controller_host}:{self.controller_port}"
 
