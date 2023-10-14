@@ -35,6 +35,9 @@ vars:
   CDB_PASSWORD:
     sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.password}'
 
+  NUV_MINIO_AUTH:
+    sh: kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.minio.nuvolaris.password}'    
+
   CDB_HOST: couchdb    
 
   MINIO_HOST: minio.nuvolaris.svc.cluster.local   
@@ -258,19 +261,19 @@ tasks:
 
   upload:webtest:
     - >
-      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/index2.html
+      curl -X PUT -T ../nuvolaris/templates/index.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/index2.html
 
   upload:webtest2:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/tidy/content.html
 
   upload:yaml:
     - >
-      curl -X PUT -T ../nuvolaris/templates/couchdb-init.yaml -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/yaml/couchdb-init.yaml      
+      curl -X PUT -T ../nuvolaris/templates/couchdb-init.yaml -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/yaml/couchdb-init.yaml      
 
   upload:chess:
     - >
-      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
+      curl -X PUT -T ../nuvolaris/templates/content.html -H "minioauth: {{.NUV_MINIO_AUTH}}" {{.APIHOST}}/api/v1/web/whisk-system/nuv/upload/nuvolaris/chess/index.html
 
   devel:redis:set:
     - >
