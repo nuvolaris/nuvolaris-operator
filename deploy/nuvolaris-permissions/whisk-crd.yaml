@@ -56,11 +56,12 @@ spec:
                     apiport:
                       type: integer
                     protocol:
-                      description: protocol to be used. Defaulted to http if TLS is not enabled. On Kind it will be always http
+                      description: protocol to be used. Defaulted to http if TLS is not enabled. On Kind it will be always http. This rules applied in auto mode, otherwise uses alway the required protocol. Default to auto.
                       type: string
                       enum:
                       - http
                       - https
+                      - auto
                     kube:
                       description: label representing the kubernetes runtime used to implement specific logic (kind, eks, aks, lks, microk8s, k3s, openshift). Defaulted to auto which is causing the operator to autodetect the k8s runtime.
                       type: string

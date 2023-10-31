@@ -75,6 +75,18 @@ def get_ingress(namespace="ingress-nginx",ingress_srv_name="service/ingress-ngin
     
     return None
 
+def assign_protocol(runtime_str, url):
+    # if no protocol is defined, or it is in auto mode, uses https in case tls is enabled
+    if not cfg.exists("nuvolaris.protocol") or 'auto' == cfg.get("nuvolaris.protocol"):
+        if cfg.get('components.tls'):
+            url = url._replace(scheme = "https")
+        else:
+            url = url._replace(scheme = "http")
+
+    # always use http on kind
+    if runtime_str == "kind":
+        url = url._replace(scheme = "http")
+
 def calculate_apihost(runtime_str,apiHost=None):
     """
     Calculate the apihost url
@@ -91,17 +103,12 @@ def calculate_apihost(runtime_str,apiHost=None):
     # in auto mode we should use the calculated ip address
     if cfg.exists("nuvolaris.apihost") and not 'auto' == cfg.get('nuvolaris.apihost'):
         url =  url._replace(netloc = ensure_host(cfg.get("nuvolaris.apihost")))
-    if cfg.exists("nuvolaris.protocol"):
+    if cfg.exists("nuvolaris.protocol") and not 'auto' == cfg.get("nuvolaris.protocol"):
         url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
     if cfg.exists("nuvolaris.apiport"):
         url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
 
-    # overrides the protocols in case tls is enabled
-    if cfg.get('components.tls') and not runtime_str=="kind":
-        url = url._replace(scheme = "https")
-    else:
-        url = url._replace(scheme = "http")    
-
+    assign_protocol(runtime_str, url)
     return url.geturl()      
 
 def get_apihost(runtime_str):
@@ -163,11 +170,7 @@ def get_user_static_url(runtime, hostname):
     """
     url = urllib.parse.urlparse(f"http://{hostname}")
 
-    if cfg.get('components.tls') and not runtime=="kind":
-        url = url._replace(scheme = "https")
-    else:
-        url = url._replace(scheme = "http")
-
+    assign_protocol(runtime, url)
     return url.geturl()
 
 def get_user_api_url(runtime, hostname, api_context):
@@ -177,11 +180,7 @@ def get_user_api_url(runtime, hostname, api_context):
     full_hostname = hostname.endswith("/") and f"{hostname}{api_context}" or f"{hostname}/{api_context}"
     url = urllib.parse.urlparse(f"http://{full_hostname}")
 
-    if cfg.get('components.tls') and not runtime=="kind":
-        url = url._replace(scheme = "https")
-    else:
-        url = url._replace(scheme = "http")
-
+    assign_protocol(runtime, url)
     return url.geturl()    
 
   
