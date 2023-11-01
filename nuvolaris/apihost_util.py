@@ -76,8 +76,16 @@ def get_ingress(namespace="ingress-nginx",ingress_srv_name="service/ingress-ngin
     return None
 
 def assign_protocol(runtime_str, url):
+    """
+    Assign the url protocol. If not protocol is defined or it is in auto mode
+    will use https in case the TLS compoenent is enabled, http otherwise.
+    Setting inside the whisk.yaml the attribute nuvolaris.protocol will forse always to use the
+    configured one, i.e it can be set as http despite it is in https and viceversa.
+    """
     # if no protocol is defined, or it is in auto mode, uses https in case tls is enabled
-    if not cfg.exists("nuvolaris.protocol") or 'auto' == cfg.get("nuvolaris.protocol"):
+    if cfg.exists("nuvolaris.protocol") and cfg.get("nuvolaris.protocol") in ["http","https"]:
+        url = url._replace(scheme = cfg.get("nuvolaris.protocol"))    
+    else:
         if cfg.get('components.tls'):
             url = url._replace(scheme = "https")
         else:
@@ -86,6 +94,8 @@ def assign_protocol(runtime_str, url):
     # always use http on kind
     if runtime_str == "kind":
         url = url._replace(scheme = "http")
+
+    return url    
 
 def calculate_apihost(runtime_str,apiHost=None):
     """
@@ -103,13 +113,11 @@ def calculate_apihost(runtime_str,apiHost=None):
     # in auto mode we should use the calculated ip address
     if cfg.exists("nuvolaris.apihost") and not 'auto' == cfg.get('nuvolaris.apihost'):
         url =  url._replace(netloc = ensure_host(cfg.get("nuvolaris.apihost")))
-    if cfg.exists("nuvolaris.protocol") and not 'auto' == cfg.get("nuvolaris.protocol"):
-        url = url._replace(scheme = cfg.get("nuvolaris.protocol"))
     if cfg.exists("nuvolaris.apiport"):
         url = url._replace(netloc = f"{url.hostname}:{cfg.get('nuvolaris.apiport')}")
 
-    assign_protocol(runtime_str, url)
-    return url.geturl()      
+    final_url = assign_protocol(runtime_str, url)
+    return final_url.geturl()      
 
 def get_apihost(runtime_str):
     """
@@ -170,8 +178,8 @@ def get_user_static_url(runtime, hostname):
     """
     url = urllib.parse.urlparse(f"http://{hostname}")
 
-    assign_protocol(runtime, url)
-    return url.geturl()
+    final_url = assign_protocol(runtime, url)
+    return final_url.geturl()
 
 def get_user_api_url(runtime, hostname, api_context):
     """
@@ -180,7 +188,7 @@ def get_user_api_url(runtime, hostname, api_context):
     full_hostname = hostname.endswith("/") and f"{hostname}{api_context}" or f"{hostname}/{api_context}"
     url = urllib.parse.urlparse(f"http://{full_hostname}")
 
-    assign_protocol(runtime, url)
-    return url.geturl()    
+    final_url = assign_protocol(runtime, url)
+    return final_url.geturl()
 
   
