@@ -102,8 +102,11 @@ spec:
                     password:
                       description: password to access the internal MINIO instance
                       type: string
+                    quota:
+                      description: maximum quota assignable in mb to each defined bucket, If omitted il will be equivalent to unlimited
+                      type: integer
                     data:
-                      description: used to configure the user MINIO dedicated bukets
+                      description: used to configure the user MINIO dedicated buckets
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                       properties:
@@ -112,7 +115,7 @@ spec:
                           type: boolean
                         bucket:
                           description: MINIO data bucket name
-                          type: string 
+                          type: string
                       required:
                       - enabled 
                       - bucket 
@@ -129,7 +132,9 @@ spec:
                           type: string                                                    
                       required:
                       - enabled 
-                      - bucket                   
+                      - bucket
+                  required:
+                  - password                     
                 mongodb:
                   description: used to configure a user dedicated mongodb database
                   type: object
