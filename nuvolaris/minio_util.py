@@ -95,6 +95,12 @@ class MinioClient:
         """
         res = util.check(self.make_bucket(bucket_name),"make_bucket",True)
         return util.check(self.mc("anonymous","-r","set","download",f"{self.alias}/{bucket_name}"),"make_public_bucket",res)
+    
+    def assign_quota_to_bucket(self, bucket_name, quota):
+        """
+        assign the specified quota on the given bucket
+        """        
+        return util.check(self.mc("quota","set",f"{self.alias}/{bucket_name}","--size", f"{quota}m"),"assign_quota_to_bucket",True)
 
     def assign_policy_to_user(self, username, policy):
         """

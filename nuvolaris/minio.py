@@ -25,6 +25,7 @@ import nuvolaris.openwhisk as openwhisk
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
+from nuvolaris.minio_util import MinioClient
 
 def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     """
@@ -142,7 +143,15 @@ def create_nuv_storage(data):
             logging.info(f"granting rw access to created policies under username {data['minio_nuv_user']}")
             minioClient.assign_rw_bucket_policy_to_user(data["minio_nuv_user"],bucket_policy_names)
 
-        logging.info(f"*** configured MINIO storage for nuvolaris") 
+        logging.info(f"*** configured MINIO storage for nuvolaris")
+
+def assign_bucket_quota(bucket_name, quota, minioClient:MinioClient):
+    logging.info(f"*** setting quota on bucket {bucket_name} with hardlimit to {quota}m")
+    res = minioClient.assign_quota_to_bucket(bucket_name,quota)
+
+    if res:
+        logging.info(f"*** quota on bucket {bucket_name} set successfully")
+
 
 def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owner=None):
     minioClient = mutil.MinioClient()    
@@ -162,13 +171,15 @@ def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owne
     if(ucfg.get('object-storage.data.enabled')):
         bucket_name = ucfg.get('object-storage.data.bucket')
         logging.info(f"*** adding private bucket {bucket_name} for {namespace}")
-        res = minioClient.make_bucket(bucket_name)                
+        res = minioClient.make_bucket(bucket_name)               
         bucket_policy_names.append(f"{bucket_name}/*")
         state['storage_data']=res
 
         if(res):
             user_metadata.add_metadata("MINIO_DATA_BUCKET",bucket_name)
 
+            if ucfg.exists('object-storage.quota'):
+                assign_bucket_quota(bucket_name,ucfg.get('object-storage.quota'), minioClient)
     
     if(ucfg.get('object-storage.route.enabled')):
         bucket_name = ucfg.get("object-storage.route.bucket")
@@ -178,6 +189,9 @@ def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owne
 
         if(res):
             user_metadata.add_metadata("MINIO_STATIC_BUCKET",bucket_name)
+            
+            if ucfg.exists('object-storage.quota'):
+                assign_bucket_quota(bucket_name,ucfg.get('object-storage.quota'), minioClient)
 
         content_path = find_content_path("index.html")
 
