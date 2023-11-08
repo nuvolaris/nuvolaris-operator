@@ -103,8 +103,8 @@ spec:
                       description: password to access the internal MINIO instance
                       type: string
                     quota:
-                      description: maximum quota assignable in mb to each defined bucket, If omitted il will be equivalent to unlimited
-                      type: integer
+                      description: maximum quota assignable in mb to each defined bucket. Defaults to auto which will not set any specific quota
+                      type: string
                     data:
                       description: used to configure the user MINIO dedicated buckets
                       type: object
