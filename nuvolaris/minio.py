@@ -146,11 +146,14 @@ def create_nuv_storage(data):
         logging.info(f"*** configured MINIO storage for nuvolaris")
 
 def assign_bucket_quota(bucket_name, quota, minioClient:MinioClient):
-    logging.info(f"*** setting quota on bucket {bucket_name} with hardlimit to {quota}m")
-    res = minioClient.assign_quota_to_bucket(bucket_name,quota)
+    if not quota.lower() in ['auto'] and quota.isnumeric():
+        logging.info(f"*** setting quota on bucket {bucket_name} with hardlimit to {quota}m")
+        res = minioClient.assign_quota_to_bucket(bucket_name,quota)
 
-    if res:
-        logging.info(f"*** quota on bucket {bucket_name} set successfully")
+        if res:
+            logging.info(f"*** quota on bucket {bucket_name} set successfully")
+    else:
+        logging.warn(f"*** skipping quota set on bucket {bucket_name}. Requested quota values is {quota}")
 
 
 def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owner=None):

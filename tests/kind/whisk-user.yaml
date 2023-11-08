@@ -31,7 +31,7 @@ spec:
     password: fttredispwd
   object-storage:        
     password: vPtIjR2MFMlYY7U5BY6N7TTogZXnJa8cl6ygPGnJIXOJonfA6MuNpVAdLN7m8iVc
-    quota: 100
+    quota: "100"
     data:
       enabled: true
       bucket: franztt-data
