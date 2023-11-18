@@ -47,14 +47,16 @@ data:
 
           proxy_pass http://{{minio_host}}.nuvolaris.svc.cluster.local:{{minio_port}}/;
           
-          error_page 404 @not_found;
-          proxy_intercept_errors on;
-          proxy_redirect     off;
+          error_page 301 404 = @spa;
+          proxy_intercept_errors on;   
       }  
 
-      location @not_found {
-        root   /usr/share/nginx/html;
-      }            
+      location @spa {
+        rewrite (.*)-web(.*) $1-web/index.html;
+        proxy_pass http://{{minio_host}}.nuvolaris.svc.cluster.local:{{minio_port}};
+        error_page 404 = /404.html;
+        proxy_intercept_errors on;
+      }           
 
       error_page  404              /404.html;
 
