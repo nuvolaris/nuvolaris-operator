@@ -49,6 +49,7 @@ data:
           
           error_page 301 404 = @spa;
           proxy_intercept_errors on;   
+          proxy_redirect     off;
       }  
 
       location @spa {
@@ -59,6 +60,10 @@ data:
       }           
 
       error_page  404              /404.html;
+
+      location = /404.html {
+          root   /usr/share/nginx/html;
+      }
 
       # redirect server error pages to the static page /50x.html
       #
