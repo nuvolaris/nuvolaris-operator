@@ -28,11 +28,6 @@ data:
 
       #access_log  /var/log/nginx/host.access.log  main;
 
-      #location / {
-      #    root   /usr/share/nginx/html;
-      #    index  index.html index.htm;
-      #}
-
       #rewrite ^/$ ${request_uri}index.html break;
       #rewrite (.*)/$ /$1/index.html;
       #rewrite ^([^.]*[^/])$ /$1/ permanent;
@@ -42,18 +37,26 @@ data:
           rewrite (.*)/$ $1/index.html;        
           rewrite ^([^.]*[^/])$ $1/ permanent;
           
-          proxy_hide_header     x-amz-id-2;
-          proxy_hide_header     x-amz-meta-etag;
-          proxy_hide_header     x-amz-request-id;
-          proxy_hide_header     x-amz-meta-server-side-encryption;
-          proxy_hide_header     x-amz-server-side-encryption;        
-          proxy_set_header Host $http_host;
+          #proxy_hide_header     x-amz-id-2;
+          #proxy_hide_header     x-amz-meta-etag;
+          #proxy_hide_header     x-amz-request-id;
+          #proxy_hide_header     x-amz-meta-server-side-encryption;
+          #proxy_hide_header     x-amz-server-side-encryption;        
+          #proxy_set_header Host $http_host;
 
           proxy_pass http://minio.nuvolaris.svc.cluster.local:9000/;
-          proxy_redirect     off;
-      }      
+          error_page 301 404 = @spa;
+          proxy_intercept_errors on;       
+      }
 
-      #error_page  404              /404.html;
+      location @spa {
+        rewrite (.*)-web(.*) $1-web/index.html;
+        proxy_pass http://minio.nuvolaris.svc.cluster.local:9000;
+        error_page 404 = /404.html;
+        proxy_intercept_errors on;
+      }
+
+      error_page  404              /404.html;
 
       # redirect server error pages to the static page /50x.html
       #
