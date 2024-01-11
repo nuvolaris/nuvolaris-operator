@@ -18,6 +18,8 @@
 [submodule "olaris"]
 	path = olaris
 	url = git@github.com:nuvolaris/olaris
+        branch = 3.0.0
 [submodule "nuv"]
 	path = nuv
 	url = git@github.com:nuvolaris/nuv
+	branch = main
