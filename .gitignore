@@ -51,3 +51,4 @@ whisk.properties
 *.log
 .latestcheck
 _failed.txt
+deploy.tar

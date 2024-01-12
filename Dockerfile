@@ -104,4 +104,5 @@ RUN chown -R nuvolaris /home/nuvolaris ;\
 USER nuvolaris
 ENV HOME=/home/nuvolaris
 RUN ./whisk-system.sh
+RUN cd deploy && tar cvf ../deploy.tar *
 CMD ./run.sh

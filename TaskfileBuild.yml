@@ -39,7 +39,7 @@ tasks:
       docker build .
       -t ${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}:{{.OPERATOR_TAG}}
       --build-arg OPERATOR_IMAGE_DEFAULT=${MY_OPERATOR_IMAGE:-{{.OPERATOR_IMAGE}}}
-      --build-arg OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}} 
+      --build-arg OPERATOR_TAG_DEFAULT={{.OPERATOR_TAG}}  --load
     
   build-and-push:
     - task: docker-login
