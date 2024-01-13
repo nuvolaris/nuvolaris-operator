@@ -82,7 +82,7 @@ def redeploy_whisk(owner=None):
     redeploy_controller(owner)
     
 
-def patch(diff, status, owner=None):
+def patch(diff, status, owner=None, name=None):
     """
     Implements the patching logic of the nuvolaris operator by analyzing the kopf
     provided diff object to identify which components needs to be added/removed.
@@ -135,7 +135,7 @@ def patch(diff, status, owner=None):
         endpoint.patch(status,what_to_do['endpoint'], owner)
 
     if components_updated:
-        operator_util.whisk_post_create()
+        operator_util.whisk_post_create(name)
     
         
     
