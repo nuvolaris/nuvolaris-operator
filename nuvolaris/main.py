@@ -281,7 +281,7 @@ def whisk_update(spec, status, namespace, diff, name, **kwargs):
     operator_util.config_from_spec(spec,handler_type="on_update")
     owner = kube.get(f"wsk/{name}")
 
-    patcher.patch(diff, status, owner)    
+    patcher.patch(diff, status, owner, name)
 
 @kopf.on.resume('nuvolaris.org', 'v1', 'whisks')
 def whisk_resume(spec, name, **kwargs):   
