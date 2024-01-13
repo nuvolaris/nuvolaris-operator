@@ -18,7 +18,14 @@
 #
 echo CONTROLLER: "$CONTROLLER_IMAGE:$CONTROLLER_TAG"
 echo OPERATOR: "$OPERATOR_IMAGE:$OPERATOR_TAG"
-
+# initializing deploy.tar - it should be in a volume
+if test -e deploy.tar
+then mkdir -p deploy
+     cd deploy
+     tar xvf ../deploy.tar
+     cd ..
+fi
+# start the operator if possible
 if kubectl -n nuvolaris get cm/config
 then poetry run kopf run -n nuvolaris -m nuvolaris nuvolaris/main.py nuvolaris/user_handlers.py nuvolaris/workflows.py "$@"
 else echo "You need to 'kubectl apply -f deploy/permissions' before starting the operator."
