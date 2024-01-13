@@ -58,9 +58,14 @@ RUN rm -Rvf /tmp/minio-binaries ;\
     rm -Rvf /tmp/minio-binaries
 # Download and instal task
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/bin
-# add user
-RUN useradd -m -s /bin/bash -g root -N nuvolaris && \
-    echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
+# add nuvolaris user
+RUN groupadd --gid 1001 nuvolaris
+RUN useradd -m nuvolaris -s /bin/bash --uid 1001 --gid 1001 --groups root
+RUN echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
+
+#RUN useradd -m -s /bin/bash -g root -N nuvolaris && \
+#    echo "nuvolaris ALL=(ALL:ALL) NOPASSWD: ALL" >>/etc/sudoers
+
 WORKDIR /home/nuvolaris
 # install the operator
 ADD nuvolaris/*.py /home/nuvolaris/nuvolaris/
