@@ -204,7 +204,7 @@ def delete(owner=None):
 
 def patch(status, action, owner=None):
     """
-    Called the the operator patcher to create/update/delete endpoint for apihost
+    Called by the operator patcher to create/update/delete endpoint for apihost
     """
     try:
         logging.info(f"*** handling request to {action} endpoint")  
@@ -213,16 +213,19 @@ def patch(status, action, owner=None):
             status['whisk_create']['endpoint']='on'
         elif action == 'delete':
             msg = delete(owner)
-            status['whisk_create']['endpoint']='off'
+            status['whisk_update']['endpoint']='off'
         else:
             msg = create(owner)
-            status['whisk_create']['endpoint']='updated'
+            status['whisk_update']['endpoint']='updated'
 
         logging.info(msg)        
         logging.info(f"*** handled request to {action} endpoint") 
     except Exception as e:
         logging.error('*** failed to update endpoint: %s' % e)
-        status['whisk_create']['endpoint']='error'
+        if  action == 'create':
+            status['whisk_create']['endpoint']='error'
+        else:            
+            status['whisk_update']['endpoint']='error'  
 
 def create_ow_api_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     """

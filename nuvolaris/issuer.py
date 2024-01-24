@@ -85,14 +85,17 @@ def patch(status, action, owner=None):
             status['whisk_create']['issuer']='on'
         elif action == 'delete':
             msg = delete(owner)
-            status['whisk_create']['issuer']='off'
+            status['whisk_update']['issuer']='off'
         else:
             msg = create(owner)
-            status['whisk_create']['issuer']='updated'
+            status['whisk_update']['issuer']='updated'
 
         logging.info(msg)        
         logging.info(f"*** handled request to {action} issuer") 
     except Exception as e:
         logging.error('*** failed to update issuer: %s' % e)
-        status['whisk_create']['issuer']='error'          
+        if  action == 'create':
+            status['whisk_create']['issuer']='error'
+        else:            
+            status['whisk_update']['issuer']='error'           
 

@@ -231,10 +231,13 @@ def patch(status, action, owner=None):
             status['whisk_create']['static']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['static']='off'
+            status['whisk_update']['static']='off'
 
         logging.info(msg)        
         logging.info(f"*** hanlded request to {action} static") 
     except Exception as e:
         logging.error('*** failed to update static: %s' % e)
-        status['whisk_create']['static']='error'           
+        if  action == 'create':
+            status['whisk_create']['static']='error'
+        else:            
+            status['whisk_update']['static']='error'            

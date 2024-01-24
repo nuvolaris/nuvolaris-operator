@@ -209,11 +209,14 @@ def patch(status, action, owner=None):
             status['whisk_create']['redis']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['redis']='off'
+            status['whisk_update']['redis']='off'
 
         logging.info(msg)        
         logging.info(f"*** hanlded request to {action} redis") 
     except Exception as e:
         logging.error('*** failed to update redis: %s' % e)
-        status['whisk_create']['redis']='error'             
+        if  action == 'create':
+            status['whisk_create']['redis']='error'
+        else:            
+            status['whisk_update']['redis']='error'               
 

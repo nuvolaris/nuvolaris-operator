@@ -127,13 +127,16 @@ def patch(status, action, owner=None):
             status['whisk_create']['ferretdb']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['ferretdb']='off'
+            status['whisk_update']['ferretdb']='off'
 
         logging.info(msg)        
         logging.info(f"*** handled request to {action} ferretdb") 
     except Exception as e:
         logging.error('*** failed to update ferretdb: %s' % e)
-        status['whisk_create']['ferretdb']='error'             
+        if  action == 'create':
+            status['whisk_create']['ferretdb']='error'
+        else:            
+            status['whisk_update']['ferretdb']='error'              
 
 def _add_mdb_user_metadata(user_metadata, data):
     """

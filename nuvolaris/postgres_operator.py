@@ -252,10 +252,13 @@ def patch(status, action, owner=None):
             status['whisk_create']['postgres']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['postgres']='off'
+            status['whisk_update']['postgres']='off'
 
         logging.info(msg)        
-        logging.info(f"*** hanlded request to {action} postgres") 
+        logging.info(f"*** handled request to {action} postgres") 
     except Exception as e:
         logging.error('*** failed to update postgres: %s' % e)
-        status['whisk_create']['postgres']='error'                     
+        if  action == 'create':
+            status['whisk_create']['postgres']='error'
+        else:            
+            status['whisk_update']['postgres']='error'                    
