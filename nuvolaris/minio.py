@@ -259,11 +259,14 @@ def patch(status, action, owner=None):
             status['whisk_create']['minio']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['minio']='off'
+            status['whisk_update']['minio']='off'
 
         logging.info(msg)        
         logging.info(f"*** hanlded request to {action} minio") 
     except Exception as e:
         logging.error('*** failed to update minio: %s' % e)
-        status['whisk_create']['minio']='error'         
+        if  action == 'create':
+            status['whisk_create']['minio']='error'
+        else:            
+            status['whisk_update']['minio']='error'           
 

@@ -411,4 +411,4 @@ def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtim
     if(runtimes):
         return runtimes[0]
 
-    raise Exception("Could not find runtimes.json inside cm/openwhisk-runtimes config Map")  
+    raise Exception("Could not find runtimes.json inside cm/openwhisk-runtimes config Map")

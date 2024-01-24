@@ -89,10 +89,13 @@ def patch(status, action, owner=None):
             status['whisk_create']['cron']='on'
         else:
             msg = delete(owner)
-            status['whisk_create']['cron']='off'
+            status['whisk_update']['cron']='off'
 
         logging.info(msg)        
         logging.info(f"*** hanlded request to {action} cron") 
     except Exception as e:
         logging.error('*** failed to update cron: %s' % e)
-        status['whisk_create']['cron']='error'       
+        if  action == 'create':
+            status['whisk_create']['cron']='error'
+        else:            
+            status['whisk_update']['cron']='error'        
