@@ -26,6 +26,8 @@ data:
       listen       8080;
       server_name  localhost;
 
+      client_max_body_size 1000M;
+
       #access_log  /var/log/nginx/host.access.log  main;
 
       #location / {
