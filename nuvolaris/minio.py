@@ -22,10 +22,14 @@ import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.minio_util as mutil
 import nuvolaris.openwhisk as openwhisk
+import nuvolaris.apihost_util as apihost_util
+import nuvolaris.endpoint as endpoint
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
 from nuvolaris.minio_util import MinioClient
+from nuvolaris.ingress_data import IngressData
+from nuvolaris.route_data import RouteData
 
 def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     """
@@ -77,12 +81,13 @@ def create(owner=None):
     # dynamically detect minio pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
     create_nuv_storage(data)
+    create_api_uploader_endpoint(owner)
     logging.info("*** configured minio standalone")
     return res
 
 def _annotate_nuv_metadata(data):
     """
-    annotate nuvolaris confgimap with entries for minio connectivity MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
+    annotate nuvolaris configmap with entries for minio connectivity MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY
     this is becasue MINIO
     """ 
     try:
@@ -243,6 +248,8 @@ def delete_by_spec():
     return res
 
 def delete(owner=None):
+    delete_api_uploader_endpoint(owner)
+
     if owner:        
         return delete_by_owner()
     else:
@@ -268,5 +275,80 @@ def patch(status, action, owner=None):
         if  action == 'create':
             status['whisk_create']['minio']='error'
         else:            
-            status['whisk_update']['minio']='error'           
+            status['whisk_update']['minio']='error'
+
+def create_api_uploader_endpoint(owner=None):
+    """
+    exposes MINIO api in the uploader-api ingress/route
+    """
+    runtime = cfg.get('nuvolaris.kube')
+    apihost = apihost_util.get_apihost(runtime)
+
+    if runtime == 'openshift':           
+        return deploy_minio_api_route(apihost, "nuvolaris")
+    else:
+        return deploy_minio_api_ingress(apihost, "nuvolaris")
+
+def deploy_minio_api_route(apihost,namespace):
+    upload = RouteData(apihost)
+    upload.with_route_name(endpoint.api_route_name(namespace,"upload"))
+    upload.with_service_name("minio")
+    upload.with_service_kind("Service")
+    upload.with_service_port("9000")
+    upload.with_context_path("/api/upload")
+    upload.with_rewrite_target("/")
+
+    logging.info(f"*** configuring route for upload")
+    path_to_template_yaml = upload.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)        
+    return res 
+
+def deploy_minio_api_ingress(apihost, namespace):
+    upload = IngressData(apihost)
+    upload.with_ingress_name(endpoint.api_ingress_name(namespace,"upload"))
+    upload.with_secret_name(endpoint.api_secret_name(namespace))
+    upload.with_context_path("/api/upload")
+    upload.with_context_regexp("(/|$)(.*)")
+    upload.with_rewrite_target("/$2")    
+    upload.with_service_name("minio")
+    upload.with_service_port("9000")
+    upload.with_middleware_ingress_name(endpoint.api_middleware_ingress_name(namespace,"upload"))
+
+    if upload.requires_traefik_middleware():
+        logging.info("*** configuring traefik middleware for upload ingress")
+        path_to_template_yaml = upload.render_traefik_middleware_template(namespace)
+        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        os.remove(path_to_template_yaml)
+
+    logging.info(f"*** configuring static ingress for upload")
+    path_to_template_yaml = upload.render_template(namespace)
+    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+
+    return res
+
+def delete_api_uploader_endpoint(owner=None):
+    """
+    undeploys ingresses for minio apihost
+    """    
+    logging.info(f"*** removing ingresses for minio upload")
+    namespace = "nuvolaris"
+    runtime = cfg.get('nuvolaris.kube')
+    ingress_class = util.get_ingress_class(runtime)
+    
+    try:
+        res = ""
+        if(runtime=='openshift'):
+            res = kube.kubectl("delete", "route",endpoint.api_route_name(namespace,"upload"))
+            return res
+
+        if(ingress_class == 'traefik'):            
+            res = kube.kubectl("delete", "middleware.traefik.containo.us",endpoint.api_middleware_ingress_name(namespace,"upload"))         
+
+        res += kube.kubectl("delete", "ingress",endpoint.api_ingress_name(namespace,"upload"))
+        return res
+    except Exception as e:
+        logging.warn(e)       
+        return False                            
 

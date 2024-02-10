@@ -124,7 +124,7 @@ spec:
       password: minioadmin    
     nuvolaris:
       user: nuvolaris
-      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+      password: tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
   postgres:    
     volume-size: 5
     replicas: 2
