@@ -233,7 +233,7 @@ def get_controller_image_data(data):
         data['controller_tag'] = img_data["tag"]
     else:        
         data['controller_image'] = cfg.get("controller.image") or "ghcr.io/nuvolaris/openwhisk-controller"
-        data['controller_tag'] = cfg.get("controller.tag") or "0.3.0-morpheus.22122609"
+        data['controller_tag'] = cfg.get("controller.tag") or "3.1.0-mastrogpt.2402101445"
 
 # return configuration parameters for the standalone controller
 def get_standalone_config_data():        
