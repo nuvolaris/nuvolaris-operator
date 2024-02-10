@@ -46,11 +46,21 @@ spec:
           - name: nginx-default-conf
             mountPath: /etc/nginx/conf.d/default.conf
             subPath: default.conf
-            readOnly: false          
+            readOnly: false 
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: false                       
       volumes:
         - name: nginx-default-conf
           configMap:
             name: nginx-static-conf-cm
             items:
               - key: default.conf
-                path: default.conf                           
+                path: default.conf 
+        - name: nginx-conf
+          configMap:
+            name: nginx-static-conf-cm
+            items:
+              - key: nginx.conf
+                path: nginx.conf                          
