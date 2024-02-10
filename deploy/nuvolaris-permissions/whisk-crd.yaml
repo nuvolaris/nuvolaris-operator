@@ -561,6 +561,25 @@ spec:
                       description: configure the OW invoker if supported by the oeprator
                       type: object
                       properties:
+                        kubernetes:
+                          description: specific kubernetes settings controlled by the invoker
+                          type: object
+                          properties:
+                           timeouts_run:
+                            description: pod run max timeout waited by the invoker. Defaults to 1 minute
+                            type: integer
+                           timeouts_logs:
+                            description: pod max timeout waited by the invoker to collect logs. Defaults to 1 minute
+                            type: integer
+                           user_pod_affinity_enabled:
+                            description: boolean falg to enable/disable user pod affinity. Default to false
+                            type: boolean                                                       
+                           port_forwarding_enabled:
+                            description: boolean falg to enable/disable port forwarding. Default to false
+                            type: boolean
+                           action_namespace:
+                            description: Action namespace. Default to nuvolaris
+                            type: string                                                       
                         javaOpts:
                           description: invoker memory settings defaulted to "-Xmx1024M"
                           type: string
