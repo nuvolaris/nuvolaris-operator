@@ -151,6 +151,16 @@ def extract_hostname(url):
     parsed_url = urllib.parse.urlparse(url)
     return parsed_url.hostname
 
+def extract_port(url):
+    """
+    Parse a url and extract the port part
+    >>> extract_port('http://localhost:8080')
+    8080
+    >>> extract_port('https://nuvolaris.org')
+    """
+    parsed_url = urllib.parse.urlparse(url)
+    return parsed_url.port
+
 
 def get_user_static_hostname(runtime, username, apihost):
     """
@@ -190,5 +200,40 @@ def get_user_api_url(runtime, hostname, api_context):
 
     final_url = assign_protocol(runtime, url)
     return final_url.geturl()
+
+def append_prefix_to_url(url,prefix):
+    """
+    Appends the given prefix to the specified if not present
+    >>> append_prefix_to_url("http://nuvolaris.dev:8080","www")    
+    'http://www.nuvolaris.dev:8080'
+    >>> append_prefix_to_url("http://www.nuvolaris.dev:8080","www")
+    'http://www.nuvolaris.dev:8080'
+    >>> append_prefix_to_url("http://nuvolaris.dev:8080",None)
+    'http://nuvolaris.dev:8080'
+    >>> append_prefix_to_url("https://nuvolaris.dev","www")
+    'https://www.nuvolaris.dev'
+    """
+    try:
+        if not prefix:
+            return url
+
+        tmp_url = urllib.parse.urlparse(url)        
+        hostname = extract_hostname(url)
+        port = extract_port(url)
+
+        if prefix in hostname:
+            return url
+
+        if port:
+            tmp_url = tmp_url._replace(netloc = f"{prefix}.{hostname}:{port}")
+        else:    
+            tmp_url = tmp_url._replace(netloc = f"{prefix}.{hostname}")
+        
+        return tmp_url.geturl()
+
+    except Exception as e:
+        return url    
+
+
 
   
