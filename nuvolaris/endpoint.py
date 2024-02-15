@@ -85,7 +85,7 @@ def deploy_api_routes(apihost,namespace,should_create_www=False):
     os.remove(path_to_template_yaml) 
 
     if should_create_www:
-            www_my = RouteData(apihost)
+            www_my = RouteData(apihost_util.append_prefix_to_url(apihost,"www"))
             www_my.with_route_name(api_route_name(namespace,"apihost-www-my"))
             www_my.with_service_name("controller-ip")
             www_my.with_service_kind("Service")
@@ -172,7 +172,7 @@ def deploy_api_ingresses(apihost, namespace,should_create_www=False):
     os.remove(path_to_template_yaml)
 
     if should_create_www:
-        www_my = IngressData(apihost)
+        www_my = IngressData(apihost_util.append_prefix_to_url(apihost,"www"))
         www_my.with_ingress_name(api_ingress_name(namespace,"apihost-www-my"))
         www_my.with_secret_name(api_secret_name(namespace)+"-www")
         www_my.with_context_path("/api/my")
