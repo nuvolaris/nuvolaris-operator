@@ -60,12 +60,23 @@ def create(owner=None):
     return res
 
 def create_nuv_static_ingress(runtime, owner=None):
+    """"
+    Deploys the static ingresses for the nuvolaris user
+    """
     apihost_url = apihost_util.get_apihost(runtime)
-
+    hostname = apihost_util.extract_hostname(apihost_url)
+    should_create_www = "www" not in hostname and runtime not in ["kind"]
+    
     if runtime == 'openshift':           
-        return deploy_content_route_template("nuvolaris","nuvolaris-web", apihost_url)
+        res = deploy_content_route_template("nuvolaris","nuvolaris-web", apihost_url)
+        if should_create_www:
+            res += deploy_content_route_template("www-nuvolaris","nuvolaris-web",apihost_util.append_prefix_to_url(apihost_url,"www"))
+        return res
     else:
-        return deploy_content_ingress_template("nuvolaris","nuvolaris-web",apihost_url)
+        res = deploy_content_ingress_template("nuvolaris","nuvolaris-web",apihost_url)
+        if should_create_www:
+            res += deploy_content_ingress_template("www-nuvolaris","nuvolaris-web",apihost_util.append_prefix_to_url(apihost_url,"www"))
+        return res
 
 def static_ingress_name(namespace, default="apihost"):
     return namespace == "nuvolaris" and f"{default}-static-ingress" or f"{namespace}-static-ingress"
@@ -121,7 +132,9 @@ def deploy_content_ingress_template(namespace, bucket, url):
     path_to_template_yaml = content.render_template(namespace)
     res += kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)
-    return res   
+
+    return res 
+  
                   
 def create_ow_static_endpoint(ucfg, user_metadata: UserMetadata, owner=None):
     """
@@ -193,20 +206,36 @@ def delete_nuv_ingresses():
     logging.info("*** deleting nuvolaris static ingresses")
     runtime = cfg.get('nuvolaris.kube')
     ingress_class = util.get_ingress_class(runtime)
+    apihost_url = apihost_util.get_apihost(runtime)
+    hostname = apihost_util.extract_hostname(apihost_url)
+    should_delete_www = "www" not in hostname and runtime not in ["kind"]
 
     try:
         res = ""
         if(runtime=='openshift'):
             route_name = static_route_name("nuvolaris")
             res = kube.kubectl("delete", "route",route_name)
+
+            if should_delete_www:
+                route_name = static_route_name("www-nuvolaris")
+                res += kube.kubectl("delete", "route",route_name)
             return res
 
         if(ingress_class == 'traefik'):            
             middleware_name = static_middleware_ingress_name("nuvolaris")
-            res += kube.kubectl("delete", "middleware.traefik.containo.us",middleware_name)            
+            res += kube.kubectl("delete", "middleware.traefik.containo.us",middleware_name)
+            
+            if should_delete_www:
+                middleware_name = static_middleware_ingress_name("www-nuvolaris")
+                res += kube.kubectl("delete", "middleware.traefik.containo.us",middleware_name)             
 
         ingress_name = static_ingress_name("nuvolaris")
         res += kube.kubectl("delete", "ingress",ingress_name)
+
+        if should_delete_www:
+            ingress_name = static_ingress_name("www-nuvolaris")
+            res += kube.kubectl("delete", "ingress",ingress_name) 
+
         return res
     except Exception as e:
         logging.warn(e)       

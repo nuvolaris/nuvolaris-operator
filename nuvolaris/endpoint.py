@@ -55,7 +55,7 @@ def deploy_info_route(apihost,namespace):
     os.remove(path_to_template_yaml)        
     return res 
 
-def deploy_api_routes(apihost,namespace):
+def deploy_api_routes(apihost,namespace,should_create_www=False):
     logging.info(f"**** configuring openshift route based endpoint for apihost {apihost}")
 
     api = RouteData(apihost)
@@ -81,11 +81,27 @@ def deploy_api_routes(apihost,namespace):
 
     logging.info(f"*** configuring route for apihost-my")
     path_to_template_yaml =  my.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
-    os.remove(path_to_template_yaml)       
+    res += kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml) 
+
+    if should_create_www:
+            www_my = RouteData(apihost)
+            www_my.with_route_name(api_route_name(namespace,"apihost-www-my"))
+            www_my.with_service_name("controller-ip")
+            www_my.with_service_kind("Service")
+            www_my.with_service_port("8080")
+            www_my.with_context_path("/api/my")
+            www_my.with_rewrite_target(f"/api/v1/web/namespace/{namespace}") 
+
+            logging.info(f"*** configuring route for apihost-www-my")
+            path_to_template_yaml =  www_my.render_template(namespace)
+            res += kube.kubectl("apply", "-f",path_to_template_yaml)
+            os.remove(path_to_template_yaml) 
+        
     return res
 
 def deploy_info_ingress(apihost, namespace):
+    res = ""
     info = IngressData(apihost)
     info.with_ingress_name(api_ingress_name(namespace,"apihost-info"))
     info.with_secret_name(api_secret_name(namespace))
@@ -99,19 +115,20 @@ def deploy_info_ingress(apihost, namespace):
     if info.requires_traefik_middleware():
         logging.info("*** configuring traefik middleware for apihost-info ingress")
         path_to_template_yaml = info.render_traefik_middleware_template(namespace)
-        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        res += kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)
 
     logging.info(f"*** configuring static ingress for apihost-info")
     path_to_template_yaml = info.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    res += kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)
 
     return res     
     
 
-def deploy_api_ingresses(apihost, namespace):
-    logging.info(f"**** configuring ingresses based endpoint for apihost {apihost}")   
+def deploy_api_ingresses(apihost, namespace,should_create_www=False):
+    logging.info(f"**** configuring ingresses based endpoint for apihost {apihost}")
+    res = ""   
     api = IngressData(apihost)
     api.with_ingress_name(api_ingress_name(namespace,"apihost"))
     api.with_secret_name(api_secret_name(namespace))
@@ -135,31 +152,54 @@ def deploy_api_ingresses(apihost, namespace):
     if api.requires_traefik_middleware():
         logging.info("*** configuring traefik middleware for apihost ingress")
         path_to_template_yaml = api.render_traefik_middleware_template(namespace)
-        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        res += kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)
 
     if my.requires_traefik_middleware():
         logging.info("*** configuring traefik middleware for apihost-my ingress")
         path_to_template_yaml = my.render_traefik_middleware_template(namespace)
-        res = kube.kubectl("apply", "-f",path_to_template_yaml)
+        res += kube.kubectl("apply", "-f",path_to_template_yaml)
         os.remove(path_to_template_yaml)        
 
     logging.info(f"*** configuring static ingress for apihost")
     path_to_template_yaml = api.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
+    res += kube.kubectl("apply", "-f",path_to_template_yaml)
     os.remove(path_to_template_yaml)
 
     logging.info(f"*** configuring static ingress for apihost-my")
     path_to_template_yaml = my.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
-    os.remove(path_to_template_yaml)    
+    res += kube.kubectl("apply", "-f",path_to_template_yaml)
+    os.remove(path_to_template_yaml)
+
+    if should_create_www:
+        www_my = IngressData(apihost)
+        www_my.with_ingress_name(api_ingress_name(namespace,"apihost-www-my"))
+        www_my.with_secret_name(api_secret_name(namespace)+"-www")
+        www_my.with_context_path("/api/my")
+        www_my.with_context_regexp("(/|$)(.*)")
+        www_my.with_rewrite_target(f"/api/v1/web/{namespace}/$2")
+        www_my.with_service_name("controller")
+        www_my.with_service_port("3233")
+        www_my.with_middleware_ingress_name(api_middleware_ingress_name(namespace,"apihost-www-my"))
+
+        if www_my.requires_traefik_middleware():
+            logging.info("*** configuring traefik middleware for apihost-www-my ingress")
+            path_to_template_yaml = www_my.render_traefik_middleware_template(namespace)
+            res += kube.kubectl("apply", "-f",path_to_template_yaml)
+            os.remove(path_to_template_yaml)
+
+        logging.info(f"*** configuring static ingress for apihost-www-my")
+        path_to_template_yaml = www_my.render_template(namespace)
+        res += kube.kubectl("apply", "-f",path_to_template_yaml)
+        os.remove(path_to_template_yaml)                     
 
     return res 
-
 
 def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     apihost = apihost_util.get_apihost(runtime)
+    hostname = apihost_util.extract_hostname(apihost)
+    should_create_www = "www" not in hostname and runtime not in ["kind"]
 
     logging.info(f"*** Saving configuration for OpenWishk apihost={apihost}")
     openwhisk.annotate(f"apihost={apihost}")
@@ -167,10 +207,10 @@ def create(owner=None):
     
     if runtime == 'openshift':
         res = deploy_info_route(apihost,"nuvolaris")
-        return deploy_api_routes(apihost,"nuvolaris")
+        return deploy_api_routes(apihost,"nuvolaris",should_create_www)
     else:
         res = deploy_info_ingress(apihost,"nuvolaris")
-        return deploy_api_ingresses(apihost,"nuvolaris")
+        return deploy_api_ingresses(apihost,"nuvolaris",should_create_www)
 
 def delete(owner=None):
     """
@@ -180,6 +220,9 @@ def delete(owner=None):
     namespace = "nuvolaris"
     runtime = cfg.get('nuvolaris.kube')        
     ingress_class = util.get_ingress_class(runtime)
+    apihost = apihost_util.get_apihost(runtime)
+    hostname = apihost_util.extract_hostname(apihost)
+    should_delete_www = "www" not in hostname and runtime not in ["kind"]
     
     try:
         res = ""
@@ -187,16 +230,23 @@ def delete(owner=None):
             res = kube.kubectl("delete", "route",api_route_name(namespace,"apihost"))
             res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-my"))
             res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-info"))
+
+            if should_delete_www:
+                res += kube.kubectl("delete", "route",api_route_name(namespace,"apihost-www-my"))
             return res
 
         if(ingress_class == 'traefik'):            
             res = kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost"))
             res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-my"))
-            res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-info"))          
+            res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-info"))
+            if should_delete_www:
+                res += kube.kubectl("delete", "middleware.traefik.containo.us",api_middleware_ingress_name(namespace,"apihost-www-my"))          
 
         res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost"))
         res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-my"))
         res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-info"))
+        if should_delete_www:
+            res += kube.kubectl("delete", "ingress",api_ingress_name(namespace,"apihost-www-my"))
         return res
     except Exception as e:
         logging.warn(e)       
