@@ -198,7 +198,6 @@ def deploy_api_ingresses(apihost, namespace,should_create_www=False):
 def create(owner=None):
     runtime = cfg.get('nuvolaris.kube')
     apihost = apihost_util.get_apihost(runtime)
-    runtime = cfg.get('nuvolaris.kube')
     hostname = apihost_util.extract_hostname(apihost)
     should_create_www = "www" not in hostname and runtime not in ["kind"]
 
