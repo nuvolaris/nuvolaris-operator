@@ -76,7 +76,13 @@ spec:
                       type: string
                     ingresslb:
                       description: allow to set the location of the ingress lb in the form namespace/service-name. Default to auto which will force the operator to use default values based on the environment.
-                      type: string                                                                   
+                      type: string
+                    affinity-enabled:
+                      description: enable/disable openwhisk configuration with node affinity. This flag can be true only on multinode cluster deployment. Default to false
+                      type: boolean
+                    toleration-enabled:
+                      description: enable/disable openwhisk toleration. This flag can be true only on multinode cluster deployment. Default to false
+                      type: boolean                                                                                                                 
                   required:
                   - password    
                 components:
