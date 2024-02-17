@@ -528,6 +528,9 @@ spec:
                       description: configure the OW controller
                       type: object
                       properties:
+                        replicas:
+                          description: controller statefulset replicas. Defaults to 1
+                          type: integer
                         javaOpts:
                           description: controller java memory settings defaulted to "-Xmx2048M"
                           type: string
@@ -567,6 +570,9 @@ spec:
                       description: configure the OW invoker if supported by the oeprator
                       type: object
                       properties:
+                        replicas:
+                          description: invoker statefulset replicas. Defaults to 1. When used be sure to enable also pod affinity
+                          type: integer
                         kubernetes:
                           description: specific kubernetes settings controlled by the invoker
                           type: object
