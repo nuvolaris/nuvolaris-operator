@@ -1,0 +1,62 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{name}}
+  namespace: nuvolaris
+spec:
+  template:
+    spec:
+      affinity:
+      {% if affinity %} 
+        # prefer to not run on an invoker node (only prefer because of single node clusters)
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: nuvolaris-role
+                operator: NotIn
+                values:
+                - {{affinity_invoker_node_label}}
+          - weight: 80
+            preference:
+              matchExpressions:
+              - key: nuvolaris-role
+                operator: In
+                values:
+                - {{affinity_core_node_label}}
+        # Fault tolerance: prevent multiple instances of {{pod_anti_affinity_name}} from running on the same node
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - {{pod_anti_affinity_name}}
+            topologyKey: "kubernetes.io/hostname"
+      {% endif %}               
+      tolerations:
+      {% if tolerations %}   
+        - key: "nuvolaris-role"
+          operator: "Equal"
+          value: {{toleration_role}}
+          effect: "NoSchedule"
+      {% endif %}            
