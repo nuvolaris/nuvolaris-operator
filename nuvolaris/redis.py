@@ -61,8 +61,10 @@ def create(owner=None):
     if data['persistence']:
        tplp.append("set-attach.yaml")
 
-    kust = kus.patchTemplates("redis",tplp , data)
-    
+    if(data['affinity'] or data['tolerations']):
+       tplp.append("affinity-tolerance-sts-core-attach.yaml")
+
+    kust = kus.patchTemplates("redis",tplp , data)    
     spec = kus.kustom_list("redis", kust, templates=["redis-conf.yaml"], data=data)
 
     if owner:

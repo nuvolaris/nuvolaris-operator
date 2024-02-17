@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-    password: nuvpassw0rd 
+    password: nuvpassw0rd
   components:
     # start openwhisk controller
     openwhisk: true

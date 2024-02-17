@@ -42,6 +42,7 @@ def enrich_ferretdb_data(data):
      
      # use nuvolaris postgres db as default configuration for FERRETDB
      data['ferretdb_postgres_url'] = postgres.get_base_postgres_url(data)
+     util.ferretb_affinity_tolerations_data(data)
 
 def create(owner=None):
     """
@@ -53,6 +54,9 @@ def create(owner=None):
     enrich_ferretdb_data(data)
 
     tplp = ["security-set-attach.yaml","set-attach.yaml","ferretdb-sts.yaml"]
+    if(data['affinity'] or data['tolerations']):
+       tplp.append("affinity-tolerance-sts-core-attach.yaml")
+           
     mkust = kus.patchTemplates("ferretdb", tplp, data)    
     mspec = kus.kustom_list("ferretdb", mkust, templates=[], data=data)
 

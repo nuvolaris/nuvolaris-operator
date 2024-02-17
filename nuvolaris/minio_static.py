@@ -30,18 +30,11 @@ from nuvolaris.route_data import RouteData
 def create(owner=None):
     logging.info(f"*** configuring nuvolaris nginx static provider")
     runtime = cfg.get('nuvolaris.kube')
-    data = {
-        "name":"nuvolaris-static",
-        "container":"nuvolaris-static",
-        "size":1,
-        "storageClass": cfg.get('nuvolaris.storageclass'),
-        "dir":"/var/cache/nginx",
-        "minio_host": cfg.get('minio.host') or "minio",
-        "minio_port": cfg.get('minio.port') or "9000",
-        "applypodsecurity": util.get_enable_pod_security()
-    }
-    
+    data = util.get_minio_static_config_data()    
     tplp = ["nginx-static-cm.yaml","nginx-static-sts.yaml","security-set-attach.yaml","set-attach.yaml"]
+
+    if(data['affinity'] or data['tolerations']):
+       tplp.append("affinity-tolerance-sts-core-attach.yaml")     
 
     kust = kus.patchTemplates("nginx-static", tplp, data)    
     spec = kus.kustom_list("nginx-static", kust, templates=[], data=data)

@@ -23,7 +23,10 @@ metadata:
 spec:
   nuvolaris:
       password: nuvpassw0rd 
-      apihost: auto #api.k3s.nuvtest.net      
+      apihost: arcosicilia.org
+      affinity: true 
+      tolerations: true
+      protocol: https  
   components:
     # start openwhisk controller
     openwhisk: true
@@ -40,7 +43,7 @@ spec:
     # start cron based action parser
     cron: true
     # enable TLS
-    tls: true
+    tls: false
     # minio enabled or not
     minio: true
     # minio static enabled or not

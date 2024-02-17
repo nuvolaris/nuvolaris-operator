@@ -26,7 +26,7 @@ spec:
    image: postgres:14.1
    database:
       size: 200Mi
-   customConfig: nuvolaris-postgres-conf 
+   customConfig: nuvolaris-postgres-conf    
    env:
       - name: POSTGRES_PASSWORD
         valueFrom:

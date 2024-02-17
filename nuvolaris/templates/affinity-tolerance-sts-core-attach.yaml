@@ -15,22 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
----
-apiVersion: kubegres.reactive-tech.io/v1
-kind: Kubegres
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: nuvolaris-postgres
+  name: {{name}}
   namespace: nuvolaris
 spec:
-   replicas: {{replicas}}
-   image: postgres:14.1
-   database:
-      size: {{size}}Gi
-      storageClassName: {{storageClass}}
-   customConfig: nuvolaris-postgres-conf
-   scheduler:
+  template:
+    spec:
       affinity:
-      {% if affinity %}
+      {% if affinity %} 
         # prefer to not run on an invoker node (only prefer because of single node clusters)
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -48,6 +42,16 @@ spec:
                 operator: In
                 values:
                 - {{affinity_core_node_label}}
+        # Fault tolerance: prevent multiple instances of {{pod_anti_affinity_name}} from running on the same node
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: name
+                operator: In
+                values:
+                - {{pod_anti_affinity_name}}
+            topologyKey: "kubernetes.io/hostname"
       {% endif %}               
       tolerations:
       {% if tolerations %}   
@@ -55,20 +59,4 @@ spec:
           operator: "Equal"
           value: {{toleration_role}}
           effect: "NoSchedule"
-      {% endif %}   
-   env:
-      - name: POSTGRES_PASSWORD
-        valueFrom:
-           secretKeyRef:
-              name: postgres-nuvolaris-secret
-              key: superUserPassword
-      - name: POSTGRES_REPLICATION_PASSWORD
-        valueFrom:
-           secretKeyRef:
-              name: postgres-nuvolaris-secret
-              key: replicationUserPassword
-      - name: POSTGRES_NUVOLARIS_DB_PASSWORD
-        valueFrom:
-           secretKeyRef:
-              name: postgres-nuvolaris-secret
-              key: nuvolarisUserPassword             
+      {% endif %}            
