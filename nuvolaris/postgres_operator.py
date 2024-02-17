@@ -32,10 +32,10 @@ def create(owner=None):
     """
     Deploys the postgres using kubegres operator and wait for the operator to be ready.
     """
-    logging.info("*** creating kubegres-operator")    
-    data = util.get_postgres_config_data()
-
-    spec = kus.kustom_list("postgres-operator")
+    logging.info("*** creating kubegres-operator")        
+    pg_cm_data = util.postgres_manager_affinity_tolerations_data()
+    pg_op_kust = kus.patchTemplates("postgres-operator",templates=["affinity-tolerance-dep-core-attach.yaml"], data=pg_cm_data)
+    spec = kus.kustom_list("postgres-operator",pg_op_kust, templates=[], data={})
 
     if owner:
         kopf.append_owner_reference(spec['items'], owner)
@@ -49,7 +49,7 @@ def create(owner=None):
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.control-plane == 'controller-manager')].metadata.name}")
     
     logging.info("*** creating a postgres instance")
-    
+    data = util.get_postgres_config_data()    
     mkust = kus.patchTemplates("postgres-operator-deploy",templates=["postgres.yaml"], data=data)
     mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/superUserPassword",data['postgres_root_password'])
     mkust += kus.patchGenericEntry("Secret","postgres-nuvolaris-secret","/stringData/replicationUserPassword",data['postgres_root_replica_password'])        

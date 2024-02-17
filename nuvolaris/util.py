@@ -238,6 +238,7 @@ def get_controller_image_data(data):
 # return configuration parameters for the standalone controller
 def get_standalone_config_data():        
     data = {
+        "name":"controller",
         "couchdb_host": cfg.get("couchdb.host") or "couchdb",
         "couchdb_port": cfg.get("couchdb.port") or "5984",
         "couchdb_admin_user": cfg.get("couchdb.admin.user"),
@@ -474,6 +475,16 @@ def ferretb_affinity_tolerations_data(data):
 # populate specific affinity data for ferretdb
 def standalone_affinity_tolerations_data(data):
     common_affinity_tolerations_data(data)
-    data["pod_anti_affinity_name"] = "controller"                    
+    data["pod_anti_affinity_name"] = "controller"
+
+# populate specific affinity data for postgres controller manager
+def postgres_manager_affinity_tolerations_data():
+    data = {
+            "pod_anti_affinity_name":"kubegres-controller-manager",
+            "name":"kubegres-controller-manager" 
+    }
+    common_affinity_tolerations_data(data)
+    return data
+                      
 
     

@@ -69,7 +69,7 @@ def create(owner=None):
     tplp = ["00-minio-pvc.yaml","01-minio-dep.yaml","02-minio-svc.yaml"]
 
     if(data['affinity'] or data['tolerations']):
-       tplp.append("affinity-tolerance-sts-core-attach.yaml")    
+       tplp.append("affinity-tolerance-dep-core-attach.yaml")    
 
     kust = kus.patchTemplates("minio", tplp, data)
     spec = kus.kustom_list("minio", kust, templates=[], data=data)

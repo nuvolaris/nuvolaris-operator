@@ -23,7 +23,7 @@ metadata:
 spec:
   nuvolaris:
       password: nuvpassw0rd 
-      apihost: auto #api.k3s.nuvtest.net
+      apihost: auto #api.k3s.nuvtest.net      
   components:
     # start openwhisk controller
     openwhisk: true
