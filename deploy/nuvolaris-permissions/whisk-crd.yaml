@@ -585,7 +585,13 @@ spec:
                             type: integer
                            user_pod_affinity_enabled:
                             description: boolean falg to enable/disable user pod affinity. Default to false
-                            type: boolean                                                       
+                            type: boolean 
+                           user_pod_affinity_key:
+                            description: node label to be used for the invoker pod affinity. Defaults to nuvolaris-role
+                            type: string 
+                           user_pod_affinity_value:
+                            description: node label value used for the invoker pod affinity. Defaults to invoker
+                            type: string                                                                                                               
                            port_forwarding_enabled:
                             description: boolean falg to enable/disable port forwarding. Default to false
                             type: boolean
