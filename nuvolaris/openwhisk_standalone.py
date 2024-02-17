@@ -31,9 +31,14 @@ def create(owner=None):
 
     whisk_image = data["controller_image"]
     whisk_tag = data["controller_tag"]
+    
+    tplp = ["set-attach.yaml"]
+    if(data['affinity'] or data['tolerations']):
+       tplp.append("affinity-tolerance-sts-core-attach.yaml") 
+
 
     config = kus.image(whisk_image, newTag=whisk_tag)
-    config += kus.patchTemplates("openwhisk-standalone", ["standalone-sts.yaml"], data) 
+    config += kus.patchTemplates("openwhisk-standalone", tplp, data) 
     spec = kus.kustom_list("openwhisk-standalone", config, templates=[], data=data)
 
     if owner:

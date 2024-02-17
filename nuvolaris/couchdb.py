@@ -63,13 +63,17 @@ def create(owner=None):
         "container_cpu_lim": cfg.get('configs.couchdb.resources.cpu-lim') or "1",
         "container_mem_req": cfg.get('configs.couchdb.resources.mem-req') or "1G",
         "container_mem_lim": cfg.get('configs.couchdb.resources.mem-lim') or "2G",
-        "container_manage_resources": cfg.exists('configs.couchdb.resources.cpu-req')
+        "container_manage_resources": cfg.exists('configs.couchdb.resources.cpu-req')    
     }
 
-    kus.processTemplate("couchdb","couchdb-set-tpl.yaml",data,"couchdb-set_generated.yaml")
+    tplp = ["set-attach.yaml"]
+    util.couch_affinity_tolerations_data(data)
+    if(data['affinity'] or data['tolerations']):
+       tplp.append("affinity-tolerance-sts-core-attach.yaml") 
 
+    kus.processTemplate("couchdb","couchdb-set-tpl.yaml",data,"couchdb-set_generated.yaml")
     kust =  kus.secretLiteral("couchdb-auth", user, pasw)
-    kust += kus.patchTemplate("couchdb", "set-attach.yaml", data) 
+    kust += kus.patchTemplates("couchdb",tplp,data)
     spec = kus.restricted_kustom_list("couchdb", kust, templates=["couchdb-init.yaml"],templates_filter=["couchdb-set_generated.yaml","couchdb-svc.yaml"],data=data)
     
     if owner:

@@ -27,7 +27,35 @@ spec:
    database:
       size: {{size}}Gi
       storageClassName: {{storageClass}}
-   customConfig: nuvolaris-postgres-conf 
+   customConfig: nuvolaris-postgres-conf
+   scheduler:
+      affinity:
+      {% if affinity %}
+        # prefer to not run on an invoker node (only prefer because of single node clusters)
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: nuvolaris-role
+                operator: NotIn
+                values:
+                - {{affinity_invoker_node_label}}
+          - weight: 80
+            preference:
+              matchExpressions:
+              - key: nuvolaris-role
+                operator: In
+                values:
+                - {{affinity_core_node_label}}
+      {% endif %}               
+      tolerations:
+      {% if tolerations %}   
+        - key: "nuvolaris-role"
+          operator: "Equal"
+          value: {{toleration_role}}
+          effect: "NoSchedule"
+      {% endif %}   
    env:
       - name: POSTGRES_PASSWORD
         valueFrom:

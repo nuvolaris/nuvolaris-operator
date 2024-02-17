@@ -268,6 +268,7 @@ def get_standalone_config_data():
     }
 
     get_controller_image_data(data)
+    standalone_affinity_tolerations_data(data)
     return data
 
 def validate_ow_auth(auth):
@@ -328,6 +329,8 @@ def get_redis_config_data():
         "persistence": cfg.get("redis.persistence-enabled") or False,
         "maxmemory": cfg.get("redis.maxmemory") or "1000mb"
     }
+
+    redis_affinity_tolerations_data(data)
     return data
 
 def get_service(jsonpath,namespace="nuvolaris"):
@@ -351,6 +354,7 @@ def get_minio_config_data():
         "minio_nuv_user": cfg.get('minio.nuvolaris.user') or "nuvolaris",
         "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
     }
+    minio_affinity_tolerations_data(data)
     return data
 
 # return postgres configuration parameter with default valued if not configured
@@ -364,6 +368,7 @@ def get_postgres_config_data():
         'replicas': cfg.get('postgres.admin.replicas') or 2,
         'storageClass': cfg.get('nuvolaris.storageclass')
         }
+    postgres_affinity_tolerations_data(data)
     return data
 
 # wait for a service matching the given jsonpath name
@@ -412,3 +417,63 @@ def get_runtimes_json_from_config_map(namespace="nuvolaris", path='{.data.runtim
         return runtimes[0]
 
     raise Exception("Could not find runtimes.json inside cm/openwhisk-runtimes config Map")
+
+# return static nginx configuration parameters with default values if not configured
+def get_minio_static_config_data():
+    data = {
+        "name":"nuvolaris-static",
+        "container":"nuvolaris-static",
+        "size":1,
+        "storageClass": cfg.get('nuvolaris.storageclass'),
+        "dir":"/var/cache/nginx",
+        "minio_host": cfg.get('minio.host') or "minio",
+        "minio_port": cfg.get('minio.port') or "9000",
+        "applypodsecurity": get_enable_pod_security()
+    }
+    minio_static_affinity_tolerations_data(data)
+    return data    
+
+# populate common affinity data
+def common_affinity_tolerations_data(data):
+    data["affinity"] = cfg.get('nuvolaris.affinity') or False
+    data["tolerations"] = cfg.get('nuvolaris.tolerations') or False
+    data["affinity_invoker_node_label"] = "invoker"
+    data["affinity_core_node_label"] = "core"
+    data["toleration_role"] = "core"
+
+# populate specific affinity data for couchdb
+def couch_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "couchdb"
+
+# populate specific affinity data for redis
+def redis_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "redis"
+
+# populate specific affinity data for minio
+def minio_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "minio"
+
+# populate specific affinity data for minio
+def minio_static_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "nuvolaris-static" 
+
+# populate specific affinity data for postgres
+def postgres_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "nuvolaris-postgres"  
+
+# populate specific affinity data for ferretdb
+def ferretb_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "ferretdb" 
+
+# populate specific affinity data for ferretdb
+def standalone_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "controller"                    
+
+    
