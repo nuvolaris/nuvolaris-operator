@@ -47,7 +47,7 @@ data:
                 # The filename where to dump the DB (uncomment the line)
                 dbfilename dump.rdb
 
-                # the direcotry where redis will store data.
+                # the directory where redis will store data.
                 dir /bitnami/redis/data 
                 {% endif %}      
 

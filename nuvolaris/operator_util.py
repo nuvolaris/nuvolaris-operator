@@ -22,6 +22,7 @@ import nuvolaris.userdb_util as userdb
 import nuvolaris.config as cfg
 import nuvolaris.util as ut
 import nuvolaris.whisk_actions_deployer as system
+import nuvolaris.redis as redis
 
 from nuvolaris.nuvolaris_metadata import NuvolarisMetadata
 
@@ -75,10 +76,15 @@ def whisk_post_resume(name):
     """    
     Executes a set of common operations after the operator resumes, which is also the scenario
     triggered by a nuv update operator
+    - restore redis nuvolaris namespace if redis is active
     - annotate operator deployed components version
     - redeploys system actions
     """
-    logging.info(f"*** whisk_post_resume {name}") 
+    logging.info(f"*** whisk_post_resume {name}")
+
+    if cfg.get("components.redis"):
+        redis.restore_nuvolaris_db_user()
+
     annotate_operator_components_version()
     sysres = system.deploy_whisk_system_action()
 
