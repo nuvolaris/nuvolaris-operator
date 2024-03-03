@@ -83,6 +83,10 @@ def wait_for_redis_ready():
     # dynamically detect redis pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.name == 'redis')].metadata.name}")
 
+def restore_nuvolaris_db_user():
+    data = util.get_redis_config_data()
+    create_nuvolaris_db_user(data)
+
 def create_nuvolaris_db_user(data):
     logging.info(f"authorizing redis for namespace nuvolaris")
     try:        
