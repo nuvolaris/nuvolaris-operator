@@ -61,13 +61,33 @@ def create(owner=None):
     else:
         cfg.put("state.postgres.spec", mspec)
     
-    res = kube.apply(mspec)
+    res += kube.apply(mspec)
     # dynamically detect postgres pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'nuvolaris-postgres')].metadata.name}")
 
     if(res):
-        util.wait_for_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
-        update_system_cm_for_pdb(data)
+        util.wait_for_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")        
+
+    if data['backup']:
+        logging.info("*** activating nuvolaris-postgres backup")
+        backup_data = util.get_postgres_backup_data()
+        tplp = ["set-attach.yaml","postgres-backup-sts.yaml"]
+
+        if(backup_data['affinity'] or backup_data['tolerations']):
+            tplp.append("affinity-tolerance-sts-core-attach.yaml")
+
+        bkust = kus.patchTemplates("postgres-backup",templates=tplp, data=backup_data)
+        bspec = kus.kustom_list("postgres-backup", bkust, templates=[],data={})
+
+        if owner:
+            kopf.append_owner_reference(bspec['items'], owner)
+        else:
+            cfg.put("state.postgres-backup.spec", bspec)
+
+        res += kube.apply(bspec)
+
+    if res:
+        update_system_cm_for_pdb(data)        
 
     return res
 
@@ -214,6 +234,9 @@ def delete_db_user(namespace, database):
         return None
 
 def delete_by_owner():
+    spec = kus.build("postgres-backup")
+    res = kube.delete(spec)
+    logging.info(f"delete postgres backup: {res}")
     spec = kus.build("postgres-operator-deploy")
     res = kube.delete(spec)
     logging.info(f"delete postgres: {res}")
@@ -223,8 +246,13 @@ def delete_by_owner():
     return res
 
 def delete_by_spec():
-    spec = cfg.get("state.postgres.spec")
+    spec = cfg.get("state.postgres-backup.spec")
     res = False
+    if spec:
+        res = kube.delete(spec)
+        logging.info(f"delete postgres backup: {res}")
+
+    spec = cfg.get("state.postgres.spec")    
     if spec:
         res = kube.delete(spec)
         logging.info(f"delete postgres: {res}")

@@ -248,7 +248,20 @@ spec:
                       type: integer
                     replicas:
                       description: number of total postgres replicas (1 primary, N-1 replicas). Defaulted to 2
-                      type: integer                      
+                      type: integer
+                    failover:
+                      description: enable or disable failover management. Defaulted to false
+                      type: boolean
+                    backup:
+                      description: controls postgres automatic backup using pgdump_app based script
+                      type: object
+                      properties:
+                        enabled:
+                          description: boolean flag enabling/disabling backup. Defaulted to false
+                          type: boolean
+                        schedule:
+                          description: cron based expression to control backup schedule. Default to once per hour at minute 30.
+                          type: string                          
                     admin:
                       description: postgres admin user credentials
                       type: object

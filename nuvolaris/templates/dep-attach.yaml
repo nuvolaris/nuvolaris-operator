@@ -15,23 +15,33 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-!kubectl -n nuvolaris delete kubegres --all
-!kubectl -n nuvolaris delete all --all
-!kubectl -n nuvolaris delete pvc --all
-
-import nuvolaris.config as cfg
-import nuvolaris.testutil as tu
-import nuvolaris.kube as kube
-import nuvolaris.postgres_operator as pdb
-import logging
-
-# test
-assert(cfg.configure(tu.load_sample_config()))
-cfg.detect_storage()
-assert(pdb.create())
-
-assert(kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.postgres_host}"))
-#assert(pdb.delete())
-
-#!kubectl -n nuvolaris delete all --all
-#!kubectl -n nuvolaris delete pvc --all
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{name}}
+  namespace: nuvolaris
+spec:
+  template:
+    spec:
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{name}}-pvc
+      containers:
+        - name: {{container}}
+          volumeMounts:
+            - name: {{name}}-pvc
+              mountPath: {{dir}}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{name}}-pvc
+    spec:
+      accessModes:
+        - 'ReadWriteOnce'
+      resources:
+        requests:
+          storage: {{size}}Gi
+      storageClassName: {{storageClass}}
+{% if hostpath %}
+      volumeName: {{name}}-pv
+{% endif %}
