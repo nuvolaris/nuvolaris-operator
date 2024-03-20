@@ -31,7 +31,7 @@ cfg.detect_storage()
 assert(pdb.create())
 
 assert(kube.kubectl("get", f"cm/config", jsonpath="{.metadata.annotations.postgres_host}"))
-#assert(pdb.delete())
+assert(pdb.delete())
 
-#!kubectl -n nuvolaris delete all --all
-#!kubectl -n nuvolaris delete pvc --all
+!kubectl -n nuvolaris delete all --all
+!kubectl -n nuvolaris delete pvc --all

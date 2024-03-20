@@ -42,6 +42,7 @@ data:
       exit 1
     fi
 
+    find $BACKUP_DESTINATION_FOLDER -type f -mtime +1 -name '*.gz' -execdir rm -- '{}' \;
     echo "$dt - DB backup completed for Kubegres resource $KUBEGRES_RESOURCE_NAME into file: $backUpFilePath";
   backup_start.sh: |
       #!/bin/bash
@@ -54,6 +55,6 @@ data:
       service cron start
 
       echo "$dt - Scheduling: $BACKUP_SCHEDULE /tmp/backup_database.sh"
-      (crontab -l 2>/dev/null || true; echo "$BACKUP_SCHEDULE /tmp/backup_database.sh /dev/stdout 2>&1") | crontab -
+      (crontab -l 2>/dev/null || true; echo "$BACKUP_SCHEDULE export KUBEGRES_RESOURCE_NAME=$KUBEGRES_RESOURCE_NAME; export BACKUP_DESTINATION_FOLDER=$BACKUP_DESTINATION_FOLDER; export BACKUP_SOURCE_DB_HOST_NAME=$BACKUP_SOURCE_DB_HOST_NAME; export PGPASSWORD=$PGPASSWORD; /tmp/backup_database.sh /dev/stdout 2>&1;") | crontab -
       while true; do sleep 60; done;
 
