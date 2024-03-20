@@ -1,0 +1,90 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nuvolaris-postgres-backup
+  namespace: nuvolaris
+spec:
+  serviceName: nuvolaris-postgres-backup
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nuvolaris-postgres-backup   
+  template:
+    metadata:
+      labels:
+        name: nuvolaris-postgres-backup
+        app: nuvolaris-postgres-backup
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"         
+    spec:
+      restartPolicy: Always    
+      containers:
+      - name: nuvolaris-postgres-backup
+        image: ghcr.io/nuvolaris/pg-dumper:14.1.2403192133
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/bash","-c","/root/backup_start.sh"]
+        env:
+        - name: BACKUP_SCHEDULE
+          value: "{{schedule}}"
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: superUserPassword
+              name: postgres-nuvolaris-secret
+        - name: KUBEGRES_RESOURCE_NAME
+          value: nuvolaris-postgres
+        - name: BACKUP_DESTINATION_FOLDER
+          value: {{dir}}
+        - name: BACKUP_SOURCE_DB_HOST_NAME
+          value: nuvolaris-postgres-replica
+        - name: BACKUP_IMPORT_DB_HOST_NAME
+          value: nuvolaris-postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: superUserPassword
+              name: postgres-nuvolaris-secret
+        - name: POSTGRES_REPLICATION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: replicationUserPassword
+              name: postgres-nuvolaris-secret
+        - name: POSTGRES_NUVOLARIS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: nuvolarisUserPassword
+              name: postgres-nuvolaris-secret
+        volumeMounts:
+        - mountPath: /tmp/backup_database.sh
+          name: config
+          subPath: backup_database.sh
+        - mountPath: /root/backup_start.sh
+          name: config
+          subPath: backup_start.sh          
+      volumes:
+        - name: config
+          configMap:
+            name: base-kubegres-backup-config
+            defaultMode: 511
+            items:
+              - key: backup_database.sh
+                path: backup_database.sh
+              - key: backup_start.sh
+                path: backup_start.sh

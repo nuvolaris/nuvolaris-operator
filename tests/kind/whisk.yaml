@@ -132,4 +132,7 @@ spec:
       password: 0therPa55
       replica-password: 0therPa55RR
     nuvolaris:
-      password: s0meP@ass3                   
+      password: s0meP@ass3
+    backup:
+      enabled: true 
+      schedule: "30 * * * *"                        

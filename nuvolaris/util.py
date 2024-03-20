@@ -367,7 +367,22 @@ def get_postgres_config_data():
         'postgres_nuvolaris_password': cfg.get('postgres.nuvolaris.password') or "s0meP@ass3",
         'size': cfg.get('postgres.volume-size') or 10,
         'replicas': cfg.get('postgres.admin.replicas') or 2,
-        'storageClass': cfg.get('nuvolaris.storageclass')
+        'storageClass': cfg.get('nuvolaris.storageclass'),
+        'failover': cfg.get('postgres.failover') or False,
+        'backup': cfg.get('postgres.backup.enabled') or False,
+        'schedule': cfg.get('postgres.backup.schedule') or '30 * * * *'
+        }
+    postgres_affinity_tolerations_data(data)
+    return data
+
+def get_postgres_backup_data():
+    data = {
+        'size': cfg.get('postgres.volume-size') or 10,
+        'storageClass': cfg.get('nuvolaris.storageclass'),
+        'schedule': cfg.get('postgres.backup.schedule') or '30 * * * *',
+        'name': 'nuvolaris-postgres-backup',
+        'dir':'/var/lib/backup',
+        'container':'nuvolaris-postgres-backup'
         }
     postgres_affinity_tolerations_data(data)
     return data
@@ -485,6 +500,10 @@ def postgres_manager_affinity_tolerations_data():
     }
     common_affinity_tolerations_data(data)
     return data
+
+def postgres_backup_affinity_tolerations_data(data):
+    common_affinity_tolerations_data(data)
+    data["pod_anti_affinity_name"] = "nuvolaris-postgres-backup" 
                       
 
     

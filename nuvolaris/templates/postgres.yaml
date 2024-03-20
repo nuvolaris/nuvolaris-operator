@@ -28,6 +28,8 @@ spec:
       size: {{size}}Gi
       storageClassName: {{storageClass}}
    customConfig: nuvolaris-postgres-conf
+   failover:
+    isDisabled: {{not failover}}
    scheduler:
       affinity:
       {% if affinity %}

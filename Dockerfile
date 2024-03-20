@@ -92,6 +92,7 @@ ADD deploy/postgres-operator /home/nuvolaris/deploy/postgres-operator
 ADD deploy/postgres-operator-deploy /home/nuvolaris/deploy/postgres-operator-deploy
 ADD deploy/ferretdb /home/nuvolaris/deploy/ferretdb
 ADD deploy/runtimes /home/nuvolaris/deploy/runtimes
+ADD deploy/postgres-backup /home/nuvolaris/deploy/postgres-backup
 ADD run.sh dbinit.sh cron.sh pyproject.toml poetry.lock whisk-system.sh /home/nuvolaris/
 
 # prepares the required folders to deploy the whisk-system actions
