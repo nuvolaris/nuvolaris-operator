@@ -24,7 +24,8 @@ metadata:
 spec:
   type: NodePort
   selector:
-    name: couchdb
+    app: nuvolaris-couchdb        
+    replicationRole: primary
   ports:   
     - port: 5984
       targetPort: 5984
@@ -37,7 +38,8 @@ metadata:
   namespace: nuvolaris
 spec:
   selector:
-    name: couchdb
+    app: nuvolaris-couchdb        
+    replicationRole: primary
   ports:   
     - port: 5984
       targetPort: 5984

@@ -19,18 +19,28 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: couchdb
   namespace: nuvolaris
+  name: {{name}}
+  labels:
+    name: {{name}} 
+    app: {{appName}}
+    index: "{{index}}"
+    replicationRole: "{{replicationRole}}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: couchdb
-  serviceName: couchdb
+      name: {{name}}
+      app: {{appName}}
+      index: "{{index}}"
+  serviceName: {{name}}
   template:
     metadata:
       labels:
-        name: couchdb
+        name: {{name}}
+        app: {{appName}}
+        index: "{{index}}" 
+        replicationRole: primary
       annotations:
         whisks.nuvolaris.org/annotate-version: "true"  
     spec:
