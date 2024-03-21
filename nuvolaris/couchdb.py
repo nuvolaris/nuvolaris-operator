@@ -63,7 +63,10 @@ def create(owner=None):
         "container_cpu_lim": cfg.get('configs.couchdb.resources.cpu-lim') or "1",
         "container_mem_req": cfg.get('configs.couchdb.resources.mem-req') or "1G",
         "container_mem_lim": cfg.get('configs.couchdb.resources.mem-lim') or "2G",
-        "container_manage_resources": cfg.exists('configs.couchdb.resources.cpu-req')    
+        "container_manage_resources": cfg.exists('configs.couchdb.resources.cpu-req'),
+        "index": "1",
+        "replicationRole":"primary",
+        "appName":"nuvolaris-couchdb"
     }
 
     tplp = ["set-attach.yaml"]
