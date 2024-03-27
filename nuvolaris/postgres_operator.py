@@ -95,7 +95,8 @@ def create(owner=None):
 def update_system_cm_for_pdb(data):
     logging.info("*** annotating configuration for postgres nuvolaris user")
     try:        
-        pdb_service = util.get_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        pdb_service = util.get_service_by_selector("app=nuvolaris-postgres","{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        
         if(pdb_service):             
             pdb_service_name = pdb_service['metadata']['name']
             pdb_ns = pdb_service['metadata']['namespace']
@@ -120,7 +121,8 @@ def update_system_cm_for_pdb(data):
 
 def get_base_postgres_url(data):    
     try:        
-        pdb_service = util.get_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        pdb_service = util.get_service_by_selector("app=nuvolaris-postgres","{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+
         if(pdb_service):             
             pdb_service_name = pdb_service['metadata']['name']
             pdb_ns = pdb_service['metadata']['namespace']
@@ -141,7 +143,7 @@ def _add_pdb_user_metadata(ucfg, user_metadata):
     """ 
 
     try:
-        pdb_service = util.get_service("{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
+        pdb_service = util.get_service_by_selector("app=nuvolaris-postgres","{.items[?(@.metadata.labels.replicationRole == 'primary')]}")
 
         if(pdb_service):
             pdb_service_name = pdb_service['metadata']['name']
@@ -195,7 +197,7 @@ def create_db_user(ucfg: UserConfig, user_metadata: UserMetadata):
 
         path_to_pgpass = render_postgres_script(ucfg.get('namespace'),"pgpass_tpl.properties",data)
         path_to_mdb_script = render_postgres_script(ucfg.get('namespace'),"postgres_manage_user_tpl.sql",data)
-        pod_name = util.get_pod_name("{.items[?(@.metadata.labels.app == 'nuvolaris-postgres')].metadata.name}")
+        pod_name = util.get_pod_name_by_selector("app=nuvolaris-postgres","{.items[?(@.metadata.labels.replicationRole == 'primary')].metadata.name}")
 
         if(pod_name):
             res = exec_psql_command(pod_name,path_to_mdb_script,path_to_pgpass)
@@ -222,7 +224,7 @@ def delete_db_user(namespace, database):
 
         path_to_pgpass = render_postgres_script(namespace,"pgpass_tpl.properties",data)
         path_to_mdb_script = render_postgres_script(namespace,"postgres_manage_user_tpl.sql",data)
-        pod_name = util.get_pod_name("{.items[?(@.metadata.labels.app == 'nuvolaris-postgres')].metadata.name}")
+        pod_name = util.get_pod_name_by_selector("app=nuvolaris-postgres","{.items[?(@.metadata.labels.replicationRole == 'primary')].metadata.name}")
 
         if(pod_name):
             res = exec_psql_command(pod_name,path_to_mdb_script,path_to_pgpass)

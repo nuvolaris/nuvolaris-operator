@@ -503,7 +503,38 @@ def postgres_manager_affinity_tolerations_data():
 
 def postgres_backup_affinity_tolerations_data(data):
     common_affinity_tolerations_data(data)
-    data["pod_anti_affinity_name"] = "nuvolaris-postgres-backup" 
+    data["pod_anti_affinity_name"] = "nuvolaris-postgres-backup"
+
+# wait for a pod name using a label selector and eventually an optional jsonpath
+@nuv_retry()
+def get_pod_name_by_selector(selector, jsonpath, namespace="nuvolaris"):
+    """
+    get pods matching the given selector filtering them using the given jsonpath.
+    param: selector (eg app="nuvolaris-postgres")
+    param: jsonpath (eg "{.items[?(@.metadata.labels.replicationRole == 'primary')].metadata.name}")
+    return: 1st mathing pod name
+    """
+    pod_names = kube.kubectl("get", "pods","-l", selector, namespace=namespace, jsonpath=jsonpath)
+    if(pod_names):
+        return pod_names[0]
+
+    raise Exception(f"could not find any pod matching jsonpath={jsonpath}")
+
+# wait for a svc name using a label selector and eventually an optional jsonpath
+@nuv_retry()
+def get_service_by_selector(selector,jsonpath,namespace="nuvolaris"):
+    """
+    get services matching the given selector filtering them using the given jsonpath
+    param: selector (eg app="nuvolaris-postgres")
+    param: jsonpath (eg "{.items[?(@.metadata.labels.replicationRole == 'primary')].metadata.name}")
+    return: 1st mathing service name
+    """
+    services= kube.kubectl("get", "svc","-l",selector, namespace=namespace, jsonpath=jsonpath)
+    if(services):
+        return services[0]
+
+    raise Exception(f"could not find any svc matching jsonpath={jsonpath}")
+
                       
 
     
