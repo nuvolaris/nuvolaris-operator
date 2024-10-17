@@ -45,12 +45,41 @@ def build_error(message: str):
         "body": message
     }
 
-def build_response(user_data):
+def build_response(user_data, args):
     body = {}
     envs = list(user_data['env'])
 
     for env in envs:
         body[env['key']]=env['value']
+
+    # ensure compatibility with ops minio/s3 related tasks.
+    if 'S3_API_URL' not in body and 's3_api_url' in args:
+        body['S3_API_URL'] = args['s3_api_url']
+
+    if 'S3_HOST' not in body and 'MINIO_HOST' in body:
+        body['S3_HOST'] = body['MINIO_HOST']
+
+    if 'S3_PORT' not in body and 'MINIO_PORT' in body:
+        body['S3_PORT'] = body['MINIO_PORT']        
+
+    if 'S3_ACCESS_KEY' not in body and 'MINIO_ACCESS_KEY' in body:
+        body['S3_ACCESS_KEY'] = body['MINIO_ACCESS_KEY'] 
+
+    if 'S3_SECRET_KEY' not in body and 'MINIO_SECRET_KEY' in body:
+        body['S3_SECRET_KEY'] = body['MINIO_SECRET_KEY'] 
+
+    if 'S3_BUCKET_DATA' not in body and 'MINIO_BUCKET_DATA' in body:
+        body['S3_BUCKET_DATA'] = body['MINIO_BUCKET_DATA']  
+
+    if 'S3_BUCKET_STATIC' not in body and 'MINIO_BUCKET_STATIC' in body:
+        body['S3_BUCKET_STATIC'] = body['MINIO_BUCKET_STATIC'] 
+
+    if 'MINIO_DATA_BUCKET' not in body and 'S3_BUCKET_DATA' in body:
+        body['MINIO_DATA_BUCKET'] = body['S3_BUCKET_DATA']                                                   
+
+    if 'MINIO_STATIC_BUCKET' not in body and 'S3_BUCKET_STATIC' in body:
+        body['MINIO_STATIC_BUCKET'] = body['S3_BUCKET_STATIC']                                                
+
 
     return {
         "statusCode": 200,

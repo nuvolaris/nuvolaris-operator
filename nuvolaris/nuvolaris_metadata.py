@@ -48,11 +48,11 @@ class NuvolarisMetadata:
         """        
         self.add_metadata("AUTH", cfg.get('openwhisk.namespaces.nuvolaris'))
         self._store_safely_from_cm("MINIO_ACCESS_KEY", '{.metadata.annotations.minio_access_key}')
-        self._store_safely_from_cm("MINIO_DATA_BUCKET", '{.metadata.annotations.minio_bucket_data}')
+        self._store_safely_from_cm("MINIO_BUCKET_DATA", '{.metadata.annotations.minio_bucket_data}')
         self._store_safely_from_cm("MINIO_HOST", '{.metadata.annotations.minio_host}') 
         self._store_safely_from_cm("MINIO_PORT", '{.metadata.annotations.minio_port}')  
         self._store_safely_from_cm("MINIO_SECRET_KEY", '{.metadata.annotations.minio_secret_key}')    
-        self._store_safely_from_cm("MINIO_STATIC_BUCKET", '{.metadata.annotations.minio_bucket_static}')
+        self._store_safely_from_cm("MINIO_BUCKET_STATIC", '{.metadata.annotations.minio_bucket_static}')
         self._store_safely_from_cm("MONGODB_URL", '{.metadata.annotations.mongodb_url}')
         self._store_safely_from_cm("POSTGRES_DATABASE", '{.metadata.annotations.postgres_database}') 
         self._store_safely_from_cm("POSTGRES_HOST", '{.metadata.annotations.postgres_host}')
@@ -62,6 +62,15 @@ class NuvolarisMetadata:
         self._store_safely_from_cm("POSTGRES_USERNAME", '{.metadata.annotations.postgres_username}') 
         self._store_safely_from_cm("REDIS_PREFIX", '{.metadata.annotations.redis_prefix}')
         self._store_safely_from_cm("REDIS_URL", '{.metadata.annotations.redis_url}')
+        self._store_safely_from_cm("S3_HOST", '{.metadata.annotations.s3_host}') 
+        self._store_safely_from_cm("S3_PORT", '{.metadata.annotations.s3_port}')  
+        self._store_safely_from_cm("S3_SECRET_KEY", '{.metadata.annotations.s3_secret_key}')    
+        self._store_safely_from_cm("S3_ACCESS_KEY", '{.metadata.annotations.s3_access_key}')    
+        self._store_safely_from_cm("S3_BUCKET_STATIC", '{.metadata.annotations.s3_bucket_static}')
+        self._store_safely_from_cm("S3_BUCKET_DATA", '{.metadata.annotations.s3_bucket_data}')
+        self._store_safely_from_cm("S3_PROVIDER", '{.metadata.annotations.s3_provider}')
+        self._store_safely_from_cm("S3_API_URL", '{.metadata.annotations.s3_api_url}')
+        self._store_safely_from_cm("S3_CONSOLE_URL", '{.metadata.annotations.s3_console_url}')        
                 
 
     def dump(self):
@@ -76,5 +85,3 @@ class NuvolarisMetadata:
 
     def get_metadata(self):
         return self._data
-    
-

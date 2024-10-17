@@ -353,7 +353,11 @@ def get_minio_config_data():
         "minio_root_password": cfg.get('minio.admin.password') or "minio123",
         "storage_class": cfg.get("nuvolaris.storageclass"),
         "minio_nuv_user": cfg.get('minio.nuvolaris.user') or "nuvolaris",
-        "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+        "minio_nuv_password": cfg.get('minio.nuvolaris.password') or "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
+        "minio_s3_ingress_enabled": cfg.get('minio.ingress.s3-enabled') or False,
+        "minio_console_ingress_enabled": cfg.get('minio.ingress.console-enabled') or False,
+        "minio_s3_ingress_hostname": cfg.get('minio.ingress.s3-hostname') or "auto",
+        "minio_console_ingress_hostname": cfg.get('minio.ingress.console-hostname') or "auto"
     }
     minio_affinity_tolerations_data(data)
     return data

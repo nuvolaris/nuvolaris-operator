@@ -22,14 +22,12 @@ import nuvolaris.config as cfg
 import nuvolaris.util as util
 import nuvolaris.minio_util as mutil
 import nuvolaris.openwhisk as openwhisk
-import nuvolaris.apihost_util as apihost_util
-import nuvolaris.endpoint as endpoint
+import nuvolaris.minio_ingress as minio_ingress
+import nuvolaris.operator_util as operator_util
 
 from nuvolaris.user_config import UserConfig
 from nuvolaris.user_metadata import UserMetadata
 from nuvolaris.minio_util import MinioClient
-from nuvolaris.ingress_data import IngressData
-from nuvolaris.route_data import RouteData
 
 def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
     """
@@ -46,14 +44,22 @@ def _add_miniouser_metadata(ucfg: UserConfig, user_metadata:UserMetadata):
             user_metadata.add_metadata("MINIO_HOST",minio_host)
             user_metadata.add_metadata("MINIO_ACCESS_KEY",access_key)
             user_metadata.add_metadata("MINIO_SECRET_KEY",secret_key)
+            user_metadata.add_metadata("S3_PROVIDER","minio")
+            user_metadata.add_metadata("S3_HOST",minio_host)
+            user_metadata.add_metadata("S3_ACCESS_KEY",access_key)
+            user_metadata.add_metadata("S3_SECRET_KEY",secret_key)
+
+            user_metadata.add_safely_from_cm("S3_API_URL", '{.metadata.annotations.s3_api_url}')
+            user_metadata.add_safely_from_cm("S3_CONSOLE_URL", '{.metadata.annotations.s3_console_url}')            
 
             ports = list(minio_service['spec']['ports'])
             for port in ports:
                 if(port['name']=='minio-api'):
                     user_metadata.add_metadata("MINIO_PORT",port['port'])
+                    user_metadata.add_metadata("S3_PORT",port['port'])
         return None
     except Exception as e:
-        logging.error(f"failed to build redis_url for {ucfg.get('namespace')}: {e}")
+        logging.error(f"failed to build MINIO metadata for {ucfg.get('namespace')}: {e}")
         return None 
     
 def find_content_path(filename):
@@ -84,7 +90,7 @@ def create(owner=None):
     # dynamically detect minio pod and wait for readiness
     util.wait_for_pod_ready("{.items[?(@.metadata.labels.app == 'minio')].metadata.name}")
     create_nuv_storage(data)
-    create_api_uploader_endpoint(owner)
+    minio_ingress.create_minio_ingresses(data, owner)
     logging.info("*** configured minio standalone")
     return res
 
@@ -102,11 +108,16 @@ def _annotate_nuv_metadata(data):
             openwhisk.annotate(f"minio_host={minio_host}")
             openwhisk.annotate(f"minio_access_key={access_key}")
             openwhisk.annotate(f"minio_secret_key={secret_key}")
+            openwhisk.annotate(f"s3_host={minio_host}")
+            openwhisk.annotate(f"s3_access_key={access_key}")
+            openwhisk.annotate(f"s3_secret_key={secret_key}")
+            openwhisk.annotate(f"s3_provider=minio")
 
             ports = list(minio_service['spec']['ports'])
             for port in ports:
                 if(port['name']=='minio-api'):
-                    openwhisk.annotate(f"minio_port={port['port']}")                    
+                    openwhisk.annotate(f"minio_port={port['port']}")
+                    openwhisk.annotate(f"s3_port={port['port']}")                  
         return None
     except Exception as e:
         logging.error(f"failed to build minio_host for nuvolaris: {e}")
@@ -132,6 +143,7 @@ def create_nuv_storage(data):
 
         if(res):
             openwhisk.annotate(f"minio_bucket_data=nuvolaris-data")
+            openwhisk.annotate(f"s3_bucket_data=nuvolaris-data")
 
         logging.info(f"*** adding nuvolaris MINIO static public bucket")
         res = minioClient.make_public_bucket("nuvolaris-web")             
@@ -139,6 +151,7 @@ def create_nuv_storage(data):
 
         if(res):
             openwhisk.annotate(f"minio_bucket_static=nuvolaris-web")
+            openwhisk.annotate(f"s3_bucket_static=nuvolaris-web")
             content_path = find_content_path("index.html")
 
             if(content_path):
@@ -187,7 +200,8 @@ def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owne
         state['storage_data']=res
 
         if(res):
-            user_metadata.add_metadata("MINIO_DATA_BUCKET",bucket_name)
+            user_metadata.add_metadata("MINIO_BUCKET_DATA",bucket_name)
+            user_metadata.add_metadata("S3_BUCKET_DATA",bucket_name)
 
             if ucfg.exists('object-storage.quota'):
                 assign_bucket_quota(bucket_name,ucfg.get('object-storage.quota'), minioClient)
@@ -195,11 +209,13 @@ def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owne
     if(ucfg.get('object-storage.route.enabled')):
         bucket_name = ucfg.get("object-storage.route.bucket")
         logging.info(f"*** adding public bucket {bucket_name} for {namespace}")
-        res = minioClient.make_public_bucket(bucket_name)   
+        res = minioClient.make_public_bucket(bucket_name) 
         bucket_policy_names.append(f"{bucket_name}/*")
 
         if(res):
-            user_metadata.add_metadata("MINIO_STATIC_BUCKET",bucket_name)
+            user_metadata.add_metadata("MINIO_BUCKET_STATIC",bucket_name)
+            user_metadata.add_metadata("S3_BUCKET_STATIC",bucket_name)
+            ucfg.put("S3_BUCKET_STATIC",bucket_name)
             
             if ucfg.exists('object-storage.quota'):
                 assign_bucket_quota(bucket_name,ucfg.get('object-storage.quota'), minioClient)
@@ -216,7 +232,7 @@ def create_ow_storage(state, ucfg: UserConfig, user_metadata: UserMetadata, owne
 
     if(len(bucket_policy_names)>0):
         logging.info(f"granting rw access to created policies under namespace {namespace}")
-        minioClient.assign_rw_bucket_policy_to_user(namespace,bucket_policy_names)        
+        minioClient.assign_rw_bucket_policy_to_user(namespace,bucket_policy_names)
 
     return state
 
@@ -251,7 +267,8 @@ def delete_by_spec():
     return res
 
 def delete(owner=None):
-    delete_api_uploader_endpoint(owner)
+    data = util.get_minio_config_data()
+    minio_ingress.delete_minio_ingresses(data, owner)
 
     if owner:        
         return delete_by_owner()
@@ -266,92 +283,30 @@ def patch(status, action, owner=None):
         logging.info(f"*** handling request to {action} minio")  
         if  action == 'create':
             msg = create(owner)
-            status['whisk_create']['minio']='on'
+            operator_util.patch_operator_status(status,'minio','on') 
         else:
             msg = delete(owner)
-            status['whisk_update']['minio']='off'
+            operator_util.patch_operator_status(status,'minio','off')
 
         logging.info(msg)        
         logging.info(f"*** hanlded request to {action} minio") 
     except Exception as e:
         logging.error('*** failed to update minio: %s' % e)
-        if  action == 'create':
-            status['whisk_create']['minio']='error'
-        else:            
-            status['whisk_update']['minio']='error'
+        operator_util.patch_operator_status(status,'minio','error')
 
-def create_api_uploader_endpoint(owner=None):
+def patch_ingresses(status, action, owner=None):
     """
-    exposes MINIO api in the uploader-api ingress/route
+    Called by the operator patcher to create/delete minio component
     """
-    runtime = cfg.get('nuvolaris.kube')
-    apihost = apihost_util.get_apihost(runtime)
-
-    if runtime == 'openshift':           
-        return deploy_minio_api_route(apihost, "nuvolaris")
-    else:
-        return deploy_minio_api_ingress(apihost, "nuvolaris")
-
-def deploy_minio_api_route(apihost,namespace):
-    upload = RouteData(apihost)
-    upload.with_route_name(endpoint.api_route_name(namespace,"upload"))
-    upload.with_service_name("minio")
-    upload.with_service_kind("Service")
-    upload.with_service_port("9000")
-    upload.with_context_path("/api/upload")
-    upload.with_rewrite_target("/")
-
-    logging.info(f"*** configuring route for upload")
-    path_to_template_yaml = upload.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
-    os.remove(path_to_template_yaml)        
-    return res 
-
-def deploy_minio_api_ingress(apihost, namespace):
-    upload = IngressData(apihost)
-    upload.with_ingress_name(endpoint.api_ingress_name(namespace,"upload"))
-    upload.with_secret_name(endpoint.api_secret_name(namespace))
-    upload.with_context_path("/api/upload")
-    upload.with_context_regexp("(/|$)(.*)")
-    upload.with_rewrite_target("/$2")    
-    upload.with_service_name("minio")
-    upload.with_service_port("9000")
-    upload.with_middleware_ingress_name(endpoint.api_middleware_ingress_name(namespace,"upload"))
-
-    if upload.requires_traefik_middleware():
-        logging.info("*** configuring traefik middleware for upload ingress")
-        path_to_template_yaml = upload.render_traefik_middleware_template(namespace)
-        res = kube.kubectl("apply", "-f",path_to_template_yaml)
-        os.remove(path_to_template_yaml)
-
-    logging.info(f"*** configuring static ingress for upload")
-    path_to_template_yaml = upload.render_template(namespace)
-    res = kube.kubectl("apply", "-f",path_to_template_yaml)
-    os.remove(path_to_template_yaml)
-
-    return res
-
-def delete_api_uploader_endpoint(owner=None):
-    """
-    undeploys ingresses for minio apihost
-    """    
-    logging.info(f"*** removing ingresses for minio upload")
-    namespace = "nuvolaris"
-    runtime = cfg.get('nuvolaris.kube')
-    ingress_class = util.get_ingress_class(runtime)
-    
     try:
-        res = ""
-        if(runtime=='openshift'):
-            res = kube.kubectl("delete", "route",endpoint.api_route_name(namespace,"upload"))
-            return res
+        logging.info(f"*** handling request to {action} minio ingresses")
+        data = util.get_minio_config_data()
+        if action == 'update':
+            msg = minio_ingress.create_minio_ingresses(data, owner)
+            operator_util.patch_operator_status(status,'minio-ingresses','on')
 
-        if(ingress_class == 'traefik'):            
-            res = kube.kubectl("delete", "middleware.traefik.containo.us",endpoint.api_middleware_ingress_name(namespace,"upload"))         
-
-        res += kube.kubectl("delete", "ingress",endpoint.api_ingress_name(namespace,"upload"))
-        return res
+        logging.info(msg)        
+        logging.info(f"*** handled request to {action} minio ingresses") 
     except Exception as e:
-        logging.warn(e)       
-        return False                            
-
+        logging.error('*** failed to update minio ingresses: %s' % e)    
+        operator_util.patch_operator_status(status,'minio-ingresses','error')
