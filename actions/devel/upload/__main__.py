@@ -31,6 +31,22 @@ def build_response(user, filename,bucket, upload_result, upload_message):
         "body": body
     }
 
+def build_delete_response(user, filename,bucket, delete_result, delete_message):
+    body = {
+        "user":user,
+        "filename":filename,
+        "bucket":bucket,
+        "delete": delete_result
+    }
+
+    if delete_message:
+        body['message']=delete_message
+
+    return {
+        "statusCode": delete_result and 200 or 400,
+        "body": body
+    }
+
 
 def process_path_param(ow_path: str):
     """ Process the __ow_path parameters to extract username and fully qualified filename
@@ -60,30 +76,38 @@ def main(args):
     and will store the given path under the given MINIO <bucket>. The bucket must exists and the impersonated user must have write permission on it.
     """
     headers = args['__ow_headers']
+    method = args['__ow_method']
+    
     if('x-impersonate-auth' not in headers):
         return build_error("invalid request, missing mandatory header: x-impersonate-auth")
     
-    if(len(args['__ow_body']) == 0):
+    if len(args['__ow_body']) == 0 and method.lower() in 'put':
         return build_error("invalid request, no file content has been received")
 
-    try:        
+    try:
         upload_data = process_path_param(args['__ow_path'])
 
         if 'bucket' not in upload_data and 'filename' not in upload_data:
             return build_error("invalid request, bucket and/or filename path error")
         
-        content_as_b64 = args['__ow_body']
+        user_data = Authorize(args['couchdb_host'],args['couchdb_user'],args['couchdb_password']).login(headers['x-impersonate-auth'])
+        mo_client = mutil.build_mo_client(ut.get_env_value(user_data,"MINIO_HOST"), ut.get_env_value(user_data,"MINIO_PORT"),ut.get_env_value(user_data,"MINIO_ACCESS_KEY")  , ut.get_env_value(user_data,"MINIO_SECRET_KEY"))                   
+        
+        if method.lower() in 'put':        
+            content_as_b64 = args['__ow_body']
+            print(f"processing request to upload file {upload_data['filename']}")
+            tmp_file = mutil.prepare_file_upload(user_data['login'],upload_data['filename'],content_as_b64)
 
-        user_data = Authorize(args['couchdb_host'],args['couchdb_user'],args['couchdb_password']).login(headers['x-impersonate-auth'])                   
-        print(f"processing request to upload file {upload_data['filename']}")
-
-        mo_client = mutil.build_mo_client(ut.get_env_value(user_data,"MINIO_HOST"), ut.get_env_value(user_data,"MINIO_PORT"),ut.get_env_value(user_data,"MINIO_ACCESS_KEY")  , ut.get_env_value(user_data,"MINIO_SECRET_KEY"))
-        tmp_file = mutil.prepare_file_upload(user_data['login'],upload_data['filename'],content_as_b64)
-
-        if tmp_file:        
-            upload_result, upload_message = mutil.upload_file(mo_client,tmp_file,upload_data['bucket'],upload_data['filename'])
-            return build_response(user_data['login'],upload_data['filename'],upload_data['bucket'],upload_result, upload_message)
-        else:
-            return build_error("Unexptected error upload action. Check activation log")
+            if tmp_file:        
+                upload_result, upload_message = mutil.upload_file(mo_client,tmp_file,upload_data['bucket'],upload_data['filename'])
+                return build_response(user_data['login'],upload_data['filename'],upload_data['bucket'],upload_result, upload_message)
+            else:
+                return build_error("Unexptected error upload action. Check activation log")
+            
+        if method.lower() in 'delete':
+            if mutil.rm_file(mo_client, upload_data['bucket'], upload_data['filename']):
+               return build_delete_response(user_data['login'],upload_data['filename'],upload_data['bucket'],True, upload_data['filename'])
+            else:
+               return build_error("Unexptected error delete action. Check activation log")
     except Exception as e:        
         return build_error(f"failed to execute nuv devel command. Reason: {e}")

@@ -52,6 +52,12 @@ def build_response(user_data, args):
     for env in envs:
         body[env['key']]=env['value']
 
+    if 'MINIO_DATA_BUCKET' not in body and 'S3_BUCKET_DATA' in body:
+        body['MINIO_DATA_BUCKET'] = body['S3_BUCKET_DATA']                                                   
+
+    if 'MINIO_STATIC_BUCKET' not in body and 'S3_BUCKET_STATIC' in body:
+        body['MINIO_STATIC_BUCKET'] = body['S3_BUCKET_STATIC']                                                
+
     # ensure compatibility with ops minio/s3 related tasks.
     if 'S3_API_URL' not in body and 's3_api_url' in args:
         body['S3_API_URL'] = args['s3_api_url']
@@ -72,13 +78,13 @@ def build_response(user_data, args):
         body['S3_BUCKET_DATA'] = body['MINIO_BUCKET_DATA']  
 
     if 'S3_BUCKET_STATIC' not in body and 'MINIO_BUCKET_STATIC' in body:
-        body['S3_BUCKET_STATIC'] = body['MINIO_BUCKET_STATIC'] 
+        body['S3_BUCKET_STATIC'] = body['MINIO_BUCKET_STATIC']
 
-    if 'MINIO_DATA_BUCKET' not in body and 'S3_BUCKET_DATA' in body:
-        body['MINIO_DATA_BUCKET'] = body['S3_BUCKET_DATA']                                                   
+    if 'S3_BUCKET_DATA' not in body and 'MINIO_DATA_BUCKET' in body:
+        body['S3_BUCKET_DATA'] = body['MINIO_DATA_BUCKET']  
 
-    if 'MINIO_STATIC_BUCKET' not in body and 'S3_BUCKET_STATIC' in body:
-        body['MINIO_STATIC_BUCKET'] = body['S3_BUCKET_STATIC']                                                
+    if 'S3_BUCKET_STATIC' not in body and 'MINIO_STATIC_BUCKET' in body:
+        body['S3_BUCKET_STATIC'] = body['MINIO_STATIC_BUCKET']         
 
 
     return {
@@ -100,7 +106,7 @@ def main(args):
 
         if(user_data):
             if(password == user_data['password']):
-                return build_response(user_data)
+                return build_response(user_data, args)
             else:
                 return build_error(f"password mismatch for user {login}")
         else:

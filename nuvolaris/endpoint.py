@@ -28,6 +28,9 @@ from nuvolaris.ingress_data import IngressData
 from nuvolaris.route_data import RouteData
 from nuvolaris.user_metadata import UserMetadata
 
+def ingress_secret_name(namespace, ingress="apihost"):
+    return f"{namespace}-{ingress}-crt"
+
 def api_ingress_name(namespace, ingress="apishost"):
     return namespace == "nuvolaris" and ingress or f"{namespace}-{ingress}-api-ingress"
 

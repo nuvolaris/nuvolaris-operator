@@ -200,7 +200,7 @@ def deploy_whisk_system_action():
         tplres = kust.processTemplate("whisk-system","whisk-system-manifest-tpl.yaml",data,"manifest.yaml")
 
         wskClient = WhiskSystemClient(auth)
-        result = safe_deploy(wskClient)
-        return result
+        return safe_deploy(wskClient)
     except Exception as e:
         logging.error("Error detected when deploying system actions", e)
+        return False
