@@ -20,7 +20,9 @@ import nuvolaris.config as cfg
 import nuvolaris.openwhisk_standalone as standalone
 import nuvolaris.kube as kube
 import nuvolaris.util as util
+from nuvolaris.util import nuv_retry
 
+@nuv_retry()
 def annotate(keyval):
     kube.kubectl("annotate", "cm/config",  keyval, "--overwrite")
 

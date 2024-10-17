@@ -17,6 +17,7 @@
 #
 import json
 import logging
+import nuvolaris.util as util
 from nuvolaris.user_config import UserConfig
 
 class UserMetadata:
@@ -27,8 +28,21 @@ class UserMetadata:
             "login":ucfg.get('namespace'),
             "password":ucfg.get('password'),
             "email":ucfg.get('email'),
-            "metadata":[]
-    }
+            "metadata":[],
+            "quota":[]
+        }
+
+        if ucfg.exists("object-storage.quota"):
+            self.add_quota("OBJECT_STORAGE",ucfg.get("object-storage.quota"))
+
+        if ucfg.exists("mongodb.quota"):
+            self.add_quota("MONGODB",ucfg.get("mongodb.quota"))
+
+        if ucfg.exists("redis.quota"):
+            self.add_quota("REDIS",ucfg.get("redis.quota"))
+
+        if ucfg.exists("postgres.quota"):
+            self.add_quota("POSTGRES",ucfg.get("postgres.quota"))             
 
     def dump(self):
         logging.debug(json.dumps(self._data))
@@ -40,7 +54,20 @@ class UserMetadata:
         logging.debug(f"adding ({key}={value})")
         self._data['metadata'].append({"key":key, "value":value})
 
+    def add_quota(self, key: str, value: str):
+        """
+        append an entry to the quota with this structure {"key":key, "value":value}
+        """
+        logging.debug(f"adding ({key}={value})")
+        self._data['quota'].append({"key":key, "value":value})        
+
     def get_metadata(self):
         return self._data
     
-
+    def add_safely_from_cm(self,metadata_key,json_path):
+            try: 
+                value = util.get_value_from_config_map("nuvolaris", json_path)
+                if value:
+                    self.add_metadata(metadata_key, value)
+            except Exception as e:
+                logging.warn(e)
